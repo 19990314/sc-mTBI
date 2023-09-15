@@ -7,16 +7,13 @@ https://uscedu-my.sharepoint.com/:f:/g/personal/schen484_usc_edu/ErcpU1Bur3tHuzQ
 GitHub:
 https://github.com/19990314/sc-mTBI
 
-<!DOCTYPE html>
-<html>
-<body>
 
-<iframe src="<https://19990314-sc-mtbi-ucla-visual-7cwnuz.streamlit.app/>" width="600" height="600">
-  <p>Your browser does not support iframes.</p>
-</iframe>
+## Environment settings
+```
+> sessionInfo()
+```
+Please use this command to check your R environment
 
-</body>
-</html>
-
+To explore UCLA data, click:
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://19990314-sc-mtbi-ucla-visual-7cwnuz.streamlit.app/)
 

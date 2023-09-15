@@ -16,4 +16,4 @@ Please use this command to check your R packages
 
 ## To explore UCLA data
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://19990314-sc-mtbi-ucla-visual-7cwnuz.streamlit.app/)
-
+This web is designed to visualize the DEGs after applying your FC and P value thresholds (interactively).

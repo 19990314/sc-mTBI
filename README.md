@@ -17,5 +17,6 @@ https://github.com/19990314/sc-mTBI
 
 </body>
 </html>
+
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://19990314-sc-mtbi-ucla-visual-7cwnuz.streamlit.app/)
 

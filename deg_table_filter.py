@@ -1,11 +1,22 @@
 import os
 import pandas as pd
 
-deg_tracker = {
-    'studies': ["Sham v.s. Day1", "Sham v.s. Day3", "Sham v.s. Day7"],
+
+# global variables
+temporal_deg_tracker = {
+    'studies': ["Sham v.s. Day1", "Sham v.s. Day3", "Sham v.s. Day7", "Sham v.s. Combined"],
     'upregulated': [],
     'downregulated': []
 }
+
+celltype_deg_tracker = {
+    'celltypes': ["aEC", "vEC", "capEC", "allEC"],
+    'upregulated': [],
+    'downregulated': []
+}
+
+# output_directory
+output_dir = "../../mTBI_scRNA_seq/Oct12/"
 
 def get_EC_celltype(filename):
     for i in filename.split("_"):
@@ -14,10 +25,10 @@ def get_EC_celltype(filename):
 
 def read_deg_tables(filename_prefix):
     # Directory containing the CSV files
-    directory = '../../mTBI_scRNA_seq/DEGs/'
+    directory = output_dir + "original_DEGs/"
 
     # Get a list of CSV files with the specified prefix
-    csv_files = [file for file in os.listdir(directory) if file.startswith(filename_prefix)]
+    csv_files = [file for file in os.listdir(directory) if (file.startswith(filename_prefix)) & ("sort" not in file)]
 
     # Create an empty dictionary to store dataframes
     dataframes = {}
@@ -26,7 +37,7 @@ def read_deg_tables(filename_prefix):
     for csv_file in csv_files:
         file_path = os.path.join(directory, csv_file)
         # Use the file name (without extension) as the dataframe key
-        dataframe_key = os.path.splitext(csv_file)[0]
+        dataframe_key = get_EC_celltype(os.path.splitext(csv_file)[0])
         # Read the CSV file into a dataframe
         dataframes[dataframe_key] = pd.read_csv(file_path, header=0, names = ['gene', 'p_val', 'avg_log2FC', 'pct.1', 'pct.2', 'p_val_adj'], dtype='object')
         dataframes[dataframe_key].set_index('gene', inplace=True)
@@ -36,30 +47,90 @@ def read_deg_tables(filename_prefix):
 
 
 def filter_degs(dataframes, pval, fc):
-    for df_key in dataframes:
-        size_tracker['celltype'].append(get_EC_celltype(df_key))
-        # Filter rows/degs
-        size_tracker['before filtering'].append(len(dataframes[df_key]))
-        dataframes[df_key] = dataframes[df_key][dataframes[df_key]['p_val'] <= pval]
-        size_tracker['after p-val'].append(len(dataframes[df_key]))
-        dataframes[df_key] = dataframes[df_key][abs(dataframes[df_key]['avg_log2FC']) >= fc]
-        size_tracker['after fc'].append(len(dataframes[df_key]))
-        if "Tmem252" in dataframes[df_key].index:
-            size_tracker['Tmem252 check'].append("Yes")
+    for celltype_key in dataframes:
+        size_tracker['celltype'].append(celltype_key)
+
+        # before filtering
+        size_tracker['before filtering'].append(len(dataframes[celltype_key]))
+        # check Tmem252
+        if "Tmem252" in dataframes[celltype_key].index:
+            size_tracker['Tmem252 check1'].append("Yes")
         else:
-            size_tracker['Tmem252 check'].append("No")
+            size_tracker['Tmem252 check1'].append("No")
+
+        # filter by p val
+        dataframes[celltype_key] = dataframes[celltype_key][dataframes[celltype_key]['p_val'] <= pval]
+        size_tracker['after p-val'].append(len(dataframes[celltype_key]))
+        # check Tmem252
+        if "Tmem252" in dataframes[celltype_key].index:
+            size_tracker['Tmem252 check2'].append("Yes")
+        else:
+            size_tracker['Tmem252 check2'].append("No")
+
+        # filter by fc
+        dataframes[celltype_key] = dataframes[celltype_key][abs(dataframes[celltype_key]['avg_log2FC']) >= fc]
+        size_tracker['after fc'].append(len(dataframes[celltype_key]))
+        #check Tmem252
+        if "Tmem252" in dataframes[celltype_key].index:
+            size_tracker['Tmem252 check3'].append("Yes")
+        else:
+            size_tracker['Tmem252 check3'].append("No")
     return dataframes
 
 
-def find_common_degs(dataframes):
-    common_degs = ()
-    for df_key in dataframes:
-        if len(common_degs) == 0:
-            common_degs = set(dataframes[df_key].index)
-            continue
-        common_degs = set(common_degs.intersection(set(dataframes[df_key].index)))
+def divide_up_down_regulation(dataframes, day_index):
+    for celltype_key in dataframes:
+        temp_dic = {}
 
-    return list(common_degs)
+        # extract up-regulated, plus sort by fc
+        temp_dic["up"] = dataframes[celltype_key][abs(dataframes[celltype_key]['avg_log2FC']) > 0].sort_values(by='avg_log2FC', ascending=False)
+        temp_dic["up"].to_csv(output_dir + 'DEGs_filtered_updown_sorted/DEG_' + day_index + "_" + celltype_key + "_up_sorted.csv") # output
+
+        # extract down-regulated, plus sort by fc
+        temp_dic["down"] = dataframes[celltype_key][abs(dataframes[celltype_key]['avg_log2FC']) < 0].sort_values(by='avg_log2FC', ascending=True)
+        temp_dic["down"].to_csv(output_dir + 'DEGs_filtered_updown_sorted/DEG_' + day_index + "_" + celltype_key + "_down_sorted.csv") # output
+
+        # replace unsplitted df
+        dataframes[celltype_key] = temp_dic
+
+    return dataframes
+
+
+def find_common_degs_for_a_day(dataframes):
+    common_degs_up = ()
+    common_degs_down = ()
+
+    # dataframes: a list of deg dfs: aEC, vEC, capEC, allEC
+    for df_key in dataframes:
+        if len(common_degs_up) == 0:
+            common_degs_up = set(dataframes[df_key]["up"].index)
+            common_degs_down = set(dataframes[df_key]["down"].index)
+            continue
+        common_degs_up = set(common_degs_up.intersection(set(dataframes[df_key]["up"].index)))
+        common_degs_down = set(common_degs_down.intersection(set(dataframes[df_key]["down"].index)))
+
+    return list(common_degs_up), list(common_degs_down)
+
+
+def find_common_degs_for_a_celltype(day1_df, day3_df, day7_df):
+    up = []
+    down = []
+
+    # dataframes: a list of deg dfs: aEC, vEC, capEC, allEC
+    for celltype_key in ["aEC", "vEC", "capEC", "allEC"]:
+        common_degs_up = ()
+        common_degs_down = ()
+        common_degs_up = set(day1_df[celltype_key]["up"].index)
+        common_degs_down = set(day1_df[celltype_key]["down"].index)
+        common_degs_up = set(common_degs_up.intersection(set(day3_df[celltype_key]["up"].index)))
+        common_degs_down = set(common_degs_up.intersection(set(day3_df[celltype_key]["down"].index)))
+        common_degs_up = set(common_degs_up.intersection(set(day7_df[celltype_key]["up"].index)))
+        common_degs_down = set(common_degs_up.intersection(set(day7_df[celltype_key]["down"].index)))
+
+        up.append(list(common_degs_up))
+        down.append(list(common_degs_down))
+
+    return up, down
 
 
 def diff_up_vs_downregulation(dataframes, common_degs):
@@ -94,30 +165,36 @@ def diff_up_vs_downregulation(dataframes, common_degs):
 
 
 
+
+
 ## ---------day1---------
 # DEG size tracker
 size_tracker = {
         'celltype': [],
         'before filtering': [],
+        'Tmem252 check1': [],
         'after p-val': [],
+        'Tmem252 check2': [],
         'after fc': [],
-        'Tmem252 check': []
+        'Tmem252 check3': []
 }
 
 # read and filter
-degs_for_day1 = read_deg_tables("1006_DEG_0v1")
+degs_for_day1 = read_deg_tables("DEG_day1") # INPUT modify here
 degs_for_day1 = filter_degs(degs_for_day1, 0.001, 0.05)
 
+# split up & down
+degs_for_day1 = divide_up_down_regulation(degs_for_day1, "day1")
+
 # diff degs
-common_degs = find_common_degs(degs_for_day1)
-#print(common_degs)
-up, down = diff_up_vs_downregulation(degs_for_day1, common_degs)
-deg_tracker['upregulated'].append(up)
-deg_tracker['downregulated'].append(down)
+up, down = find_common_degs_for_a_day(degs_for_day1)
+temporal_deg_tracker['upregulated'].append(up)
+temporal_deg_tracker['downregulated'].append(down)
 
 # output
 df = pd.DataFrame(size_tracker)
-df.to_csv('../../mTBI_scRNA_seq/DEGs/day1_deg_counts.csv', index=False)
+df.to_csv(output_dir + 'filtration_statistics/DEG_statistics_day1.csv', index=False) # OUTPUT modify here
+
 
 
 
@@ -128,25 +205,28 @@ df.to_csv('../../mTBI_scRNA_seq/DEGs/day1_deg_counts.csv', index=False)
 size_tracker = {
         'celltype': [],
         'before filtering': [],
+        'Tmem252 check1': [],
         'after p-val': [],
+        'Tmem252 check2': [],
         'after fc': [],
-        'Tmem252 check': []
+        'Tmem252 check3': []
 }
 
 # read and filter
-degs_for_day3 = read_deg_tables("1005_DEG_0v3")
+degs_for_day3 = read_deg_tables("DEG_day3")
 degs_for_day3 = filter_degs(degs_for_day3, 0.001, 0.05)
 
+# split up & down
+degs_for_day3 = divide_up_down_regulation(degs_for_day3, "day3")
+
 # diff degs
-common_degs = find_common_degs(degs_for_day3)
-#print(common_degs)
-up, down = diff_up_vs_downregulation(degs_for_day3, common_degs)
-deg_tracker['upregulated'].append(up)
-deg_tracker['downregulated'].append(down)
+up, down = find_common_degs_for_a_day(degs_for_day3)
+temporal_deg_tracker['upregulated'].append(up)
+temporal_deg_tracker['downregulated'].append(down)
 
 # output
 df = pd.DataFrame(size_tracker)
-df.to_csv('../../mTBI_scRNA_seq/DEGs/day3_deg_counts.csv', index=False)
+df.to_csv(output_dir + 'filtration_statistics/DEG_statistics_day3.csv', index=False) # OUTPUT modify here
 
 
 
@@ -156,28 +236,67 @@ df.to_csv('../../mTBI_scRNA_seq/DEGs/day3_deg_counts.csv', index=False)
 size_tracker = {
         'celltype': [],
         'before filtering': [],
+        'Tmem252 check1': [],
         'after p-val': [],
+        'Tmem252 check2': [],
         'after fc': [],
-        'Tmem252 check': []
+        'Tmem252 check3': []
 }
 
 # read and filter
-degs_for_day7 = read_deg_tables("1005_DEG_0v7")
+degs_for_day7 = read_deg_tables("DEG_day7")
 degs_for_day7 = filter_degs(degs_for_day7, 0.001, 0.05)
 
+# split up & down
+degs_for_day7 = divide_up_down_regulation(degs_for_day7, "day7")
+
 # diff degs
-common_degs = find_common_degs(degs_for_day7)
-#print(common_degs)
-up, down = diff_up_vs_downregulation(degs_for_day7, common_degs)
-deg_tracker['upregulated'].append(up)
-deg_tracker['downregulated'].append(down)
+up, down = find_common_degs_for_a_day(degs_for_day7)
+temporal_deg_tracker['upregulated'].append(up)
+temporal_deg_tracker['downregulated'].append(down)
 
 # output
 df = pd.DataFrame(size_tracker)
-df.to_csv('../../mTBI_scRNA_seq/DEGs/day7_deg_counts.csv', index=False)
+df.to_csv(output_dir + 'filtration_statistics/DEG_statistics_day7.csv', index=False) # OUTPUT modify here
+
+
+## ---------all days combined---------
+# DEG size tracker
+size_tracker = {
+        'celltype': [],
+        'before filtering': [],
+        'Tmem252 check1': [],
+        'after p-val': [],
+        'Tmem252 check2': [],
+        'after fc': [],
+        'Tmem252 check3': []
+}
+
+# read and filter
+degs_for_alldays = read_deg_tables("DEG_alldays")
+degs_for_alldays = filter_degs(degs_for_alldays, 0.001, 0.05)
+
+# split up & down
+degs_for_alldays = divide_up_down_regulation(degs_for_alldays, "alldays")
+
+# diff degs
+up, down = find_common_degs_for_a_day(degs_for_alldays)
+temporal_deg_tracker['upregulated'].append(up)
+temporal_deg_tracker['downregulated'].append(down)
+
+# output
+df = pd.DataFrame(size_tracker)
+df.to_csv(output_dir + 'filtration_statistics/DEG_statistics_alldays.csv', index=False) # OUTPUT modify here
 
 
 
-# output degs for day 1,3,7
-df = pd.DataFrame(deg_tracker)
-df.to_csv('../../mTBI_scRNA_seq/DEGs/up&down_degs_across137days.csv', index=False)
+
+
+## ---------find common deg for each cell type---------
+celltype_deg_tracker["upregulated"], celltype_deg_tracker["downregulated"] = find_common_degs_for_a_celltype(degs_for_day1, degs_for_day3, degs_for_day7)
+df = pd.DataFrame(celltype_deg_tracker)
+df.to_csv(output_dir + "common_DEGs/up&down_degs_celltype_specific.csv", index=False) # OUTPUT modify here
+
+# --------- output degs for day 1,3,7 ---------
+df = pd.DataFrame(temporal_deg_tracker)
+df.to_csv(output_dir + "common_DEGs/up&down_degs_temporal_specific.csv", index=False) # OUTPUT modify here

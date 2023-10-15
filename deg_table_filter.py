@@ -6,13 +6,17 @@ import pandas as pd
 temporal_deg_tracker = {
     'studies': ["Sham v.s. Day1", "Sham v.s. Day3", "Sham v.s. Day7", "Sham v.s. Combined"],
     'upregulated': [],
-    'downregulated': []
+    'up_count': [],
+    'downregulated': [],
+    'down_count': []
 }
 
 celltype_deg_tracker = {
     'celltypes': ["aEC", "vEC", "capEC", "allEC"],
     'upregulated': [],
-    'downregulated': []
+    'up_count': [],
+    'downregulated': [],
+    'down_count': []
 }
 
 # output_directory
@@ -83,11 +87,11 @@ def divide_up_down_regulation(dataframes, day_index):
         temp_dic = {}
 
         # extract up-regulated, plus sort by fc
-        temp_dic["up"] = dataframes[celltype_key][abs(dataframes[celltype_key]['avg_log2FC']) > 0].sort_values(by='avg_log2FC', ascending=False)
+        temp_dic["up"] = dataframes[celltype_key][dataframes[celltype_key]['avg_log2FC'] > 0].sort_values(by='avg_log2FC', ascending=False)
         temp_dic["up"].to_csv(output_dir + 'DEGs_filtered_updown_sorted/DEG_' + day_index + "_" + celltype_key + "_up_sorted.csv") # output
 
         # extract down-regulated, plus sort by fc
-        temp_dic["down"] = dataframes[celltype_key][abs(dataframes[celltype_key]['avg_log2FC']) < 0].sort_values(by='avg_log2FC', ascending=True)
+        temp_dic["down"] = dataframes[celltype_key][dataframes[celltype_key]['avg_log2FC'] < 0].sort_values(by='avg_log2FC', ascending=True)
         temp_dic["down"].to_csv(output_dir + 'DEGs_filtered_updown_sorted/DEG_' + day_index + "_" + celltype_key + "_down_sorted.csv") # output
 
         # replace unsplitted df
@@ -97,40 +101,67 @@ def divide_up_down_regulation(dataframes, day_index):
 
 
 def find_common_degs_for_a_day(dataframes):
-    common_degs_up = ()
-    common_degs_down = ()
+    common_degs_up = {}
+    common_degs_down = {}
 
     # dataframes: a list of deg dfs: aEC, vEC, capEC, allEC
     for df_key in dataframes:
-        if len(common_degs_up) == 0:
-            common_degs_up = set(dataframes[df_key]["up"].index)
-            common_degs_down = set(dataframes[df_key]["down"].index)
-            continue
-        common_degs_up = set(common_degs_up.intersection(set(dataframes[df_key]["up"].index)))
-        common_degs_down = set(common_degs_down.intersection(set(dataframes[df_key]["down"].index)))
 
-    return list(common_degs_up), list(common_degs_down)
+        # up DEGs
+        for gene, info in dataframes[df_key]["up"].iterrows():
+            if gene not in common_degs_up.keys():
+                common_degs_up[gene] = abs(info['avg_log2FC'])
+            else:
+                common_degs_up[gene] += abs(info['avg_log2FC'])
+
+        # down DEGs
+        for gene, info in dataframes[df_key]["down"].iterrows():
+            if gene not in common_degs_down.keys():
+                common_degs_down[gene] = abs(info['avg_log2FC'])
+            else:
+                common_degs_down[gene] += abs(info['avg_log2FC'])
+
+    # Sort the DEGs
+    sorted_common_degs_up = dict(sorted(common_degs_up.items(), key=lambda kv: kv[1], reverse=True))
+    sorted_common_degs_down = dict(sorted(common_degs_down.items(), key=lambda kv: kv[1], reverse=True))
+
+    return list(sorted_common_degs_up.keys()), list(sorted_common_degs_down.keys())
 
 
 def find_common_degs_for_a_celltype(day1_df, day3_df, day7_df):
     up = []
     down = []
+    up_ct = []
+    down_ct = []
 
     # dataframes: a list of deg dfs: aEC, vEC, capEC, allEC
     for celltype_key in ["aEC", "vEC", "capEC", "allEC"]:
-        common_degs_up = ()
-        common_degs_down = ()
-        common_degs_up = set(day1_df[celltype_key]["up"].index)
-        common_degs_down = set(day1_df[celltype_key]["down"].index)
-        common_degs_up = set(common_degs_up.intersection(set(day3_df[celltype_key]["up"].index)))
-        common_degs_down = set(common_degs_up.intersection(set(day3_df[celltype_key]["down"].index)))
-        common_degs_up = set(common_degs_up.intersection(set(day7_df[celltype_key]["up"].index)))
-        common_degs_down = set(common_degs_up.intersection(set(day7_df[celltype_key]["down"].index)))
+        common_degs_up = {}
+        common_degs_down = {}
 
-        up.append(list(common_degs_up))
-        down.append(list(common_degs_down))
+        for gene, info in day1_df[celltype_key]["up"].iterrows():
+            if gene not in common_degs_up.keys():
+                common_degs_up[gene] = abs(info['avg_log2FC'])
+            else:
+                common_degs_up[gene] += abs(info['avg_log2FC'])
 
-    return up, down
+        for gene, info in day1_df[celltype_key]["down"].iterrows():
+            if gene not in common_degs_down.keys():
+                common_degs_down[gene] = abs(info['avg_log2FC'])
+            else:
+                common_degs_down[gene] += abs(info['avg_log2FC'])
+
+        # Sort the DEGs
+        sorted_common_degs_up = dict(sorted(common_degs_up.items(), key=lambda kv: kv[1], reverse=True))
+        sorted_common_degs_down = dict(sorted(common_degs_down.items(), key=lambda kv: kv[1], reverse=True))
+
+        #
+        up.append(list(sorted_common_degs_up.keys()))
+        up_ct.append(len(sorted_common_degs_up.keys()))
+        down.append(list(sorted_common_degs_down.keys()))
+        down_ct.append(len(sorted_common_degs_down.keys()))
+
+    return up, up_ct, down, down_ct
 
 
 def diff_up_vs_downregulation(dataframes, common_degs):
@@ -189,7 +220,9 @@ degs_for_day1 = divide_up_down_regulation(degs_for_day1, "day1")
 # diff degs
 up, down = find_common_degs_for_a_day(degs_for_day1)
 temporal_deg_tracker['upregulated'].append(up)
+temporal_deg_tracker['up_count'].append(len(up))
 temporal_deg_tracker['downregulated'].append(down)
+temporal_deg_tracker['down_count'].append(len(down))
 
 # output
 df = pd.DataFrame(size_tracker)
@@ -222,7 +255,9 @@ degs_for_day3 = divide_up_down_regulation(degs_for_day3, "day3")
 # diff degs
 up, down = find_common_degs_for_a_day(degs_for_day3)
 temporal_deg_tracker['upregulated'].append(up)
+temporal_deg_tracker['up_count'].append(len(up))
 temporal_deg_tracker['downregulated'].append(down)
+temporal_deg_tracker['down_count'].append(len(down))
 
 # output
 df = pd.DataFrame(size_tracker)
@@ -253,7 +288,10 @@ degs_for_day7 = divide_up_down_regulation(degs_for_day7, "day7")
 # diff degs
 up, down = find_common_degs_for_a_day(degs_for_day7)
 temporal_deg_tracker['upregulated'].append(up)
+temporal_deg_tracker['up_count'].append(len(up))
 temporal_deg_tracker['downregulated'].append(down)
+temporal_deg_tracker['down_count'].append(len(down))
+
 
 # output
 df = pd.DataFrame(size_tracker)
@@ -273,16 +311,18 @@ size_tracker = {
 }
 
 # read and filter
-degs_for_alldays = read_deg_tables("DEG_alldays")
+degs_for_alldays = read_deg_tables("DEG_combined")
 degs_for_alldays = filter_degs(degs_for_alldays, 0.001, 0.05)
 
 # split up & down
-degs_for_alldays = divide_up_down_regulation(degs_for_alldays, "alldays")
+degs_for_alldays = divide_up_down_regulation(degs_for_alldays, "combined")
 
 # diff degs
 up, down = find_common_degs_for_a_day(degs_for_alldays)
 temporal_deg_tracker['upregulated'].append(up)
+temporal_deg_tracker['up_count'].append(len(up))
 temporal_deg_tracker['downregulated'].append(down)
+temporal_deg_tracker['down_count'].append(len(down))
 
 # output
 df = pd.DataFrame(size_tracker)
@@ -293,7 +333,9 @@ df.to_csv(output_dir + 'filtration_statistics/DEG_statistics_alldays.csv', index
 
 
 ## ---------find common deg for each cell type---------
-celltype_deg_tracker["upregulated"], celltype_deg_tracker["downregulated"] = find_common_degs_for_a_celltype(degs_for_day1, degs_for_day3, degs_for_day7)
+celltype_deg_tracker["upregulated"], celltype_deg_tracker['up_count'], celltype_deg_tracker["downregulated"], celltype_deg_tracker['down_count'] = find_common_degs_for_a_celltype(degs_for_day1, degs_for_day3, degs_for_day7)
+
+
 df = pd.DataFrame(celltype_deg_tracker)
 df.to_csv(output_dir + "common_DEGs/up&down_degs_celltype_specific.csv", index=False) # OUTPUT modify here
 

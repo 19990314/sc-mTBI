@@ -3,6 +3,12 @@ import pandas as pd
 
 
 # global variables
+
+# output_directory
+output_dir = "../../mTBI_scRNA_seq/Oct17/"
+
+
+# statistics
 temporal_deg_tracker = {
     'studies': ["Sham v.s. Day1", "Sham v.s. Day3", "Sham v.s. Day7", "Sham v.s. Combined"],
     'upregulated': [],
@@ -19,8 +25,10 @@ celltype_deg_tracker = {
     'down_count': []
 }
 
-# output_directory
-output_dir = "../../mTBI_scRNA_seq/Oct12/"
+def prep_workspace(dir):
+    # Check if the directory exists
+    if not os.path.exists(dir):
+        os.mkdir(dir)
 
 def get_EC_celltype(filename):
     for i in filename.split("_"):
@@ -50,7 +58,7 @@ def read_deg_tables(filename_prefix):
     return dataframes
 
 
-def filter_degs(dataframes, pval, fc):
+def filter_degs(dataframes, pval, fc, pct, pval_adj):
     for celltype_key in dataframes:
         size_tracker['celltype'].append(celltype_key)
 
@@ -79,6 +87,24 @@ def filter_degs(dataframes, pval, fc):
             size_tracker['Tmem252 check3'].append("Yes")
         else:
             size_tracker['Tmem252 check3'].append("No")
+
+        # filter by fc
+        dataframes[celltype_key] = dataframes[celltype_key][(dataframes[celltype_key]['pct.1'] >= pct) & (dataframes[celltype_key]['pct.2'] >= pct)]
+        size_tracker['after pct'].append(len(dataframes[celltype_key]))
+        #check Tmem252
+        if "Tmem252" in dataframes[celltype_key].index:
+            size_tracker['Tmem252 check4'].append("Yes")
+        else:
+            size_tracker['Tmem252 check4'].append("No")
+
+        # filter by fc
+        dataframes[celltype_key] = dataframes[celltype_key][dataframes[celltype_key]['p_val_adj'] <= pval_adj]
+        size_tracker['after adj'].append(len(dataframes[celltype_key]))
+        #check Tmem252
+        if "Tmem252" in dataframes[celltype_key].index:
+            size_tracker['Tmem252 check5'].append("Yes")
+        else:
+            size_tracker['Tmem252 check5'].append("No")
     return dataframes
 
 
@@ -196,6 +222,11 @@ def diff_up_vs_downregulation(dataframes, common_degs):
 
 
 
+# create dir
+# DEGs_filtered_updown_sorted/   filtration_statistics/   common_DEGs/
+prep_workspace(output_dir + "DEGs_filtered_updown_sorted/")
+prep_workspace(output_dir + "filtration_statistics/")
+prep_workspace(output_dir + "Fig1g_common_DEGs/")
 
 
 ## ---------day1---------
@@ -207,12 +238,17 @@ size_tracker = {
         'after p-val': [],
         'Tmem252 check2': [],
         'after fc': [],
-        'Tmem252 check3': []
+        'Tmem252 check3': [],
+        'after pct': [],
+        'Tmem252 check4': [],
+        'after adj': [],
+        'Tmem252 check5': []
+
 }
 
 # read and filter
 degs_for_day1 = read_deg_tables("DEG_day1") # INPUT modify here
-degs_for_day1 = filter_degs(degs_for_day1, 0.001, 0.05)
+degs_for_day1 = filter_degs(degs_for_day1, 0.05, 0.2, 0.1, 0.001)
 
 # split up & down
 degs_for_day1 = divide_up_down_regulation(degs_for_day1, "day1")
@@ -236,18 +272,23 @@ df.to_csv(output_dir + 'filtration_statistics/DEG_statistics_day1.csv', index=Fa
 ## ---------day3---------
 # DEG size tracker
 size_tracker = {
-        'celltype': [],
-        'before filtering': [],
-        'Tmem252 check1': [],
-        'after p-val': [],
-        'Tmem252 check2': [],
-        'after fc': [],
-        'Tmem252 check3': []
+    'celltype': [],
+    'before filtering': [],
+    'Tmem252 check1': [],
+    'after p-val': [],
+    'Tmem252 check2': [],
+    'after fc': [],
+    'Tmem252 check3': [],
+    'after pct': [],
+    'Tmem252 check4': [],
+    'after adj': [],
+    'Tmem252 check5': []
+
 }
 
 # read and filter
 degs_for_day3 = read_deg_tables("DEG_day3")
-degs_for_day3 = filter_degs(degs_for_day3, 0.001, 0.05)
+degs_for_day3 = filter_degs(degs_for_day3, 0.001, 0.05, 0.1, 0.001)
 
 # split up & down
 degs_for_day3 = divide_up_down_regulation(degs_for_day3, "day3")
@@ -269,18 +310,23 @@ df.to_csv(output_dir + 'filtration_statistics/DEG_statistics_day3.csv', index=Fa
 ## ---------day7---------
 # DEG size tracker
 size_tracker = {
-        'celltype': [],
-        'before filtering': [],
-        'Tmem252 check1': [],
-        'after p-val': [],
-        'Tmem252 check2': [],
-        'after fc': [],
-        'Tmem252 check3': []
+    'celltype': [],
+    'before filtering': [],
+    'Tmem252 check1': [],
+    'after p-val': [],
+    'Tmem252 check2': [],
+    'after fc': [],
+    'Tmem252 check3': [],
+    'after pct': [],
+    'Tmem252 check4': [],
+    'after adj': [],
+    'Tmem252 check5': []
+
 }
 
 # read and filter
 degs_for_day7 = read_deg_tables("DEG_day7")
-degs_for_day7 = filter_degs(degs_for_day7, 0.001, 0.05)
+degs_for_day7 = filter_degs(degs_for_day7, 0.001, 0.05, 0.1, 0.001)
 
 # split up & down
 degs_for_day7 = divide_up_down_regulation(degs_for_day7, "day7")
@@ -301,18 +347,23 @@ df.to_csv(output_dir + 'filtration_statistics/DEG_statistics_day7.csv', index=Fa
 ## ---------all days combined---------
 # DEG size tracker
 size_tracker = {
-        'celltype': [],
-        'before filtering': [],
-        'Tmem252 check1': [],
-        'after p-val': [],
-        'Tmem252 check2': [],
-        'after fc': [],
-        'Tmem252 check3': []
+    'celltype': [],
+    'before filtering': [],
+    'Tmem252 check1': [],
+    'after p-val': [],
+    'Tmem252 check2': [],
+    'after fc': [],
+    'Tmem252 check3': [],
+    'after pct': [],
+    'Tmem252 check4': [],
+    'after adj': [],
+    'Tmem252 check5': []
+
 }
 
 # read and filter
 degs_for_alldays = read_deg_tables("DEG_combined")
-degs_for_alldays = filter_degs(degs_for_alldays, 0.001, 0.05)
+degs_for_alldays = filter_degs(degs_for_alldays, 0.001, 0.05, 0., 0.001)
 
 # split up & down
 degs_for_alldays = divide_up_down_regulation(degs_for_alldays, "combined")
@@ -337,8 +388,9 @@ celltype_deg_tracker["upregulated"], celltype_deg_tracker['up_count'], celltype_
 
 
 df = pd.DataFrame(celltype_deg_tracker)
-df.to_csv(output_dir + "common_DEGs/up&down_degs_celltype_specific.csv", index=False) # OUTPUT modify here
+df.to_csv(output_dir + "Fig1g_common_DEGs/up&down_degs_celltype_specific.csv", index=False) # OUTPUT modify here
+
 
 # --------- output degs for day 1,3,7 ---------
 df = pd.DataFrame(temporal_deg_tracker)
-df.to_csv(output_dir + "common_DEGs/up&down_degs_temporal_specific.csv", index=False) # OUTPUT modify here
+df.to_csv(output_dir + "Fig1g_common_DEGs/up&down_degs_temporal_specific.csv", index=False) # OUTPUT modify here

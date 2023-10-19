@@ -1,12 +1,23 @@
 import os
 import pandas as pd
+import logging
+
+# Set up the logger
+logging.basicConfig(filename='mylog.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.critical('\n======================================New Pipeline Started======================================')
 
 
-# global variables
+
+
+# global variabless
 
 # output_directory
 output_dir = "../../mTBI_scRNA_seq/Oct17/"
 
+# thresholds
+p_adj = 0.01 #
+pv = 0.001
+fc = 0.2
 
 # statistics
 temporal_deg_tracker = {
@@ -58,7 +69,7 @@ def read_deg_tables(filename_prefix):
     return dataframes
 
 
-def filter_degs(dataframes, pval, fc, pct, pval_adj):
+def filter_degs(dataframes, pval, fc, pval_adj):
     for celltype_key in dataframes:
         size_tracker['celltype'].append(celltype_key)
 
@@ -88,40 +99,49 @@ def filter_degs(dataframes, pval, fc, pct, pval_adj):
         else:
             size_tracker['Tmem252 check3'].append("No")
 
-        # filter by fc
-        dataframes[celltype_key] = dataframes[celltype_key][(dataframes[celltype_key]['pct.1'] >= pct) & (dataframes[celltype_key]['pct.2'] >= pct)]
-        size_tracker['after pct'].append(len(dataframes[celltype_key]))
+
+        # filter by adj p-val
+        dataframes[celltype_key] = dataframes[celltype_key][dataframes[celltype_key]['p_val_adj'] <= pval_adj]
+        size_tracker['after p-adj'].append(len(dataframes[celltype_key]))
         #check Tmem252
         if "Tmem252" in dataframes[celltype_key].index:
             size_tracker['Tmem252 check4'].append("Yes")
         else:
             size_tracker['Tmem252 check4'].append("No")
-
-        # filter by fc
-        dataframes[celltype_key] = dataframes[celltype_key][dataframes[celltype_key]['p_val_adj'] <= pval_adj]
-        size_tracker['after adj'].append(len(dataframes[celltype_key]))
-        #check Tmem252
-        if "Tmem252" in dataframes[celltype_key].index:
-            size_tracker['Tmem252 check5'].append("Yes")
-        else:
-            size_tracker['Tmem252 check5'].append("No")
     return dataframes
 
 
-def divide_up_down_regulation(dataframes, day_index):
+def divide_up_down_regulation(dataframes, day_index, pct):
+    logging.info('Up- and down- regulated DEGs for each cell type were saved to: DEGs_filtered_updown_sorted/')  # *log
+
     for celltype_key in dataframes:
         temp_dic = {}
 
         # extract up-regulated, plus sort by fc
         temp_dic["up"] = dataframes[celltype_key][dataframes[celltype_key]['avg_log2FC'] > 0].sort_values(by='avg_log2FC', ascending=False)
+
+        # filter by pct
+        temp_dic["up"] = temp_dic["up"][temp_dic["up"]['pct.1'] >= pct]
+
+        # output
         temp_dic["up"].to_csv(output_dir + 'DEGs_filtered_updown_sorted/DEG_' + day_index + "_" + celltype_key + "_up_sorted.csv") # output
+        logging.critical('Output ---> DEGs_filtered_updown_sorted/DEG_' + day_index + "_" + celltype_key + "_up_sorted.csv")  # *log
 
         # extract down-regulated, plus sort by fc
         temp_dic["down"] = dataframes[celltype_key][dataframes[celltype_key]['avg_log2FC'] < 0].sort_values(by='avg_log2FC', ascending=True)
+
+        # filter by pct
+        temp_dic["down"] = temp_dic["down"][temp_dic["down"]['pct.2'] >= pct]
+
+        # output
         temp_dic["down"].to_csv(output_dir + 'DEGs_filtered_updown_sorted/DEG_' + day_index + "_" + celltype_key + "_down_sorted.csv") # output
+        logging.critical('Output ---> DEGs_filtered_updown_sorted/DEG_' + day_index + "_" + celltype_key + "_down_sorted.csv")  # *log
 
         # replace unsplitted df
         dataframes[celltype_key] = temp_dic
+
+        # statistics
+        size_tracker['after pct (UP/DOWN)'].append(str(len(dataframes[celltype_key]["up"])) + "/" + str(len(dataframes[celltype_key]["down"])))
 
     return dataframes
 
@@ -228,8 +248,16 @@ prep_workspace(output_dir + "DEGs_filtered_updown_sorted/")
 prep_workspace(output_dir + "filtration_statistics/")
 prep_workspace(output_dir + "Fig1g_common_DEGs/")
 
+# *log
+logging.info('Workspace Created: DEGs_filtered_updown_sorted/ filtration_statistics/ Fig1g_common_DEGs/')
+logging.info('*DEGs_filtered_updown_sorted/: DEG tables for each single day and each cell types')
+logging.info('*filtration_statistics/: the DEG counts and Tmem252 flag after each filtration step (each single day, each cell types)')
+logging.info('*Fig1g_common_DEGs/: common DEGs and counts (each single day, each cell types)')
+
 
 ## ---------day1---------
+logging.critical('********************Day 1************************')# *log
+
 # DEG size tracker
 size_tracker = {
         'celltype': [],
@@ -239,22 +267,34 @@ size_tracker = {
         'Tmem252 check2': [],
         'after fc': [],
         'Tmem252 check3': [],
-        'after pct': [],
+        'after p-adj': [],
         'Tmem252 check4': [],
-        'after adj': [],
-        'Tmem252 check5': []
-
+        'after pct (UP/DOWN)': []
 }
 
-# read and filter
+# read
+logging.info('Day 1: Read 4 DEG files (aEC, vEC, capEC, allEC)') # *log
 degs_for_day1 = read_deg_tables("DEG_day1") # INPUT modify here
-degs_for_day1 = filter_degs(degs_for_day1, 0.05, 0.2, 0.1, 0.001)
+logging.info('---- DONE ----') # *log
 
-# split up & down
-degs_for_day1 = divide_up_down_regulation(degs_for_day1, "day1")
+# filter
+logging.info('DEG filtration (p-value: 0.05, fc: 0.2, pval-adj: 0.001)')# *log
+degs_for_day1 = filter_degs(degs_for_day1, pv, fc,  p_adj)
+logging.info('---- DONE ----') # *log
+
+
+# up & down
+logging.info('DEG UP or Down (pct: 0.1)')# *log
+degs_for_day1 = divide_up_down_regulation(degs_for_day1, "day1", 0.1)
+logging.info('---- DONE ----')# *log
+
 
 # diff degs
+logging.info('Find common DEGs for Day1 up- and down-regulated DEGs from its a,v,cap,allEC groups')# *log
 up, down = find_common_degs_for_a_day(degs_for_day1)
+logging.info('---- DONE ----')# *log
+
+# record day1 DEGs
 temporal_deg_tracker['upregulated'].append(up)
 temporal_deg_tracker['up_count'].append(len(up))
 temporal_deg_tracker['downregulated'].append(down)
@@ -263,6 +303,7 @@ temporal_deg_tracker['down_count'].append(len(down))
 # output
 df = pd.DataFrame(size_tracker)
 df.to_csv(output_dir + 'filtration_statistics/DEG_statistics_day1.csv', index=False) # OUTPUT modify here
+logging.critical('OUTPUT ---> filtration_statistics/DEG_statistics_day1.csv')# *log
 
 
 
@@ -270,6 +311,8 @@ df.to_csv(output_dir + 'filtration_statistics/DEG_statistics_day1.csv', index=Fa
 
 
 ## ---------day3---------
+logging.critical('********************Day 3************************')# *log
+
 # DEG size tracker
 size_tracker = {
     'celltype': [],
@@ -279,22 +322,35 @@ size_tracker = {
     'Tmem252 check2': [],
     'after fc': [],
     'Tmem252 check3': [],
-    'after pct': [],
+    'after p-adj': [],
     'Tmem252 check4': [],
-    'after adj': [],
-    'Tmem252 check5': []
+    'after pct (UP/DOWN)': []
 
 }
 
-# read and filter
+# read
+logging.info('Day 3: Read 4 DEG files (aEC, vEC, capEC, allEC)') # *log
 degs_for_day3 = read_deg_tables("DEG_day3")
-degs_for_day3 = filter_degs(degs_for_day3, 0.001, 0.05, 0.1, 0.001)
+logging.info('---- DONE ----') # *log
 
-# split up & down
-degs_for_day3 = divide_up_down_regulation(degs_for_day3, "day3")
+# filter
+logging.info('DEG filtration (p-value: 0.05, fc: 0.2, pval-adj: 0.001)')# *log
+degs_for_day3 = filter_degs(degs_for_day3, pv, fc,  p_adj)
+logging.info('---- DONE ----') # *log
+
+
+# up & down
+logging.info('DEG UP or Down (pct: 0.1)')# *log
+degs_for_day3 = divide_up_down_regulation(degs_for_day3, "day3", 0.1)
+logging.info('---- DONE ----')# *log
+
 
 # diff degs
+logging.info('Find common DEGs for Day3 up- and down-regulated DEGs from its a,v,cap,allEC groups')# *log
 up, down = find_common_degs_for_a_day(degs_for_day3)
+logging.info('---- DONE ----')# *log
+
+# record day1 DEGs
 temporal_deg_tracker['upregulated'].append(up)
 temporal_deg_tracker['up_count'].append(len(up))
 temporal_deg_tracker['downregulated'].append(down)
@@ -303,11 +359,14 @@ temporal_deg_tracker['down_count'].append(len(down))
 # output
 df = pd.DataFrame(size_tracker)
 df.to_csv(output_dir + 'filtration_statistics/DEG_statistics_day3.csv', index=False) # OUTPUT modify here
+logging.critical('OUTPUT ---> filtration_statistics/DEG_statistics_day3.csv')# *log
 
 
 
 
 ## ---------day7---------
+logging.critical('********************Day 7************************')# *log
+
 # DEG size tracker
 size_tracker = {
     'celltype': [],
@@ -317,22 +376,35 @@ size_tracker = {
     'Tmem252 check2': [],
     'after fc': [],
     'Tmem252 check3': [],
-    'after pct': [],
+    'after p-adj': [],
     'Tmem252 check4': [],
-    'after adj': [],
-    'Tmem252 check5': []
+    'after pct (UP/DOWN)': []
 
 }
 
-# read and filter
+# read
+logging.info('Day 3: Read 4 DEG files (aEC, vEC, capEC, allEC)') # *log
 degs_for_day7 = read_deg_tables("DEG_day7")
-degs_for_day7 = filter_degs(degs_for_day7, 0.001, 0.05, 0.1, 0.001)
+logging.info('---- DONE ----') # *log
 
-# split up & down
-degs_for_day7 = divide_up_down_regulation(degs_for_day7, "day7")
+# filter
+logging.info('DEG filtration (p-value: 0.05, fc: 0.2, pval-adj: 0.001)')# *log
+degs_for_day7 = filter_degs(degs_for_day7, pv, fc,  p_adj)
+logging.info('---- DONE ----') # *log
+
+
+# up & down
+logging.info('DEG UP or Down (pct: 0.1)')# *log
+degs_for_day7 = divide_up_down_regulation(degs_for_day7, "day7", 0.1)
+logging.info('---- DONE ----')# *log
+
 
 # diff degs
+logging.info('Find common DEGs for Day7 up- and down-regulated DEGs from its a,v,cap,allEC groups')# *log
 up, down = find_common_degs_for_a_day(degs_for_day7)
+logging.info('---- DONE ----')# *log
+
+# record day1 DEGs
 temporal_deg_tracker['upregulated'].append(up)
 temporal_deg_tracker['up_count'].append(len(up))
 temporal_deg_tracker['downregulated'].append(down)
@@ -342,9 +414,12 @@ temporal_deg_tracker['down_count'].append(len(down))
 # output
 df = pd.DataFrame(size_tracker)
 df.to_csv(output_dir + 'filtration_statistics/DEG_statistics_day7.csv', index=False) # OUTPUT modify here
+logging.critical('OUTPUT ---> filtration_statistics/DEG_statistics_day7.csv')# *log
 
 
 ## ---------all days combined---------
+logging.critical('********************All days************************')# *log
+
 # DEG size tracker
 size_tracker = {
     'celltype': [],
@@ -354,22 +429,34 @@ size_tracker = {
     'Tmem252 check2': [],
     'after fc': [],
     'Tmem252 check3': [],
-    'after pct': [],
+    'after p-adj': [],
     'Tmem252 check4': [],
-    'after adj': [],
-    'Tmem252 check5': []
-
+    'after pct (UP/DOWN)': []
 }
 
-# read and filter
+# read
+logging.info('Day 3: Read 4 DEG files (aEC, vEC, capEC, allEC)') # *log
 degs_for_alldays = read_deg_tables("DEG_combined")
-degs_for_alldays = filter_degs(degs_for_alldays, 0.001, 0.05, 0., 0.001)
+logging.info('---- DONE ----') # *log
 
-# split up & down
-degs_for_alldays = divide_up_down_regulation(degs_for_alldays, "combined")
+# filter
+logging.info('DEG filtration (p-value: 0.05, fc: 0.2, pval-adj: 0.001)')# *log
+degs_for_alldays = filter_degs(degs_for_alldays, pv, fc,  p_adj)
+logging.info('---- DONE ----') # *log
+
+
+# up & down
+logging.info('DEG UP or Down (pct: 0.1)')# *log
+degs_for_alldays = divide_up_down_regulation(degs_for_alldays, "combined", 0.1)
+logging.info('---- DONE ----')# *log
+
 
 # diff degs
+logging.info('Find common DEGs for Day1 up- and down-regulated DEGs from its a,v,cap,allEC groups')# *log
 up, down = find_common_degs_for_a_day(degs_for_alldays)
+logging.info('---- DONE ----')# *log
+
+# record day1 DEGs
 temporal_deg_tracker['upregulated'].append(up)
 temporal_deg_tracker['up_count'].append(len(up))
 temporal_deg_tracker['downregulated'].append(down)
@@ -378,6 +465,8 @@ temporal_deg_tracker['down_count'].append(len(down))
 # output
 df = pd.DataFrame(size_tracker)
 df.to_csv(output_dir + 'filtration_statistics/DEG_statistics_alldays.csv', index=False) # OUTPUT modify here
+logging.critical('OUTPUT ---> filtration_statistics/DEG_statistics_alldays.csv')# *log
+
 
 
 
@@ -389,8 +478,9 @@ celltype_deg_tracker["upregulated"], celltype_deg_tracker['up_count'], celltype_
 
 df = pd.DataFrame(celltype_deg_tracker)
 df.to_csv(output_dir + "Fig1g_common_DEGs/up&down_degs_celltype_specific.csv", index=False) # OUTPUT modify here
-
+logging.info('Output ---> Fig1g_common_DEGs/up&down_degs_celltype_specific.csv')  # *log
 
 # --------- output degs for day 1,3,7 ---------
 df = pd.DataFrame(temporal_deg_tracker)
 df.to_csv(output_dir + "Fig1g_common_DEGs/up&down_degs_temporal_specific.csv", index=False) # OUTPUT modify here
+logging.info('Output ---> Fig1g_common_DEGs/up&down_degs_temporal_specific.csv')  # *log

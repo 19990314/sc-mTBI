@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-
 from bioinfokit import analys, visuz
 
 # Read the DataFrame with p-value and log2 fold change columns

@@ -12,12 +12,12 @@ logging.critical('\n======================================New Pipeline Started==
 # global variabless
 
 # output_directory
-output_dir = "../../mTBI_scRNA_seq/Oct17/"
+output_dir = "../../mTBI_scRNA_seq/Oct20/"
 
 # thresholds
-p_adj = 0.01 #
+p_adj = 5e-12 #
 pv = 0.001
-fc = 0.2
+fc = 0.25
 
 # statistics
 temporal_deg_tracker = {
@@ -29,12 +29,26 @@ temporal_deg_tracker = {
 }
 
 celltype_deg_tracker = {
+    'celltypes': ["aEC", "vEC", "capEC"],
+    'upregulated': [],
+    'up_count': [],
+    'downregulated': [],
+    'down_count': [],
+    'upregulated_celltype_specific': [],
+    'up_celltype_specific_count': [],
+    'downregulated_celltype_specific': [],
+    'down_celltype_specific_count': []
+}
+
+celltype_specific_deg_tracker = {
     'celltypes': ["aEC", "vEC", "capEC", "allEC"],
     'upregulated': [],
     'up_count': [],
     'downregulated': [],
     'down_count': []
 }
+
+
 
 def prep_workspace(dir):
     # Check if the directory exists
@@ -145,14 +159,36 @@ def divide_up_down_regulation(dataframes, day_index, pct):
 
     return dataframes
 
+def celltype_specific_DEGs(dataframes, day_index, up, down):
+    logging.info('Up- and down- regulated DEGs (celltype specific) were saved to: DEGs_celltype_specific/')  # *log
+
+    for celltype_key in dataframes:
+        # up
+        dataframes[celltype_key]["up"].drop(set(up).intersection(dataframes[celltype_key]["up"].index)).to_csv(
+            output_dir + 'DEGs_celltype_specific/DEG_' + day_index + "_" + celltype_key + "_up_sorted.csv")  # output
+        logging.critical(
+            'Output ---> DEGs_celltype_specific/DEG_' + day_index + "_" + celltype_key + "_up_sorted.csv")
+
+
+        # down
+        dataframes[celltype_key]["down"].drop(set(down).intersection(dataframes[celltype_key]["down"].index)).to_csv(
+            output_dir + 'DEGs_celltype_specific/DEG_' + day_index + "_" + celltype_key + "_down_sorted.csv")  # output
+        logging.critical(
+            'Output ---> DEGs_celltype_specific/DEG_' + day_index + "_" + celltype_key + "_down_sorted.csv")
+
+
+
+    return dataframes
+
 
 def find_common_degs_for_a_day(dataframes):
     common_degs_up = {}
     common_degs_down = {}
+    unique_up = ()
+    unique_down = ()
 
     # dataframes: a list of deg dfs: aEC, vEC, capEC, allEC
     for df_key in dataframes:
-
         # up DEGs
         for gene, info in dataframes[df_key]["up"].iterrows():
             if gene not in common_degs_up.keys():
@@ -167,11 +203,43 @@ def find_common_degs_for_a_day(dataframes):
             else:
                 common_degs_down[gene] += abs(info['avg_log2FC'])
 
+        if len(unique_up) == 0:
+            unique_up = set(dataframes[df_key]["up"].index)
+        else:
+            unique_up = unique_up.intersection(dataframes[df_key]["up"].index)
+
+        if len(unique_down) == 0:
+            unique_down = set(dataframes[df_key]["down"].index)
+        else:
+            unique_down = unique_down.intersection(dataframes[df_key]["down"].index)
+
+
     # Sort the DEGs
     sorted_common_degs_up = dict(sorted(common_degs_up.items(), key=lambda kv: kv[1], reverse=True))
     sorted_common_degs_down = dict(sorted(common_degs_down.items(), key=lambda kv: kv[1], reverse=True))
 
-    return list(sorted_common_degs_up.keys()), list(sorted_common_degs_down.keys())
+    common_degs_up = set(sorted_common_degs_up.keys())
+    common_degs_down = set(sorted_common_degs_down.keys())
+
+    # check appear twice
+    for gene in common_degs_up:
+        score = 0
+        for df_key in dataframes:
+            if gene in dataframes[df_key]["up"].index:
+                score += 1
+        if score < 2:
+            sorted_common_degs_up.pop(gene)
+
+    for gene in common_degs_down:
+        score = 0
+        for df_key in dataframes:
+            if gene in dataframes[df_key]["down"].index:
+                score += 1
+        if score < 2:
+            sorted_common_degs_down.pop(gene)
+
+
+    return list(sorted_common_degs_up.keys()), list(sorted_common_degs_down.keys()), list(unique_up), list(unique_down)
 
 
 def find_common_degs_for_a_celltype(day1_df, day3_df, day7_df):
@@ -181,7 +249,7 @@ def find_common_degs_for_a_celltype(day1_df, day3_df, day7_df):
     down_ct = []
 
     # dataframes: a list of deg dfs: aEC, vEC, capEC, allEC
-    for celltype_key in ["aEC", "vEC", "capEC", "allEC"]:
+    for celltype_key in ["aEC", "vEC", "capEC"]:
         common_degs_up = {}
         common_degs_down = {}
 
@@ -197,6 +265,30 @@ def find_common_degs_for_a_celltype(day1_df, day3_df, day7_df):
             else:
                 common_degs_down[gene] += abs(info['avg_log2FC'])
 
+        for gene, info in day3_df[celltype_key]["up"].iterrows():
+            if gene not in common_degs_up.keys():
+                common_degs_up[gene] = abs(info['avg_log2FC'])
+            else:
+                common_degs_up[gene] += abs(info['avg_log2FC'])
+
+        for gene, info in day3_df[celltype_key]["down"].iterrows():
+            if gene not in common_degs_down.keys():
+                common_degs_down[gene] = abs(info['avg_log2FC'])
+            else:
+                common_degs_down[gene] += abs(info['avg_log2FC'])
+
+        for gene, info in day7_df[celltype_key]["up"].iterrows():
+            if gene not in common_degs_up.keys():
+                common_degs_up[gene] = abs(info['avg_log2FC'])
+            else:
+                common_degs_up[gene] += abs(info['avg_log2FC'])
+
+        for gene, info in day7_df[celltype_key]["down"].iterrows():
+            if gene not in common_degs_down.keys():
+                common_degs_down[gene] = abs(info['avg_log2FC'])
+            else:
+                common_degs_down[gene] += abs(info['avg_log2FC'])
+
         # Sort the DEGs
         sorted_common_degs_up = dict(sorted(common_degs_up.items(), key=lambda kv: kv[1], reverse=True))
         sorted_common_degs_down = dict(sorted(common_degs_down.items(), key=lambda kv: kv[1], reverse=True))
@@ -207,7 +299,32 @@ def find_common_degs_for_a_celltype(day1_df, day3_df, day7_df):
         down.append(list(sorted_common_degs_down.keys()))
         down_ct.append(len(sorted_common_degs_down.keys()))
 
-    return up, up_ct, down, down_ct
+    # Find intersections
+    intersection_all_celltypes_up = list(set(up[0]).intersection(up[1], up[2]))
+    intersection_all_celltypes_down = list(set(down[0]).intersection(down[1], down[2]))
+
+    up_celltype_specific = up
+    down_celltype_specific = down
+    up_celltype_specific_ct = []
+    down_celltype_specific_ct = []
+
+    # Remove elements that are in intersections
+    for item in intersection_all_celltypes_up:
+        for celltype_deg in up_celltype_specific:
+            if item in celltype_deg:
+                celltype_deg.remove(item)
+    for i in up_celltype_specific:
+        up_celltype_specific_ct.append(len(i))
+
+
+    for item in intersection_all_celltypes_down:
+        for celltype_deg in down_celltype_specific:
+            if item in celltype_deg:
+                celltype_deg.remove(item)
+    for i in down_celltype_specific:
+        down_celltype_specific_ct.append(len(i))
+
+    return up, up_ct, down, down_ct, up_celltype_specific, up_celltype_specific_ct, down_celltype_specific, down_celltype_specific_ct
 
 
 def diff_up_vs_downregulation(dataframes, common_degs):
@@ -247,13 +364,15 @@ def diff_up_vs_downregulation(dataframes, common_degs):
 prep_workspace(output_dir + "DEGs_filtered_updown_sorted/")
 prep_workspace(output_dir + "filtration_statistics/")
 prep_workspace(output_dir + "Fig1g_common_DEGs/")
+prep_workspace(output_dir + "DEGs_celltype_specific/")
+prep_workspace(output_dir + "DEGs_day_specific/")
 
 # *log
 logging.info('Workspace Created: DEGs_filtered_updown_sorted/ filtration_statistics/ Fig1g_common_DEGs/')
 logging.info('*DEGs_filtered_updown_sorted/: DEG tables for each single day and each cell types')
 logging.info('*filtration_statistics/: the DEG counts and Tmem252 flag after each filtration step (each single day, each cell types)')
 logging.info('*Fig1g_common_DEGs/: common DEGs and counts (each single day, each cell types)')
-
+logging.info('*DEGs_celltype_specific/: DEGs for each cell type')
 
 ## ---------day1---------
 logging.critical('********************Day 1************************')# *log
@@ -286,13 +405,18 @@ logging.info('---- DONE ----') # *log
 # up & down
 logging.info('DEG UP or Down (pct: 0.1)')# *log
 degs_for_day1 = divide_up_down_regulation(degs_for_day1, "day1", 0.1)
-logging.info('---- DONE ----')# *log
+logging.info('---- DONE ----') # *log
 
 
 # diff degs
 logging.info('Find common DEGs for Day1 up- and down-regulated DEGs from its a,v,cap,allEC groups')# *log
-up, down = find_common_degs_for_a_day(degs_for_day1)
-logging.info('---- DONE ----')# *log
+up, down, up_unique, down_unique = find_common_degs_for_a_day(degs_for_day1)
+logging.info('---- DONE ----') # *log
+
+# cell-type specific DEG tables
+logging.info('Find cell-type specific DEGs for Day1 up- and down-regulated DEGs from its a,v,cap groups')# *log
+celltype_specific_DEGs(degs_for_day1, "day1", up, down)
+logging.info('---- DONE ----') # *log
 
 # record day1 DEGs
 temporal_deg_tracker['upregulated'].append(up)
@@ -347,8 +471,15 @@ logging.info('---- DONE ----')# *log
 
 # diff degs
 logging.info('Find common DEGs for Day3 up- and down-regulated DEGs from its a,v,cap,allEC groups')# *log
-up, down = find_common_degs_for_a_day(degs_for_day3)
+up, down, up_unique, down_unique = find_common_degs_for_a_day(degs_for_day3)
 logging.info('---- DONE ----')# *log
+
+
+# cell-type specific DEG tables
+logging.info('Find cell-type specific DEGs for Day1 up- and down-regulated DEGs from its a,v,cap groups')# *log
+celltype_specific_DEGs(degs_for_day3, "day3", up, down)
+logging.info('---- DONE ----') # *log
+
 
 # record day1 DEGs
 temporal_deg_tracker['upregulated'].append(up)
@@ -401,8 +532,15 @@ logging.info('---- DONE ----')# *log
 
 # diff degs
 logging.info('Find common DEGs for Day7 up- and down-regulated DEGs from its a,v,cap,allEC groups')# *log
-up, down = find_common_degs_for_a_day(degs_for_day7)
+up, down, up_unique, down_unique = find_common_degs_for_a_day(degs_for_day7)
 logging.info('---- DONE ----')# *log
+
+
+# cell-type specific DEG tables
+logging.info('Find cell-type specific DEGs for Day1 up- and down-regulated DEGs from its a,v,cap groups')# *log
+celltype_specific_DEGs(degs_for_day7, "day7", up, down)
+logging.info('---- DONE ----') # *log
+
 
 # record day1 DEGs
 temporal_deg_tracker['upregulated'].append(up)
@@ -453,8 +591,15 @@ logging.info('---- DONE ----')# *log
 
 # diff degs
 logging.info('Find common DEGs for Day1 up- and down-regulated DEGs from its a,v,cap,allEC groups')# *log
-up, down = find_common_degs_for_a_day(degs_for_alldays)
+up, down, up_unique, down_unique = find_common_degs_for_a_day(degs_for_alldays)
 logging.info('---- DONE ----')# *log
+
+
+# cell-type specific DEG tables
+logging.info('Find cell-type specific DEGs for Day1 up- and down-regulated DEGs from its a,v,cap groups')# *log
+celltype_specific_DEGs(degs_for_alldays, "alldays", up, down)
+logging.info('---- DONE ----') # *log
+
 
 # record day1 DEGs
 temporal_deg_tracker['upregulated'].append(up)
@@ -473,7 +618,7 @@ logging.critical('OUTPUT ---> filtration_statistics/DEG_statistics_alldays.csv')
 
 
 ## ---------find common deg for each cell type---------
-celltype_deg_tracker["upregulated"], celltype_deg_tracker['up_count'], celltype_deg_tracker["downregulated"], celltype_deg_tracker['down_count'] = find_common_degs_for_a_celltype(degs_for_day1, degs_for_day3, degs_for_day7)
+celltype_deg_tracker["upregulated"], celltype_deg_tracker['up_count'], celltype_deg_tracker["downregulated"], celltype_deg_tracker['down_count'], celltype_deg_tracker['upregulated_celltype_specific'], celltype_deg_tracker['up_celltype_specific_count'], celltype_deg_tracker['downregulated_celltype_specific'], celltype_deg_tracker['down_celltype_specific_count'] = find_common_degs_for_a_celltype(degs_for_day1, degs_for_day3, degs_for_day7)
 
 
 df = pd.DataFrame(celltype_deg_tracker)
@@ -484,3 +629,46 @@ logging.info('Output ---> Fig1g_common_DEGs/up&down_degs_celltype_specific.csv')
 df = pd.DataFrame(temporal_deg_tracker)
 df.to_csv(output_dir + "Fig1g_common_DEGs/up&down_degs_temporal_specific.csv", index=False) # OUTPUT modify here
 logging.info('Output ---> Fig1g_common_DEGs/up&down_degs_temporal_specific.csv')  # *log
+
+
+
+## ---------temporal-specific DEGs---------
+union_DEG = set(degs_for_day1["allEC"]["up"].index).union(degs_for_day3["allEC"]["up"].index, degs_for_day7["allEC"]["up"].index)
+common_DEG_alldays = []
+for i in union_DEG:
+    score = 0
+    if i in degs_for_day1["allEC"]["up"].index:
+        score += 1
+    if i in degs_for_day3["allEC"]["up"].index:
+        score += 1
+    if i in degs_for_day7["allEC"]["up"].index:
+        score += 1
+
+    if score>=2:
+        common_DEG_alldays.append(i)
+
+degs_for_day1["allEC"]["up"].drop(set(common_DEG_alldays).intersection(degs_for_day1["allEC"]["up"].index)).to_csv(output_dir + 'DEGs_day_specific/DEG_1_allEC_up_sorted.csv')
+degs_for_day3["allEC"]["up"].drop(set(common_DEG_alldays).intersection(degs_for_day3["allEC"]["up"].index)).to_csv(output_dir + 'DEGs_day_specific/DEG_3_allEC_up_sorted.csv')
+degs_for_day7["allEC"]["up"].drop(set(common_DEG_alldays).intersection(degs_for_day7["allEC"]["up"].index)).to_csv(output_dir + 'DEGs_day_specific/DEG_7_allEC_up_sorted.csv')
+
+
+union_DEG = set(degs_for_day1["allEC"]["down"].index).union(degs_for_day3["allEC"]["down"].index, degs_for_day7["allEC"]["down"].index)
+common_DEG_alldays = []
+for i in union_DEG:
+    score = 0
+    if i in degs_for_day1["allEC"]["down"].index:
+        score += 1
+    if i in degs_for_day3["allEC"]["down"].index:
+        score += 1
+    if i in degs_for_day7["allEC"]["down"].index:
+        score += 1
+
+    if score >= 2:
+        common_DEG_alldays.append(i)
+
+degs_for_day1["allEC"]["down"].drop(set(common_DEG_alldays).intersection(degs_for_day1["allEC"]["down"].index)).to_csv(output_dir + 'DEGs_day_specific/DEG_1_allEC_down_sorted.csv')
+degs_for_day3["allEC"]["down"].drop(set(common_DEG_alldays).intersection(degs_for_day3["allEC"]["down"].index)).to_csv(output_dir + 'DEGs_day_specific/DEG_3_allEC_down_sorted.csv')
+degs_for_day7["allEC"]["down"].drop(set(common_DEG_alldays).intersection(degs_for_day7["allEC"]["down"].index)).to_csv(output_dir + 'DEGs_day_specific/DEG_7_allEC_down_sorted.csv')
+
+
+

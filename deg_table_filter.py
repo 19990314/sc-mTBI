@@ -12,12 +12,14 @@ logging.critical('\n======================================New Pipeline Started==
 # global variabless
 
 # output_directory
-output_dir = "../../mTBI_scRNA_seq/Oct20/"
+output_dir = "../../mTBI_scRNA_seq/0ct27_withTransitionState/"
 
 # thresholds
 p_adj = 5e-12 #
 pv = 0.001
 fc = 0.25
+
+cell_types = ["aEC", "vEC", "capEC","acapEC","vcapEC"]
 
 # statistics
 temporal_deg_tracker = {
@@ -28,8 +30,9 @@ temporal_deg_tracker = {
     'down_count': []
 }
 
+
 celltype_deg_tracker = {
-    'celltypes': ["aEC", "vEC", "capEC"],
+    'celltypes': cell_types,
     'upregulated': [],
     'up_count': [],
     'downregulated': [],
@@ -41,7 +44,7 @@ celltype_deg_tracker = {
 }
 
 celltype_specific_deg_tracker = {
-    'celltypes': ["aEC", "vEC", "capEC", "allEC"],
+    'celltypes': cell_types.append("allEC"),
     'upregulated': [],
     'up_count': [],
     'downregulated': [],
@@ -159,6 +162,7 @@ def divide_up_down_regulation(dataframes, day_index, pct):
 
     return dataframes
 
+
 def celltype_specific_DEGs(dataframes, day_index, up, down):
     logging.info('Up- and down- regulated DEGs (celltype specific) were saved to: DEGs_celltype_specific/')  # *log
 
@@ -175,8 +179,6 @@ def celltype_specific_DEGs(dataframes, day_index, up, down):
             output_dir + 'DEGs_celltype_specific/DEG_' + day_index + "_" + celltype_key + "_down_sorted.csv")  # output
         logging.critical(
             'Output ---> DEGs_celltype_specific/DEG_' + day_index + "_" + celltype_key + "_down_sorted.csv")
-
-
 
     return dataframes
 
@@ -249,7 +251,7 @@ def find_common_degs_for_a_celltype(day1_df, day3_df, day7_df):
     down_ct = []
 
     # dataframes: a list of deg dfs: aEC, vEC, capEC, allEC
-    for celltype_key in ["aEC", "vEC", "capEC"]:
+    for celltype_key in cell_types:
         common_degs_up = {}
         common_degs_down = {}
 
@@ -615,21 +617,20 @@ logging.critical('OUTPUT ---> filtration_statistics/DEG_statistics_alldays.csv')
 
 
 
-
-
 ## ---------find common deg for each cell type---------
 celltype_deg_tracker["upregulated"], celltype_deg_tracker['up_count'], celltype_deg_tracker["downregulated"], celltype_deg_tracker['down_count'], celltype_deg_tracker['upregulated_celltype_specific'], celltype_deg_tracker['up_celltype_specific_count'], celltype_deg_tracker['downregulated_celltype_specific'], celltype_deg_tracker['down_celltype_specific_count'] = find_common_degs_for_a_celltype(degs_for_day1, degs_for_day3, degs_for_day7)
 
 
 df = pd.DataFrame(celltype_deg_tracker)
 df.to_csv(output_dir + "Fig1g_common_DEGs/up&down_degs_celltype_specific.csv", index=False) # OUTPUT modify here
+#df.to_excel(output_dir + "Fig1g_common_DEGs/up&down_degs_celltype_specific.xlsx", index=False) # OUTPUT modify here
 logging.info('Output ---> Fig1g_common_DEGs/up&down_degs_celltype_specific.csv')  # *log
 
 # --------- output degs for day 1,3,7 ---------
 df = pd.DataFrame(temporal_deg_tracker)
 df.to_csv(output_dir + "Fig1g_common_DEGs/up&down_degs_temporal_specific.csv", index=False) # OUTPUT modify here
+#df.to_excel(output_dir + "Fig1g_common_DEGs/up&down_degs_temporal_specific.xlsx", index=False) # OUTPUT modify here
 logging.info('Output ---> Fig1g_common_DEGs/up&down_degs_temporal_specific.csv')  # *log
-
 
 
 ## ---------temporal-specific DEGs---------
@@ -646,6 +647,7 @@ for i in union_DEG:
 
     if score>=2:
         common_DEG_alldays.append(i)
+
 
 degs_for_day1["allEC"]["up"].drop(set(common_DEG_alldays).intersection(degs_for_day1["allEC"]["up"].index)).to_csv(output_dir + 'DEGs_day_specific/DEG_1_allEC_up_sorted.csv')
 degs_for_day3["allEC"]["up"].drop(set(common_DEG_alldays).intersection(degs_for_day3["allEC"]["up"].index)).to_csv(output_dir + 'DEGs_day_specific/DEG_3_allEC_up_sorted.csv')

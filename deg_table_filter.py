@@ -1,89 +1,11 @@
-import os
-import pandas as pd
 import logging
+from global_var import *
+
+
 
 # Set up the logger
 logging.basicConfig(filename='mylog.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logging.critical('\n======================================New Pipeline Started======================================')
-
-
-
-
-# global variabless
-
-# output_directory
-output_dir = "../../mTBI_scRNA_seq/0ct27_withTransitionState/"
-
-# thresholds
-p_adj = 5e-12 #
-pv = 0.001
-fc = 0.25
-
-cell_types = ["aEC", "vEC", "capEC","acapEC","vcapEC"]
-
-# statistics
-temporal_deg_tracker = {
-    'studies': ["Sham v.s. Day1", "Sham v.s. Day3", "Sham v.s. Day7", "Sham v.s. Combined"],
-    'upregulated': [],
-    'up_count': [],
-    'downregulated': [],
-    'down_count': []
-}
-
-
-celltype_deg_tracker = {
-    'celltypes': cell_types,
-    'upregulated': [],
-    'up_count': [],
-    'downregulated': [],
-    'down_count': [],
-    'upregulated_celltype_specific': [],
-    'up_celltype_specific_count': [],
-    'downregulated_celltype_specific': [],
-    'down_celltype_specific_count': []
-}
-
-celltype_specific_deg_tracker = {
-    'celltypes': cell_types.append("allEC"),
-    'upregulated': [],
-    'up_count': [],
-    'downregulated': [],
-    'down_count': []
-}
-
-
-
-def prep_workspace(dir):
-    # Check if the directory exists
-    if not os.path.exists(dir):
-        os.mkdir(dir)
-
-def get_EC_celltype(filename):
-    for i in filename.split("_"):
-        if "EC" in i:
-            return i
-
-def read_deg_tables(filename_prefix):
-    # Directory containing the CSV files
-    directory = output_dir + "original_DEGs/"
-
-    # Get a list of CSV files with the specified prefix
-    csv_files = [file for file in os.listdir(directory) if (file.startswith(filename_prefix)) & ("sort" not in file)]
-
-    # Create an empty dictionary to store dataframes
-    dataframes = {}
-
-    # Loop through the CSV files and read them into dataframes
-    for csv_file in csv_files:
-        file_path = os.path.join(directory, csv_file)
-        # Use the file name (without extension) as the dataframe key
-        dataframe_key = get_EC_celltype(os.path.splitext(csv_file)[0])
-        # Read the CSV file into a dataframe
-        dataframes[dataframe_key] = pd.read_csv(file_path, header=0, names = ['gene', 'p_val', 'avg_log2FC', 'pct.1', 'pct.2', 'p_val_adj'], dtype='object')
-        dataframes[dataframe_key].set_index('gene', inplace=True)
-        dataframes[dataframe_key] = dataframes[dataframe_key].apply(pd.to_numeric, errors='coerce')
-
-    return dataframes
 
 
 def filter_degs(dataframes, pval, fc, pval_adj):
@@ -154,11 +76,21 @@ def divide_up_down_regulation(dataframes, day_index, pct):
         temp_dic["down"].to_csv(output_dir + 'DEGs_filtered_updown_sorted/DEG_' + day_index + "_" + celltype_key + "_down_sorted.csv") # output
         logging.critical('Output ---> DEGs_filtered_updown_sorted/DEG_' + day_index + "_" + celltype_key + "_down_sorted.csv")  # *log
 
+        # chaos statistics
+        chaos = []
+        chaos.append(len(temp_dic["up"][temp_dic["up"]['avg_log2FC'] >= 0.4]['avg_log2FC']))
+        chaos.append(len(temp_dic["down"][temp_dic["down"]['avg_log2FC'] <= -0.4]['avg_log2FC']))
+        chaos.append(temp_dic["up"][temp_dic["up"]['avg_log2FC'] >= 0.4]['avg_log2FC'].sum())
+        chaos.append(temp_dic["down"][temp_dic["down"]['avg_log2FC'] <= -0.4]['avg_log2FC'].sum())
+
         # replace unsplitted df
         dataframes[celltype_key] = temp_dic
 
         # statistics
         size_tracker['after pct (UP/DOWN)'].append(str(len(dataframes[celltype_key]["up"])) + "/" + str(len(dataframes[celltype_key]["down"])))
+        size_tracker['chaos DEGs (UP/DOWN)'].append(str(chaos[0]) + "/" + str(chaos[1]))
+        size_tracker['chaos score (UP/DOWN)'].append(str(chaos[2]) + "/" + str(chaos[3]))
+        size_tracker['chaos score (total)'].append(str(chaos[2] - chaos[3]))
 
     return dataframes
 
@@ -390,12 +322,15 @@ size_tracker = {
         'Tmem252 check3': [],
         'after p-adj': [],
         'Tmem252 check4': [],
-        'after pct (UP/DOWN)': []
+        'after pct (UP/DOWN)': [],
+        'chaos DEGs (UP/DOWN)': [],
+        'chaos score (UP/DOWN)': [],
+        'chaos score (total)': []
 }
 
 # read
 logging.info('Day 1: Read 4 DEG files (aEC, vEC, capEC, allEC)') # *log
-degs_for_day1 = read_deg_tables("DEG_day1") # INPUT modify here
+degs_for_day1 = read_deg_tables("original_DEGs/", "DEG_day1") # INPUT modify here
 logging.info('---- DONE ----') # *log
 
 # filter
@@ -450,13 +385,15 @@ size_tracker = {
     'Tmem252 check3': [],
     'after p-adj': [],
     'Tmem252 check4': [],
-    'after pct (UP/DOWN)': []
-
+    'after pct (UP/DOWN)': [],
+    'chaos DEGs (UP/DOWN)': [],
+    'chaos score (UP/DOWN)': [],
+    'chaos score (total)': []
 }
 
 # read
 logging.info('Day 3: Read 4 DEG files (aEC, vEC, capEC, allEC)') # *log
-degs_for_day3 = read_deg_tables("DEG_day3")
+degs_for_day3 = read_deg_tables("original_DEGs/", "DEG_day3")
 logging.info('---- DONE ----') # *log
 
 # filter
@@ -511,13 +448,15 @@ size_tracker = {
     'Tmem252 check3': [],
     'after p-adj': [],
     'Tmem252 check4': [],
-    'after pct (UP/DOWN)': []
-
+    'after pct (UP/DOWN)': [],
+    'chaos DEGs (UP/DOWN)': [],
+    'chaos score (UP/DOWN)': [],
+    'chaos score (total)': []
 }
 
 # read
 logging.info('Day 3: Read 4 DEG files (aEC, vEC, capEC, allEC)') # *log
-degs_for_day7 = read_deg_tables("DEG_day7")
+degs_for_day7 = read_deg_tables("original_DEGs/", "DEG_day7")
 logging.info('---- DONE ----') # *log
 
 # filter
@@ -571,12 +510,15 @@ size_tracker = {
     'Tmem252 check3': [],
     'after p-adj': [],
     'Tmem252 check4': [],
-    'after pct (UP/DOWN)': []
+    'after pct (UP/DOWN)': [],
+    'chaos DEGs (UP/DOWN)': [],
+    'chaos score (UP/DOWN)': [],
+    'chaos score (total)': []
 }
 
 # read
 logging.info('Day 3: Read 4 DEG files (aEC, vEC, capEC, allEC)') # *log
-degs_for_alldays = read_deg_tables("DEG_combined")
+degs_for_alldays = read_deg_tables("original_DEGs/", "DEG_combined")
 logging.info('---- DONE ----') # *log
 
 # filter

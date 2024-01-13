@@ -4,12 +4,12 @@ import pandas as pd
 # global variabless
 
 # output_directory
-output_dir = "../../mTBI_scRNA_seq/0ct27_withTransitionState/"
-updown_DEG_dir = "../../mTBI_scRNA_seq/0ct27_withTransitionState/DEGs_filtered_updown_sorted/"
+output_dir = "../../mTBI_scRNA_seq/Jan12/"
+updown_DEG_dir = output_dir + "DEGs_filtered_updown_sorted/"
 
 # thresholds
-p_adj = 5e-12 #
-pv = 0.001
+p_adj = 0.05 #
+pv = 0.05
 fc = 0.25
 chaos_pct = 0.5
 

@@ -1,0 +1,22 @@
+========== Where is my data located? ==========
+========== What are they? ===========
+
+Dierctories:
+
+/original_DEGs: 
+outputs from Seurat FindMarkers pipeline
+* fc = 0.1 was used
+
+/DEGs_filtered_updown_sorted:
+sorting & filtering the DEG outputs in /original_DEGs
+
+/filtration_statistics:
+4 files (corresponding to 4 integrated conditions)
+each is a table which counts: 
+"celltype", "before filtering", "Tmem252 check1", "after p-val", "Tmem252 check2", "after fc", "Tmem252 check3", "after p-adj", "Tmem252 check4", "after pct (UP/DOWN)", "chaos DEGs (UP/DOWN)", "chaos score (UP/DOWN)", "chaos score (total)
+
+/DEGs_day_specific:
+shared DEGs across days
+
+/DEGs_celltype_specific:
+shared DEGs across celltypes

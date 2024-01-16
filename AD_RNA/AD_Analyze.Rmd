@@ -1,0 +1,319 @@
+# Version info: R 4.2.2, Biobase 2.58.0, GEOquery 2.66.0, limma 3.54.0
+################################################################
+
+```{r}
+BiocManager::install("GEOquery")
+
+```
+
+
+```{r}
+#   Data plots for selected GEO samples
+library(GEOquery)
+library(limma)
+library(umap)
+library(Biobase)
+```
+
+
+```{r}
+# load series and platform data from GEO
+
+gset <- getGEO("GSE101689", GSEMatrix =TRUE, getGPL=FALSE)
+if (length(gset) > 1) idx <- grep("GPL23811", attr(gset, "names")) else idx <- 1
+gset <- gset[[idx]]
+
+ex <- exprs(gset)
+ex <- log2(ex)  # log2 transformation
+
+# box-and-whisker plot
+
+#dev.new(width=3+ncol(gset)/6, height=5)
+par(mar=c(7,4,2,1))
+title <- paste ("GSE101689", "/", annotation(gset), sep ="")
+boxplot(ex, boxwex=0.7, notch=T, main=title, outline=FALSE, las=2)
+#dev.off()
+```
+
+
+
+```{r}
+
+# expression value distribution plot
+par(mar=c(4,4,2,1))
+title <- paste ("GSE101689", "/", annotation(gset), " value distribution", sep ="")
+plotDensities(ex, main=title, legend=F)
+
+# mean-variance trend
+ex <- na.omit(ex) # eliminate rows with NAs
+plotSA(lmFit(ex), main="Mean variance trend, GSE101689")
+
+# UMAP plot (multi-dimensional scaling)
+ex <- ex[!duplicated(ex), ]  # remove duplicates
+ump <- umap(t(ex), n_neighbors = 15, random_state = 123)
+plot(ump$layout, main="UMAP plot, nbrs=15", xlab="", ylab="", pch=20, cex=1.5)
+library("maptools")  # point labels without overlaps
+pointLabel(ump$layout, labels = rownames(ump$layout), method="SANN", cex=0.6)
+
+```
+
+```{r}
+ex <- exprs(GSE101689)
+ex <- ex[which(ex <= 0)] <- NaN
+ex <- log2(ex)  # log2 transformation
+```
+
+
+```{r}
+# box-and-whisker plot
+dev.new(width=3+ncol(GSE101689)/6, height=5)
+par(mar=c(7,4,2,1))
+title <- paste ("GSE101689", "/", annotation(GSE101689), sep ="")
+boxplot(ex, boxwex=0.7, notch=T, main=title, outline=FALSE, las=2)
+dev.off()
+```
+
+
+# Synapse
+```{r}
+library(synapser) 
+library(synapserutils) 
+ 
+synLogin('xiashang', 'Synapse2022!') 
+files <- synapserutils::syncFromSynapse('syn51272688') 
+```
+
+
+
+# Nature: GSE98969
+```{r}
+
+#setwd("D:/Shuting_Chen/AD_RNA")
+#read
+
+gse <- getGEO("GSE98969", GSEMatrix=TRUE)
+gse  <- gse[[1]]
+
+# filePaths = getGEOSuppFiles("GSE98969")
+```
+
+```{r}
+sample_info <- pData(gse)
+```
+
+
+
+```{r}
+gse <- exprs(gse)
+```
+
+
+
+```{r}
+library(GEOquery)
+library(DESeq2)
+```
+
+
+```{r}
+# Create a DESeqDataSet object
+dds <- DESeqDataSetFromMatrix(countData = gse, colData = sample_info, design = ~ group)
+```
+
+
+```{r}
+# Specify the GEO dataset accession number
+geo_dataset <- "GSE12345"  # Replace with the actual dataset accession number
+
+# Download the data using GEOquery
+geo_data <- getGEO(geo_dataset, GSEMatrix = TRUE)
+
+# Extract expression data
+expression_data <- exprs(geo_data[[1]])
+
+# Load sample information (replace "GSM12345" with the actual sample names)
+sample_info <- pData(geo_data[[1]])
+
+# Create a DESeqDataSet object
+dds <- DESeqDataSetFromMatrix(countData = expression_data,
+                              colData = sample_info,
+                              design = ~ group)
+
+# Run DESeq2 analysis
+dds <- DESeq(dds)
+
+# Perform differential expression analysis (replace "case" and "control" with actual group names)
+results <- results(dds, contrast = c("group", "case", "control"))
+
+# Display the top differentially expressed genes
+top_genes <- head(rownames(results[order(results$pvalue), ]), 10)
+print(top_genes)
+
+# Save the results to a CSV file
+write.csv(results, "differential_expression_results.csv")
+```
+
+
+# GSE98969: Process from raw data
+```{r}
+library(DropletUtils)
+
+# importing the raw count data
+sce <- read10xCounts("D:/Shuting_Chen/AD_RNA/98969/GSE98969_RAW")
+```
+
+
+
+```{r}
+library(dplyr)
+library(Seurat)
+library(patchwork)
+library(cowplot)
+library(ggplot2)
+```
+
+
+```{r}
+AD00301 <- subset(AD00301,idents = c("Microglia"))
+AD00303 <- subset(AD00303,idents = c("Microglia"))
+```
+
+
+```{r}
+AD00303@meta.data$orig.ident <- "Alzheimer's Disease"
+```
+
+
+```{r}
+##Perform integration
+anchors <- FindIntegrationAnchors(object.list = list(AD00301, AD00303), dims = 1:30, k.anchor = 30)
+AD_study <- IntegrateData(anchorset = anchors, dims = 1:30)
+
+#Perform an integrated analysis
+DefaultAssay(AD_study) <- "integrated"
+```
+
+
+```{r}
+# Run the standard workflow for visualization and clustering
+AD_study <- ScaleData(AD_study, verbose = FALSE)
+AD_study <- RunPCA(AD_study, npcs = 30, verbose = FALSE)
+# t-SNE and Clustering
+AD_study <- RunUMAP(AD_study, reduction = "pca", dims = 1:30)
+AD_study <- FindNeighbors(AD_study, reduction = "pca", dims = 1:30)
+AD_study <- FindClusters(AD_study, resolution = 0.8)
+AD_study
+
+# overall Visualization
+DimPlot(AD_study, reduction = "umap", group.by = "orig.ident")
+DimPlot(AD_study, reduction = "umap", label = TRUE)
+```
+
+```{r}
+DefaultAssay(AD_study) <- "RNA"
+my_features <- c("B2m", "Ifngr1", "Ifngr2", "Irf3", "Irf8", "Ptpn1")
+
+```
+
+
+```{r}
+# B2M,CAMK2A,CAMK2B,CAMK2D,CAMK2G,HLAA,ICAM1,IFNGR1,IFNGR2,IRF2,IRF3,IRF8,JAK1,NCAM1,PIAS1,PRKCD,PTPN1,SMAD7,TRIM14,TRIM2,TRIM26,TRIM35,TRIM5
+
+
+my_features <- c("B2m", "Ifngr1", "Ifngr2", "Irf3", "Irf8", "Ptpn1")
+#my_features <- c("B2m", "PTPN1")
+
+DotPlot(AD_study, features = my_features, group.by = "orig.ident") + coord_flip()
+
+
+```
+
+```{r}
+DotPlot(AD_study, features = my_features) + coord_flip()
+
+```
+
+```{r}
+DotPlot(AD_study, features = my_features, split.by = "orig.ident") + coord_flip()
+ 
+```
+```{r}
+AD_study_delete <- AD_study
+```
+
+
+```{r}
+Idents(AD_study_delete) <- AD_study_delete$orig.ident
+```
+
+
+
+```{r}
+DefaultAssay(AD_study_delete) <- "RNA"
+
+DoHeatmap(AD_study_delete, features = my_features, size = 3)
+
+```
+
+```{r}
+DefaultAssay(AD_study_delete) <- "RNA"
+#day1
+degs_AD_WT <- FindMarkers(AD_study_delete, ident.1 = "healthy", ident.2 = "Alzheimer's Disease", logfc.threshold = 0.1, verbose = FALSE)
+write.csv(degs, "DEGs_AD_vs_WT_samples", row.names=T)
+```
+
+
+
+```{r}
+DefaultAssay(AD_study) <- "RNA"
+#day1
+degs <- FindMarkers(AD_study, ident.1 = "1", ident.2 = c("2", "3"), logfc.threshold = 0.1, verbose = FALSE)
+write.csv(degs, "DEGs_1vs_23_samples", row.names=T)
+```
+
+
+```{r}
+library(ggplot2)
+
+# Sample data generation (replace with your actual data)
+set.seed(123)
+deg_table1 <- data.frame(
+  Gene = c("Gene1", "Gene2", "Gene3", "Gene4", "Gene5", "Gene6"),
+  P_Value = runif(6, 0, 0.05),
+  Fold_Change = rnorm(6)
+)
+
+deg_table2 <- data.frame(
+  Gene = c("Gene1", "Gene2", "Gene3", "Gene4", "Gene5", "Gene6"),
+  P_Value = runif(6, 0, 0.05),
+  Fold_Change = rnorm(6)
+)
+```
+
+
+```{r}
+# Merging data frames
+merged_deg <- merge(degs_AD_WT[degs_AD_WT$gene %in% my_features,], degs[degs$gene %in% my_features,], by = "gene", suffixes = c("_AD_vs_Healthy", "_Cluster1_vs_2and3"))
+```
+
+```{r}
+p_value_range <- range(c(merged_deg$p_val_AD_vs_Healthy, merged_deg$p_val_Cluster1_vs_2and3))
+
+```
+
+
+```{r}
+# Dot plot using ggplot2
+dot_plot <- ggplot(merged_deg, aes(x = gene)) +
+  geom_point(aes(y = "AD vs Healthy", size = p_val_AD_vs_Healthy, color = p_val_AD_vs_Healthy), shape = 16) +
+  geom_point(aes(y = "Cluster1 vs 2+3", size = avg_log2FC_Cluster1_vs_2and3, color = avg_log2FC_Cluster1_vs_2and3), shape = 16) +
+  scale_size_continuous(name = "p_val", range = c(2,  10), limits = p_value_range) + #range = c(2,  10), 
+  scale_color_continuous(name = "avg_log2FC") +
+  labs(title = "Differentially Expressed Genes across studies", x = "DEGs", y = NULL) +
+  theme_minimal() +
+  theme(legend.position = "right") + coord_flip()
+
+
+# Show the dot plot
+print(dot_plot)
+```

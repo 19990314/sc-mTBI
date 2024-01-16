@@ -1,0 +1,444 @@
+# Version info: R 4.2.2, Biobase 2.58.0, GEOquery 2.66.0, limma 3.54.0
+################################################################
+
+```{r}
+BiocManager::install("GEOquery")
+
+```
+
+
+```{r}
+#   Data plots for selected GEO samples
+library(GEOquery)
+library(limma)
+library(umap)
+library(Biobase)
+```
+
+
+```{r}
+# load series and platform data from GEO
+
+gset <- getGEO("GSE101689", GSEMatrix =TRUE, getGPL=FALSE)
+if (length(gset) > 1) idx <- grep("GPL23811", attr(gset, "names")) else idx <- 1
+gset <- gset[[idx]]
+
+ex <- exprs(gset)
+ex <- log2(ex)  # log2 transformation
+
+# box-and-whisker plot
+
+#dev.new(width=3+ncol(gset)/6, height=5)
+par(mar=c(7,4,2,1))
+title <- paste ("GSE101689", "/", annotation(gset), sep ="")
+boxplot(ex, boxwex=0.7, notch=T, main=title, outline=FALSE, las=2)
+#dev.off()
+```
+
+
+
+```{r}
+
+# expression value distribution plot
+par(mar=c(4,4,2,1))
+title <- paste ("GSE101689", "/", annotation(gset), " value distribution", sep ="")
+plotDensities(ex, main=title, legend=F)
+
+# mean-variance trend
+ex <- na.omit(ex) # eliminate rows with NAs
+plotSA(lmFit(ex), main="Mean variance trend, GSE101689")
+
+# UMAP plot (multi-dimensional scaling)
+ex <- ex[!duplicated(ex), ]  # remove duplicates
+ump <- umap(t(ex), n_neighbors = 15, random_state = 123)
+plot(ump$layout, main="UMAP plot, nbrs=15", xlab="", ylab="", pch=20, cex=1.5)
+library("maptools")  # point labels without overlaps
+pointLabel(ump$layout, labels = rownames(ump$layout), method="SANN", cex=0.6)
+
+```
+
+```{r}
+ex <- exprs(GSE101689)
+ex <- ex[which(ex <= 0)] <- NaN
+ex <- log2(ex)  # log2 transformation
+```
+
+
+```{r}
+# box-and-whisker plot
+dev.new(width=3+ncol(GSE101689)/6, height=5)
+par(mar=c(7,4,2,1))
+title <- paste ("GSE101689", "/", annotation(GSE101689), sep ="")
+boxplot(ex, boxwex=0.7, notch=T, main=title, outline=FALSE, las=2)
+dev.off()
+```
+
+
+
+# Nature: GSE98969
+
+```{r}
+tar_file_path <- "/Users/iris/Downloads/GSE98969_RAW (1).tar"
+extraction_path <- "/Users/iris/Downloads/AD_RNA"
+untar(tarfile = tar_file_path, exdir = extraction_path)
+```
+
+```{r}
+geo_dataset <- "GSE98969"  # Replace with the actual dataset accession number
+geo_data <- getGEO(geo_dataset, GSEMatrix=TRUE)
+geo_data <-geo_data[[1]]
+```
+
+```{r}
+#read
+gse <- getGEO("GSE98969", GSEMatrix=TRUE)
+#gse  <- gse[[1]]
+```
+
+```{r}
+sample_info <- pData(geo_data)
+```
+
+```{r}
+gse <- exprs(gse)
+```
+
+
+
+```{r}
+library(GEOquery)
+library(DESeq2)
+```
+
+
+```{r}
+selected_samples <- sample_info[grepl("^(AD|WT)", sample_info$description.1), ]
+selected_samples[grepl("^(AD)", selected_samples$description.1), ]$description.1 <- "AD"
+selected_samples[grepl("^(WT)", selected_samples$description.1), ]$description.1 <- "WT"
+```
+
+
+```{r}
+# Create a DESeqDataSet object
+dds <- DESeqDataSetFromMatrix(countData = gse, colData = sample_info, design = ~ description.1)
+```
+
+
+```{r}
+# Specify the GEO dataset accession number
+geo_dataset <- "GSE12345"  # Replace with the actual dataset accession number
+
+# Download the data using GEOquery
+geo_data <- getGEO(geo_dataset, GSEMatrix = TRUE)
+
+# Extract expression data
+expression_data <- exprs(geo_data[[1]])
+
+# Load sample information (replace "GSM12345" with the actual sample names)
+sample_info <- pData(geo_data[[1]])
+
+# Create a DESeqDataSet object
+dds <- DESeqDataSetFromMatrix(countData = expression_data,
+                              colData = sample_info,
+                              design = ~ group)
+
+# Run DESeq2 analysis
+dds <- DESeq(dds)
+
+# Perform differential expression analysis (replace "case" and "control" with actual group names)
+results <- results(dds, contrast = c("group", "case", "control"))
+
+# Display the top differentially expressed genes
+top_genes <- head(rownames(results[order(results$pvalue), ]), 10)
+print(top_genes)
+
+# Save the results to a CSV file
+write.csv(results, "differential_expression_results.csv")
+```
+
+```{r}
+AD00303 <- subset(AD00303, idents = c("Microglia"))
+                                                       AD00301 <- subset(AD00301, idents = c("Microglia"))
+
+```
+
+
+
+```{r}
+#integration of case control
+anchors <- FindIntegrationAnchors(object.list = list(AD00301, AD00303), dims = 1:30, k.anchor = 25)
+```
+
+
+```{r}
+ad <- IntegrateData(anchorset = anchors, dims = 1:25)
+DefaultAssay(ad) <- "integrated"
+
+# Run the standard workflow for visualization and clustering
+ad <- ScaleData(ad, verbose = FALSE)
+ad <- RunPCA(ad, npcs = 30, verbose = FALSE)
+
+# t-SNE and Clustering
+ad <- RunUMAP(ad, reduction = "pca", dims = 1:25)
+ad <- FindNeighbors(ad, reduction = "pca", dims = 1:25)
+ad <- FindClusters(ad, resolution = 0.8)
+```
+
+
+```{r}
+pdf("/Users/iris/Downloads/dim_plot.pdf")
+
+# Visualization
+DimPlot(ad, reduction = "umap", group.by = "orig.ident")
+DimPlot(ad, reduction = "umap", label = TRUE)
+
+dev.off()
+```
+```{r}
+DefaultAssay(ad) <- "RNA"
+degs <- FindMarkers(ad, ident.1 = "1", ident.2 = c("2","4"), logfc.threshold = 0.25, verbose = FALSE)
+write.csv(degs, "DEGs_cluster1_vs_2+4.csv", row.names=T)
+```
+
+
+# new
+```{r}
+my_features <- c("B2m", "Ifngr1", "Ifngr2", "Irf3", "Irf8", "Ptpn1")
+
+
+```
+
+```{r}
+degs_AD_WT$gene <- row.names(degs_AD_WT)
+degs$gene <- row.names(degs)
+```
+
+```{r}
+degs_AD_WT$"-log(p_value)" <- -log(degs_AD_WT$p_val)
+degs$gene <- row.names(degs)
+```
+
+```{r}
+# B2M,CAMK2A,CAMK2B,CAMK2D,CAMK2G,HLAA,ICAM1,IFNGR1,IFNGR2,IRF2,IRF3,IRF8,JAK1,NCAM1,PIAS1,PRKCD,PTPN1,SMAD7,TRIM14,TRIM2,TRIM26,TRIM35,TRIM5
+
+
+my_features <- c("B2m", "Ifngr1", "Ifngr2", "Irf3", "Irf8", "Ptpn1", "Tmem173", "Mb21d1")
+#my_features <- c("B2m", "PTPN1")
+
+pdf("/Users/iris/Downloads/dot_plot_2_supplementary.pdf")
+DotPlot(ad, features = my_features, group.by = "orig.ident") + coord_flip()
+dev.off()
+
+```
+
+```{r}
+DotPlot(ad, features = my_features) + coord_flip()
+
+```
+
+
+
+```{r}
+AD_study_delete <- ad
+```
+
+
+
+
+```{r}
+Idents(AD_study_delete) <- AD_study_delete$orig.ident
+```
+
+
+
+```{r}
+DefaultAssay(AD_study_delete) <- "RNA"
+DoHeatmap(AD_study_delete, features = my_features, size = 3)
+```
+
+```{r}
+degs_AD_WT <- FindMarkers(AD_study_delete, ident.1 = "healthy", ident.2 = "AD", logfc.threshold = 0.1, verbose = FALSE)
+write.csv(degs_AD_WT, "DEGs_AD_vs_WT_samples", row.names=T)
+```
+
+
+
+```{r}
+library(ggplot2)
+
+# Sample data generation (replace with your actual data)
+set.seed(123)
+deg_table1 <- data.frame(
+  Gene = c("Gene1", "Gene2", "Gene3", "Gene4", "Gene5", "Gene6"),
+  P_Value = runif(6, 0, 0.05),
+  Fold_Change = rnorm(6)
+)
+
+deg_table2 <- data.frame(
+  Gene = c("Gene1", "Gene2", "Gene3", "Gene4", "Gene5", "Gene6"),
+  P_Value = runif(6, 0, 0.05),
+  Fold_Change = rnorm(6)
+)
+```
+
+
+```{r}
+# Merging data frames
+merged_deg <- merge(degs_AD_WT[degs_AD_WT$gene %in% my_features,], degs[degs$gene %in% my_features,], by = "gene", suffixes = c("_AD_vs_Healthy", "_Cluster1_vs_2and3"))
+```
+
+```{r}
+p_value_range <- range(c(merged_deg$p_val_AD_vs_Healthy, merged_deg$p_val_Cluster1_vs_2and3))
+```
+
+
+```{r}
+
+pdf("/Users/iris/Downloads/dot_plot_1_logpval.pdf")
+p_value_range <- range(c(merged_deg$logp_g1, merged_deg$logp_g2))
+
+# Dot plot using ggplot2
+dot_plot <- ggplot(merged_deg, aes(x = gene)) +
+  geom_point(aes(y = "AD v.s. Healthy", size = logp_g1, color = avg_log2FC_AD_vs_Healthy), shape = 16) +
+  geom_point(aes(y = "Cluster1 v.s. 2+3", size = logp_g2, color = avg_log2FC_Cluster1_vs_2and3), shape = 16) +
+  scale_size_continuous(name = "-log(p value)", range = c(2,  10), limits = p_value_range) + #range = c(2,  10), 
+  scale_color_continuous(name = "log2(FC)") +
+  scale_color_gradient(name = "avg_log2FC", low = "#508ab2", high = "#c52a20") +
+  labs(title = "Differentially Expressed Genes across studies", x = "DEGs", y = NULL) +
+  theme_minimal() +
+  theme(panel.grid = element_blank()) +
+  theme(legend.position = "right") + 
+  coord_flip()
+
+
+# Show the dot plot
+print(dot_plot)
+dev.off()
+```
+
+
+```{r}
+p_value_range <- range(c(merged_deg$logp_g1, merged_deg$logp_g2))
+
+# Dot plot using ggplot2
+dot_plot <- ggplot(merged_deg, aes(x = gene)) +
+  geom_point(aes(y = "AD v.s. Healthy", size = logp_g1, color = avg_log2FC_AD_vs_Healthy), shape = 16) +
+  geom_point(aes(y = "Cluster1 v.s. 2+3", size = logp_g2, color = avg_log2FC_Cluster1_vs_2and3), shape = 16) +
+  scale_size_continuous(name = "-log(p value)", range = c(2,  10), limits = p_value_range) + #range = c(2,  10), 
+  scale_color_continuous(name = "log2(FC)") +
+  scale_color_gradient(name = "avg_log2FC", low = "#508ab2", high = "#c52a20") +
+  labs(title = "Differentially Expressed Genes across studies", x = "DEGs", y = NULL) +
+  theme_minimal() +
+  theme(panel.grid = element_blank()) +
+  theme(legend.position = "right") + 
+  coord_flip()
+
+
+# Show the dot plot
+print(dot_plot)
+```
+
+
+```{r}
+# Dot plot using ggplot2
+dot_plot <- ggplot(merged_deg, aes(x = gene)) +
+  geom_point(aes(y = "AD v.s. Healthy", size = logp_g1, color = avg_log2FC_AD_vs_Healthy), shape = 16) +
+  geom_point(aes(y = "Cluster1 v.s. 2+4", size =  logp_g2, color = avg_log2FC_Cluster1_vs_2and3), shape = 16) +
+  scale_size_continuous(name = "p_val", range = c(2,  10), limits = p_value_range) + #range = c(2,  10), 
+  scale_color_continuous(name = "avg_log2FC") +
+  scale_color_gradient(name = "avg_log2FC", low = "#7da6c6", high = "#c52a20") +
+  labs(title = "Differentially Expressed Genes across studies", x = "DEGs", y = NULL) +
+  theme_minimal() +
+  theme(panel.grid = element_blank()) +
+  theme(legend.position = "right") + 
+  coord_flip()
+
+
+# Show the dot plot
+print(dot_plot)
+```
+
+# pathways *******************
+
+```{r}
+library(readr)
+ipa <- read_delim("/Users/iris/Downloads/zic3/Zic3_vs_plvap_IPA_341DEGs_Dec4.txt", delim = "\t", escape_double = FALSE, trim_ws = TRUE, skip = 2)
+
+colnames(ipa)[colnames(ipa) == "-log(p-value)"] <- "p_val"
+colnames(ipa)[colnames(ipa) == "Ingenuity Canonical Pathways"] <- "pathway"
+
+#degs_AD_WT$"-log(p_value)" <- -log(degs_AD_WT$p_val)
+
+p_value_range <- range(ipa$p_val)
+
+```
+
+
+
+
+```{r}
+library(ggplot2)
+
+# Dot plot using ggplot2
+dot_plot <- ggplot(ipa_subset, aes(x = pathway, y = p_val)) +
+  geom_point(aes(ysize = p_val, color = "z-score"), shape = 16) +
+  scale_size_continuous(name = "p_val", range = c(2,  10), limits = p_value_range) + #range = c(2,  10), 
+  scale_color_continuous(name = "p_val") +
+  scale_color_gradient(name = "p_valC", low = "#7da6c6", high = "#c52a20") +
+  labs(title = "Differentially Expressed Genes across studies", x = "Pathways", y = NULL) +
+  theme_minimal() +
+  theme(panel.grid = element_blank()) +
+  theme(legend.position = "right") + 
+  coord_flip()
+
+
+# Show the dot plot
+print(dot_plot)
+```
+
+```{r}
+library(dplyr)
+
+# Sort the data frame by P-Value in ascending order
+deg_table <- ipa_subset %>% arrange(p_val)
+deg_table$p_val <- as.numeric(as.character(deg_table$p_val))
+```
+
+
+```{r}
+# Create a ggplot dot plot with P-Value on the x-axis
+ggplot(deg_table, aes(x = p_val, y = pathway, size = p_val, color = z-score)) +
+  geom_point(shape = 16) +
+  scale_size_continuous(name = "p_val", range = c(2, 10)) +
+  scale_color_gradient(name = "z-score", low = "blue", high = "red") +
+  labs(title = "Differential Expression Dot Plot", x = "P Value", y = "Genes") +
+  theme_minimal() +
+  theme(panel.grid = element_blank())  # Remove grid lines
+```
+```{r}
+
+# Sample data generation (replace with your actual data)
+set.seed(123)
+deg_table <- data.frame(
+  Gene = c("Gene1", "Gene2", "Gene3", "Gene4", "Gene5", "Gene6"),
+  P_Value = as.factor(runif(6, 0, 0.05)),
+  Fold_Change = rnorm(6)
+)
+
+# Sort the data frame by P-Value in ascending order
+deg_table <- deg_table %>% arrange(as.numeric(as.character(P_Value)))
+
+# Create a ggplot dot plot with P-Value on the x-axis
+ggplot(deg_table, aes(x = P_Value, y = Gene, size = P_Value * 100, color = Fold_Change)) +
+  geom_point(shape = 16) +
+  scale_size_continuous(name = "P Value", range = c(2, 10)) +
+  scale_color_gradient(name = "Fold Change", low = "blue", high = "red") +
+  labs(title = "Differential Expression Dot Plot", x = "P Value", y = "Genes") +
+  theme_minimal() +
+  theme(panel.grid = element_blank())  # Remove grid lines
+
+print(dot_plot)
+
+```
+
+

@@ -1,0 +1,304 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+library(readr)
+library(ggpolypath)
+library(ggplot2)
+library(venn) 
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+```{r}
+setwd("/Users/iris/Downloads/DEGs_filtered_updown_sorted")
+
+DEG_day1_aEC_up <- read_csv("./DEG_day1_aEC_up_sorted.csv")
+DEG_day1_aEC_down <- read_csv("./DEG_day1_aEC_down_sorted.csv")
+DEG_day1_capEC_up <- read_csv("./DEG_day1_capEC_up_sorted.csv")
+DEG_day1_capEC_down <- read_csv("./DEG_day1_capEC_down_sorted.csv")
+DEG_day1_vEC_up <- read_csv("./DEG_day1_vEC_up_sorted.csv")
+DEG_day1_vEC_down <- read_csv("./DEG_day1_vEC_down_sorted.csv")
+
+DEG_day1_acapEC_up <- read_csv("./DEG_day1_acapEC_up_sorted.csv")
+DEG_day1_acapEC_down <- read_csv("./DEG_day1_acapEC_down_sorted.csv")
+DEG_day1_vcapEC_up <- read_csv("./DEG_day1_vcapEC_up_sorted.csv")
+DEG_day1_vcapEC_down <- read_csv("./DEG_day1_vcapEC_down_sorted.csv")
+
+
+
+DEG_day3_aEC_up <- read_csv("./DEG_day3_aEC_up_sorted.csv")
+DEG_day3_aEC_down <- read_csv("./DEG_day3_aEC_down_sorted.csv")
+DEG_day3_capEC_up <- read_csv("./DEG_day3_capEC_up_sorted.csv")
+DEG_day3_capEC_down <- read_csv("./DEG_day3_capEC_down_sorted.csv")
+DEG_day3_vEC_up <- read_csv("./DEG_day3_vEC_up_sorted.csv")
+DEG_day3_vEC_down <- read_csv("./DEG_day3_vEC_down_sorted.csv")
+
+DEG_day3_acapEC_up <- read_csv("./DEG_day3_acapEC_up_sorted.csv")
+DEG_day3_acapEC_down <- read_csv("./DEG_day3_acapEC_down_sorted.csv")
+DEG_day3_vcapEC_up <- read_csv("./DEG_day3_vcapEC_up_sorted.csv")
+DEG_day3_vcapEC_down <- read_csv("./DEG_day3_vcapEC_down_sorted.csv")
+
+
+
+DEG_day7_aEC_up <- read_csv("./DEG_day7_aEC_up_sorted.csv")
+DEG_day7_aEC_down <- read_csv("./DEG_day7_aEC_down_sorted.csv")
+DEG_day7_capEC_up <- read_csv("./DEG_day7_capEC_up_sorted.csv")
+DEG_day7_capEC_down <- read_csv("./DEG_day7_capEC_down_sorted.csv")
+DEG_day7_vEC_up <- read_csv("./DEG_day7_vEC_up_sorted.csv")
+DEG_day7_vEC_down <- read_csv("./DEG_day7_vEC_down_sorted.csv")
+
+DEG_day7_acapEC_up <- read_csv("./DEG_day7_acapEC_up_sorted.csv")
+DEG_day7_acapEC_down <- read_csv("./DEG_day7_acapEC_down_sorted.csv")
+DEG_day7_vcapEC_up <- read_csv("./DEG_day7_vcapEC_up_sorted.csv")
+DEG_day7_vcapEC_down <- read_csv("./DEG_day7_vcapEC_down_sorted.csv")
+```
+
+
+```{r}
+setwd("/Users/iris/Downloads/DEGs_filtered_updown_sorted")
+
+DEG_day1_allEC_up <- read_csv("./DEG_day1_allEC_up_sorted.csv")
+DEG_day1_allEC_down <- read_csv("./DEG_day1_allEC_down_sorted.csv")
+DEG_day3_allEC_up <- read_csv("./DEG_day3_allEC_up_sorted.csv")
+DEG_day3_allEC_down <- read_csv("./DEG_day3_allEC_down_sorted.csv")
+DEG_day7_allEC_up <- read_csv("./DEG_day7_allEC_up_sorted.csv")
+DEG_day7_allEC_down <- read_csv("./DEG_day7_allEC_down_sorted.csv")
+```
+
+
+
+```{r}
+x <- list(
+  aEC = unique(c(DEG_day1_aEC_up$gene, DEG_day3_aEC_up$gene, DEG_day7_aEC_up$gene), c(DEG_day1_aEC_up$gene, DEG_day3_aEC_up$gene, DEG_day7_aEC_up$gene)), 
+  vEC = unique(c(DEG_day1_vEC_up$gene, DEG_day3_vEC_up$gene, DEG_day7_vEC_up$gene)),
+  capEC = unique(c(DEG_day1_capEC_up$gene, DEG_day3_capEC_up$gene, DEG_day7_capEC_up$gene))
+  )
+```
+
+```{r}
+x <- list(
+  aEC_1 = unique(c(DEG_day1_aEC_up$gene, DEG_day3_aEC_up$gene, DEG_day7_aEC_up$gene)), 
+  vEC_1 = unique(c(DEG_day1_vEC_up$gene, DEG_day3_vEC_up$gene, DEG_day7_vEC_up$gene)),
+  capEC_1 = unique(c(DEG_day1_capEC_up$gene, DEG_day3_capEC_up$gene, DEG_day7_capEC_up$gene)),
+  aEC_3 = unique(c(DEG_day1_aEC_up$gene, DEG_day3_aEC_up$gene, DEG_day7_aEC_up$gene)), 
+  vEC_3 = unique(c(DEG_day1_vEC_up$gene, DEG_day3_vEC_up$gene, DEG_day7_vEC_up$gene)),
+  capEC_3 = unique(c(DEG_day1_capEC_up$gene, DEG_day3_capEC_up$gene, DEG_day7_capEC_up$gene)),
+  aEC_7 = unique(c(DEG_day1_aEC_up$gene, DEG_day3_aEC_up$gene, DEG_day7_aEC_up$gene)), 
+  vEC_7 = unique(c(DEG_day1_vEC_up$gene, DEG_day3_vEC_up$gene, DEG_day7_vEC_up$gene)),
+  capEC_7 = unique(c(DEG_day1_capEC_up$gene, DEG_day3_capEC_up$gene, DEG_day7_capEC_up$gene))
+  )
+```
+
+
+
+```{r}
+setwd("/Users/iris/Downloads/DEGs_filtered_updown_sorted")
+
+#ucla_degs <- read_csv("./ucla_degs.csv")
+ucla_degs <- ucla_degs[ucla_degs$`Cell Type` == "Endothelial",]
+ucla_degs <- ucla_degs[ucla_degs$Log.fold.change > 0.25 | ucla_degs$Log.fold.change < -0.25,]
+ucla_degs <- ucla_degs[ucla_degs$`P Value` > 5e-12,]
+ucla_degs <- ucla_degs[(ucla_degs$Log.fold.change > 0 & ucla_degs$PCT.TBI > 0.1) | (ucla_degs$Log.fold.change < 0 & ucla_degs$PCT.Sham > 0.1),]
+```
+
+
+
+
+
+# each day
+```{r}
+x <- list(
+  aEC = unique(c(DEG_day1_aEC_up$gene), c(DEG_day1_aEC_down$gene)),
+  vEC = unique(c(DEG_day1_vEC_up$gene),c(DEG_day1_aEC_down$gene)),
+  capEC = unique(c(DEG_day1_capEC_up$gene),c(DEG_day1_capEC_down$gene))
+  )
+```
+
+```{r}
+x <- list(
+  aEC = unique(c(DEG_day1_aEC_up$gene), c(DEG_day1_aEC_down$gene)),
+  vEC = unique(c(DEG_day1_vEC_up$gene),c(DEG_day1_aEC_down$gene)),
+  capEC = unique(c(DEG_day1_capEC_up$gene),c(DEG_day1_capEC_down$gene)),
+  acapEC = unique(c(DEG_day1_acapEC_up$gene),c(DEG_day1_acapEC_down$gene)),
+  vcapEC = unique(c(DEG_day1_vcapEC_up$gene),c(DEG_day1_vcapEC_down$gene))
+  )
+```
+
+```{r}
+pdf("/Users/iris/Downloads/venn/day1.pdf")
+#venn(x, ilab=TRUE, box = FALSE, ggplot = TRUE, size = 0, lty = "blank", zcolor = c("#FFCC99", "#009999", "#CCFF66"), sncs = 1.1, ilcs = 0.9)
+venn(x, ilab=TRUE, box = FALSE, ggplot = TRUE, size = 0, lty = "blank", zcolor = c("#f7cecc", "#9ccfe6", "#CCFF66", "#bdb5e1", "#f7b722"), sncs = 1.1, ilcs = 0.9)
+dev.off()
+```
+
+
+```{r}
+x <- list(
+  aEC = unique(c(DEG_day1_aEC_up$gene), c(DEG_day1_aEC_down$gene)),
+  vEC = unique(c(DEG_day1_vEC_up$gene),c(DEG_day1_aEC_down$gene)),
+  capEC = unique(c(DEG_day1_capEC_up$gene),c(DEG_day1_capEC_down$gene)),
+  UCLA = ucla_degs$Gene
+  )
+```
+
+```{r}
+pdf("day1+UCLA.pdf")
+#venn(x, ilab=TRUE, box = FALSE, ggplot = TRUE, size = 0, lty = "blank", zcolor = c("#FFCC99", "#009999", "#CCFF66", "#CC99CC"), sncs = 1.1, ilcs = 0.9)
+venn(x, ilab=TRUE, box = FALSE, ggplot = TRUE, size = 0, lty = "blank", zcolor = c("#f7cecc", "#9ccfe6", "#CCFF66", "#bdb5e1", "#f7b722"), sncs = 1.1, ilcs = 0.9)
+
+dev.off()
+```
+
+
+```{r}
+x <- list(
+  aEC = unique(c(DEG_day3_aEC_up$gene), c(DEG_day3_aEC_down$gene)),
+  vEC = unique(c(DEG_day3_vEC_up$gene),c(DEG_day3_aEC_down$gene)),
+  capEC = unique(c(DEG_day3_capEC_up$gene),c(DEG_day3_capEC_down$gene)),
+  acapEC = unique(c(DEG_day3_acapEC_up$gene),c(DEG_day3_acapEC_down$gene)),
+  vcapEC = unique(c(DEG_day3_vcapEC_up$gene),c(DEG_day3_vcapEC_down$gene))
+  )
+```
+
+```{r}
+pdf("/Users/iris/Downloads/venn/day3.pdf")
+#venn(x, ilab=TRUE, box = FALSE, ggplot = TRUE, size = 0, lty = "blank", zcolor = c("#FFCC99", "#009999", "#CCFF66"), sncs = 1.1, ilcs = 0.9)
+venn(x, ilab=TRUE, box = FALSE, ggplot = TRUE, size = 0, lty = "blank", zcolor = c("#f7cecc", "#9ccfe6", "#CCFF66", "#bdb5e1", "#f7b722"), sncs = 1.1, ilcs = 0.9)
+dev.off()
+```
+
+```{r}
+x <- list(
+  aEC = unique(c(DEG_day3_aEC_up$gene), c(DEG_day3_aEC_down$gene)),
+  vEC = unique(c(DEG_day3_vEC_up$gene),c(DEG_day3_aEC_down$gene)),
+  capEC = unique(c(DEG_day3_capEC_up$gene),c(DEG_day3_capEC_down$gene)),
+  UCLA = ucla_degs$Gene
+  )
+```
+
+```{r}
+pdf("day3+UCLA.pdf")
+venn(x, ilab=TRUE, box = FALSE, ggplot = TRUE, size = 0, lty = "blank", zcolor = c("#FFCC99", "#009999", "#CCFF66", "#CC99CC"), sncs = 1.1, ilcs = 0.9)
+dev.off()
+```
+
+
+
+```{r}
+x <- list(
+  aEC = unique(c(DEG_day7_aEC_up$gene), c(DEG_day7_aEC_down$gene)),
+  vEC = unique(c(DEG_day7_vEC_up$gene),c(DEG_day7_aEC_down$gene)),
+  capEC = unique(c(DEG_day7_capEC_up$gene),c(DEG_day7_capEC_down$gene)),
+  acapEC = unique(c(DEG_day7_acapEC_up$gene),c(DEG_day7_acapEC_down$gene)),
+  vcapEC = unique(c(DEG_day7_vcapEC_up$gene),c(DEG_day7_vcapEC_down$gene))
+  )
+```
+
+
+```{r}
+pdf("/Users/iris/Downloads/venn/day7.pdf")
+#venn(x, ilab=TRUE, box = FALSE, ggplot = TRUE, size = 0, lty = "blank", zcolor = c("#FFCC99", "#009999", "#CCFF66"), sncs = 1.1, ilcs = 0.9)
+venn(x, ilab=TRUE, box = FALSE, ggplot = TRUE, size = 0, lty = "blank", zcolor = c("#f7cecc", "#9ccfe6", "#CCFF66", "#bdb5e1", "#f7b722"), sncs = 1.1, ilcs = 0.9)
+
+dev.off()
+```
+
+```{r}
+x <- list(
+  aEC = unique(c(DEG_day7_aEC_up$gene), c(DEG_day7_aEC_down$gene)),
+  vEC = unique(c(DEG_day7_vEC_up$gene),c(DEG_day7_aEC_down$gene)),
+  capEC = unique(c(DEG_day7_capEC_up$gene),c(DEG_day7_capEC_down$gene)),
+  UCLA = ucla_degs$Gene
+  )
+```
+
+
+```{r}
+pdf("day7+UCLA.pdf")
+venn(x, ilab=TRUE, box = FALSE, ggplot = TRUE, size = 0, lty = "blank", zcolor = c("#FFCC99", "#009999", "#CCFF66", "#CC99CC"), sncs = 1.1, ilcs = 0.9)
+dev.off()
+```
+
+# allEC
+
+```{r}
+x <- list(
+  UP_US = unique(c(DEG_day1_allEC_up$gene, DEG_day3_allEC_up$gene, DEG_day7_allEC_up$gene)),
+  DOWN_US = unique(c(DEG_day1_allEC_down$gene, DEG_day3_allEC_down$gene, DEG_day7_allEC_down$gene)),
+  UP_UCLA = ucla_degs[ucla_degs$Log.fold.change > 0,]$Gene,
+  DOWN_UCLA = ucla_degs[ucla_degs$Log.fold.change < 0,]$Gene
+  )
+```
+
+```{r}
+x <- list(
+  UCLA = ucla_degs$Gene,
+  TBI_Day1 = unique(c(DEG_day1_allEC_up$gene, DEG_day1_allEC_down$gene)),
+  TBI_Day3 = unique(c(DEG_day3_allEC_up$gene, DEG_day3_allEC_down$gene)),
+  TBI_Day7 = unique(c(DEG_day7_allEC_up$gene, DEG_day7_allEC_down$gene))
+  )
+```
+
+```{r}
+pdf("/Users/iris/Downloads/venn/mTBI_3days_withUCLA.pdf")
+venn(x, ilab=TRUE, box = FALSE, ggplot = TRUE, size = 0, lty = "blank", zcolor = c("#CC99CC", "#f7cecc", "#9ccfe6", "#CCFF66"), sncs = 1.1, ilcs = 0.9)
+dev.off()
+```
+
+
+# pairwise day
+```{r}
+x <- list(
+  aEC_d1 = unique(c(DEG_day1_aEC_up$gene), c(DEG_day1_aEC_down$gene)),
+  vEC_d1 = unique(c(DEG_day1_vEC_up$gene),c(DEG_day1_aEC_down$gene)),
+  capEC_d1 = unique(c(DEG_day1_capEC_up$gene),c(DEG_day1_capEC_down$gene)),
+  aEC_d3 = unique(c(DEG_day3_aEC_up$gene), c(DEG_day3_aEC_down$gene)),
+  vEC_d3 = unique(c(DEG_day3_vEC_up$gene),c(DEG_day3_aEC_down$gene)),
+  capEC_d3 = unique(c(DEG_day3_capEC_up$gene),c(DEG_day3_capEC_down$gene))
+  )
+```
+
+```{r}
+x <- list(
+  aEC_d3 = unique(c(DEG_day3_aEC_up$gene), c(DEG_day3_aEC_down$gene)),
+  vEC_d3 = unique(c(DEG_day3_vEC_up$gene),c(DEG_day3_aEC_down$gene)),
+  capEC_d3 = unique(c(DEG_day3_capEC_up$gene),c(DEG_day3_capEC_down$gene)),
+  aEC_d7 = unique(c(DEG_day7_aEC_up$gene), c(DEG_day7_aEC_down$gene)),
+  vEC_d7 = unique(c(DEG_day7_vEC_up$gene),c(DEG_day7_aEC_down$gene)),
+  capEC_d7 = unique(c(DEG_day7_capEC_up$gene),c(DEG_day7_capEC_down$gene))
+  )
+```
+
+```{r}
+x <- list(
+  aEC_d1 = unique(c(DEG_day1_aEC_up$gene), c(DEG_day1_aEC_down$gene)),
+  vEC_d1 = unique(c(DEG_day1_vEC_up$gene),c(DEG_day1_aEC_down$gene)),
+  capEC_d1 = unique(c(DEG_day1_capEC_up$gene),c(DEG_day1_capEC_down$gene)),
+  aEC_d7 = unique(c(DEG_day7_aEC_up$gene), c(DEG_day7_aEC_down$gene)),
+  vEC_d7 = unique(c(DEG_day7_vEC_up$gene),c(DEG_day7_aEC_down$gene)),
+  capEC_d7 = unique(c(DEG_day7_capEC_up$gene),c(DEG_day7_capEC_down$gene))
+  )
+```
+
+
+```{r}
+Reduce(intersect, list(unique(c(DEG_day1_allEC_up$gene, DEG_day1_allEC_down$gene)), unique(c(DEG_day3_allEC_up$gene, DEG_day3_allEC_down$gene)), unique(c(DEG_day7_allEC_up$gene, DEG_day7_allEC_down$gene))))
+
+Reduce(intersect, list(unique(c(DEG_day1_allEC_up$gene, DEG_day1_allEC_down$gene)), unique(c(DEG_day3_allEC_up$gene, DEG_day3_allEC_down$gene)), unique(c(DEG_day7_allEC_up$gene, DEG_day7_allEC_down$gene)), ucla_degs$Gene))
+
+Reduce(intersect, list(DEG_day1_allEC_up$gene, DEG_day3_allEC_up$gene, DEG_day7_allEC_up$gene))
+Reduce(intersect, list(DEG_day1_allEC_down$gene, DEG_day3_allEC_down$gene, DEG_day7_allEC_down$gene))
+
+```
+

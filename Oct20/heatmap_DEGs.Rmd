@@ -1,0 +1,457 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+
+```{r}
+# Read UCLA expression data from a csv file
+expression_data <- read.csv("./DEGs/ucla_DEGs.csv", header = TRUE)
+
+# Print the data
+head(expression_data)
+
+```
+
+```{r}
+# Filter rows where Age is greater than or equal to 30
+EC_df <- subset(expression_data, Cell.Type == "Endothelial")
+
+head(EC_df)
+
+
+```
+
+
+## START HERE
+
+
+```{r}
+path_prefix <- "D:/Shuting_Chen/mTBI_scRNA_seq/Oct17/original_DEGs/"
+```
+
+
+# time specific
+```{r}
+# day 1 
+df_capEC <- read.csv(paste(path_prefix, "DEG_day1_capEC_fc02.csv", sep=""), header = TRUE, row.names = 1)
+df_vEC <- read.csv(paste(path_prefix, "DEG_day1_vEC_fc02.csv",sep=""), header = TRUE, row.names = 1)
+df_aEC <- read.csv(paste(path_prefix, "DEG_day1_aEC_fc02.csv",sep=""), header = TRUE, row.names = 1)
+df_allEC <- read.csv(paste(path_prefix, "DEG_day1_allEC_fc02.csv",sep=""), header = TRUE, row.names = 1)
+```
+
+```{r}
+# day 3
+df_capEC <- read.csv(paste(path_prefix, "DEG_day3_capEC_fc02.csv",sep=""), header = TRUE, row.names = 1)
+df_vEC <- read.csv(paste(path_prefix, "DEG_day3_vEC_fc02.csv",sep=""), header = TRUE, row.names = 1)
+df_aEC <- read.csv(paste(path_prefix, "DEG_day3_aEC_fc02.csv",sep=""), header = TRUE, row.names = 1)
+df_allEC <- read.csv(paste(path_prefix, "DEG_day3_allEC_fc02.csv",sep=""), header = TRUE, row.names = 1)
+```
+
+```{r}
+# day 7
+df_capEC <- read.csv(paste(path_prefix, "DEG_day7_capEC_fc02.csv",sep=""), header = TRUE, row.names = 1)
+df_vEC <- read.csv(paste(path_prefix, "DEG_day7_vEC_fc02.csv",sep=""), header = TRUE, row.names = 1)
+df_aEC <- read.csv(paste(path_prefix, "DEG_day7_aEC_fc02.csv",sep=""), header = TRUE, row.names = 1)
+df_allEC <- read.csv(paste(path_prefix, "DEG_day7_allEC_fc02.csv",sep=""), header = TRUE, row.names = 1)
+```
+
+
+
+# cell type specific
+```{r}
+#aEC
+df_day1 <- read.csv(paste(path_prefix, "DEG_day1_aEC_fc02.csv",sep=""), header = TRUE, row.names = 1)
+df_day3 <- read.csv(paste(path_prefix, "DEG_day3_aEC_fc02.csv",sep=""), header = TRUE, row.names = 1)
+df_day7 <- read.csv(paste(path_prefix, "DEG_day7_aEC_fc02.csv",sep=""), header = TRUE, row.names = 1)
+```
+
+```{r}
+#capEC
+df_day1 <- read.csv(paste(path_prefix, "DEG_day1_capEC_fc02.csv",sep=""), header = TRUE, row.names = 1)
+df_day3 <- read.csv(paste(path_prefix, "DEG_day3_capEC_fc02.csv",sep=""), header = TRUE, row.names = 1)
+df_day7 <- read.csv(paste(path_prefix, "DEG_day7_capEC_fc02.csv",sep=""), header = TRUE, row.names = 1)
+```
+
+```{r}
+#vEC
+df_day1 <- read.csv(paste(path_prefix, "DEG_day1_vEC_fc02.csv",sep=""), header = TRUE, row.names = 1)
+df_day3 <- read.csv(paste(path_prefix, "DEG_day3_vEC_fc02.csv",sep=""), header = TRUE, row.names = 1)
+df_day7 <- read.csv(paste(path_prefix, "DEG_day7_vEC_fc02.csv",sep=""), header = TRUE, row.names = 1)
+```
+
+
+```{r}
+#vEC
+df_day1 <- read.csv(paste(path_prefix, "DEG_day1_allEC_fc02.csv",sep=""), header = TRUE, row.names = 1)
+df_day3 <- read.csv(paste(path_prefix, "DEG_day3_allEC_fc02.csv",sep=""), header = TRUE, row.names = 1)
+df_day7 <- read.csv(paste(path_prefix, "DEG_day7_allEC_fc02.csv",sep=""), header = TRUE, row.names = 1)
+```
+
+
+
+## ignone start
+```{r}
+# Combine the four data frames into one
+combined_df <- rbind(df_capEC, df_vEC, df_aEC, df_allEC)
+combined_df
+
+
+# Find the intersection step by step
+intersection_1 <- intersect(row.names(df_capEC),row.names(df_vEC))
+intersection_2 <- intersect(row.names(df_aEC), row.names(df_allEC))
+mtbi <- intersect(intersection_1, intersection_2)
+mtbi_ucla_dups <- intersect(mtbi, EC_df$Gene)
+
+
+# Print the duplicate rows
+heatmap_genes <- unique(c(mtbi_ucla_dups, shared_features))
+heatmap_genes <- heatmap_genes[heatmap_genes != "Scgb3a1" & heatmap_genes != "Adamts1"]
+print(heatmap_genes)
+
+```
+
+## ignone end
+
+
+
+```{r}
+#d1
+up_genes <- c('Adamts9', 'AY036118', 'Arl15', 'Maml2', 'Ptprg', 'Magi1', 'Plcb1', 'Scgb3a1', 'Dach1', 'Tshz2', 'Mecom', 'Fryl', 'Wwox', 'Dock4', 'Nr3c2', 'Ptprm', 'Insr', 'Apbb2', 'Etv6', 'Prkch', 'Klf12', 'Syne1', 'Exoc4', 'Pard3b', 'Atrnl1', 'Acer2', 'Pard3', 'Mllt3', 'Pitpnc1', 'Dock1', 'Nrp1', 'Msi2', 'Prex2', 'Exoc6b', 'Zeb1', 'Fbxl17', 'Dnah3', 'Ebf1', 'Pkp4', 'Psd3', 'Igf1r', 'Adamts1')
+
+down_genes <- c('Klf2', 'Edn1', 'Tuba1a', 'Itm2a', 'Sox18', 'Vwa1', 'Bsg', 'Dusp1', 'Apoe', 'Tsc22d3', 'Hspb1', 'Crip2', 'Jund', 'Rps28', 'Rpl38', 'Gkn3', 'Sox17', 'Hspa8', 'Uba52', 'Pltp', 'Itm2b', 'Ramp2', 'Id3', 'Actg1', 'Ier2', 'Id1', 'Gsta4', 'Tubb5', 'Tinagl1', 'Icam2', 'Myl12b', 'Rps21', 'Cldn5', 'Ctsh', 'Rps27', 'Vim', 'Rps29', 'Dnaja1', 'Wfdc1', 'Rpl37a', 'Car4', 'Rhob')
+
+heatmap_genes <- c(up_genes, rev(down_genes))
+```
+
+
+```{r}
+#d3
+up_genes <- c('Cdkn1a', 'Rgcc', 'Depp1', 'Tsc22d3', 'Mt1', 'Ddit4', 'Zbtb16', 'Pim3', 'Nfkbia', 'Txnip', 'Rpl35', 'Angptl4', 'Fam107a', 'Bcl2l1', 'Hspb1', 'Pglyrp1', 'Rps27', 'Ndrg1', 'Rpl37', 'Rpl41', 'S1pr1', 'Rpl36', 'Mt2', 'Xdh', 'Cttnbp2nl', 'Fzd4', 'Apold1', 'Plat', 'Rpl37a', 'Nostrin', 'Rpl10', 'Net1', 'Tmcc3', 'Irf2bp2', 'Tmsb10', 'Fam117b')
+
+down_genes <- c('Bc1', 'Btg1', 'Pdgfb', 'Tfrc', 'mt-Atp8', 'Gm11867', 'Usp53', 'Cobll1', 'Slc38a2', 'Edn1', 'Nmt1', 'Frmd5', 'Lars2', 'Vwf', 'Adamts1', 'Rpl9-ps6', 'Rapgef4', 'Slc6a6', 'Ap2b1', 'Apcdd1', 'Rundc3b', 'Ebf1', 'Vcam1', 'Plxdc2', 'Fryl', 'Cdk8', 'Sema6a', 'Cfh', 'Stox2', 'Clec2d', 'Lama4', 'Dync1i2', 'Junb', 'Ier5', 'Fli1', 'Ptprm', 'Ier3', 'Slco1c1')
+
+heatmap_genes <- c(up_genes, rev(down_genes))
+```
+
+
+```{r}
+#d7
+up_genes <- c('Cdkn1a', 'Zbtb16', 'Hspa1b', 'Ddit4', 'Fam107a', 'Tsc22d3', 'Snrk', 'Bcl2l1', 'Net1', 'Hes1', 'Cdk8', 'Rgcc', 'Galnt15', 'Plxna2', 'Timp3', 'Pim3', 'S1pr1', 'Nfkbia', 'Ttll7', 'Slc7a5', 'Plat', 'Cyth3', 'Hspa1a', 'Mcf2l', 'Ndrg1', 'Rps29', 'B2m', 'Xdh', 'Ccdc85a', 'Susd6', 'Trp53inp1', 'Angptl4', 'Cavin2', 'Fam117b', 'Cttnbp2nl', 'Serinc3')
+
+down_genes <- c('Jund', 'Tfrc', 'Cobll1', 'Slc6a6', 'Cldn5', 'Frmd5', 'Usp53', 'Bsg', 'Grrp1', 'Layn', 'Gkn3', 'Tubb4b', 'Tmtc2', 'Ndnf', 'Vwa1', 'Itm2a', 'Grb14', 'Gsta4', 'Lmo2', 'Sema6a', 'Ier3', 'Jun', 'H3f3a', 'Adamts1', 'Kdr', 'Pcp4l1', 'Fut8', 'Lmntd1', 'Lrrn3', 'Fosb', 'Egfl7', 'Fos', 'Cfh', 'Vwf', 'Apcdd1', 'Lama4', 'Nkd1', 'Ifnar1', 'Stox2', 'Csrp2', 'Ldha', 'Dipk1a', 'BC028528')
+
+heatmap_genes <- c(up_genes, rev(down_genes))
+```
+
+
+
+
+```{r}
+#aEC
+up_genes <- c('Adamts9', 'AY036118', 'Arl15', 'Plcb1', 'Maml2', 'Ptprg', 'Cdh13', 'Fryl', 'Dach1', 'Nr3c2', 'Magi1', 'Tshz2', 'Klf12', 'Mllt3', 'Mecom', 'Lncpint', 'Wwox', 'Igf1r', 'Syne1', 'Dock4', 'Ptprm', 'Sptbn1', 'Tbc1d4', 'Prkch', 'Stard13', 'Pard3', 'Insr', 'Zbtb20', 'Atp10a', 'Exoc4', 'Stox2', 'Foxp1', 'Cyyr1', 'Exoc6b', 'Ebf1', 'Atrnl1', 'Lrch1', 'Sema3c', 'Apbb2')
+
+down_genes <- c('Gkn3', 'Tuba1a', 'Edn1', 'Bc1', 'Vwa1', 'Sox18', 'Klf2', 'Dusp1', 'Tubb5', 'Tinagl1', 'Jund', 'Hspb1', 'Vim', 'Icam2', 'Hspa8', 'Rps28', 'Sox17', 'Myl12b', 'Tm4sf1', 'Cldn5', 'Itm2a', 'Actg1', 'Tubb2a', 'Uba52', 'Dnaja1', 'Tubb4b', 'Id3', 'Rasd1', 'Crip2', 'Crip1', 'Bsg', 'Pdgfa', 'Egfl8', 'Ctsh', 'Itm2b', 'Tsc22d3', 'Ier2', 'Id1', 'Wfdc1', 'Rps21')
+
+heatmap_genes <- c(up_genes, rev(down_genes))
+```
+
+
+```{r}
+#capEC
+up_genes <- c('Hbb-bs', 'Hba-a1', 'Hba-a2', 'Hbb-bt', 'Scgb3a1', 'Adamts9', 'Angpt2', 'Cdh13', 'Immp2l', 'Rapgef5', 'S100a6', 'Ghr', 'Adm', 'Lrmda', 'Maml3', 'Gja1', 'Fhit', 'Pgf', 'Errfi1', 'Ch25h', 'Wwox', 'Il1r1', 'Nav2', 'Lrrc32', 'Fmnl2', 'Litaf', 'Ccnd1', 'Ccser1', 'Arl15', 'Grk5', 'Kcnq1ot1', 'Ube2e2', 'Snx29', 'Slc1a2', 'Apln', 'Airn', 'Tubb6', 'Mertk', 'Igfbp3', 'Cd93', 'Ptprk', 'Cacna1e', 'Nrp2', 'Kit', 'Pde4d')
+
+down_genes <- c('Edn1', 'Bc1', 'Rgs5', 'Hspa1a', 'Hspa1b', 'Fos', 'Gkn3', 'Junb', 'AY036118', 'Car4', 'Rgcc', 'Jun', 'Isg15', 'Gm11867', 'Ifit1', 'Cxcl12', 'Zfp36', 'Gadd45g', 'Ttr', 'Jund', 'Id2', 'Cdkn1c', 'Sgk1', 'Rasd1', 'Alpl', 'Stmn2', 'Gm11290', 'Tcim', 'Apod', 'Stmn1', 'Htra1', 'Ifit3', 'Rsad2', 'Irf7', 'Tom1', 'Car2', 'Tex14', 'Prdx6', 'Plxdc2', 'Slfn2', 'Gatm', 'Slc26a10', 'Slc38a5', 'Timp3', 'Nfe2l2', 'Pdgfa', 'Sat1')
+
+heatmap_genes <- c(up_genes, rev(down_genes))
+```
+
+
+```{r}
+#vEC
+up_genes <- c('AY036118', 'Adamts9', 'Scgb3a1', 'Lcn2', 'Arl15', 'Adamts1', 'Maml2', 'Magi1', 'Dach1', 'Tshz2', 'Ptprg', 'Wwox', 'Prkg1', 'Pitpnc1', 'Acer2', 'Plcb1', 'Etv6', 'Apbb2', 'Rapgef5', 'Prkch', 'Pard3b', 'Mecom', 'Dock4', 'Pard3', 'Fryl', 'Nr3c2', 'Psd3', 'Lrmda', 'Exoc4', 'Pkp4', 'Dnah3', 'Dock1', 'Arhgap26', 'Frmd5', 'Msi2')
+
+down_genes <- c('Apoe', 'Edn1', 'Klf2', 'Bsg', 'Itm2a', 'Rpl38', 'Car4', 'Tsc22d3', 'Pltp', 'Sox18', 'Crip2', 'Rps28', 'Vwa1', 'Zfp36', 'Ramp2', 'Uba52', 'Dusp1', 'Itm2b', 'Tmsb10', 'Actg1', 'Tuba1a', 'Sox17', 'Ier2', 'Rps21', 'Id1', 'Rps27', 'Hspb1', 'Gsta4', 'Id3', 'Hspa8', 'Rhob', 'Jund', 'Rpl37', 'Rpl37a', 'Slc9a3r2', 'Rps4x', 'Tinagl1', 'Rps27rt', 'Rps29')
+
+heatmap_genes <- c(up_genes, rev(down_genes))
+```
+
+
+```{r}
+#allEC
+up_genes <- c('Hbb-bs', 'Hba-a1', 'Hba-a2', 'Hbb-bt', 'Scgb3a1', 'Adamts9', 'Angpt2', 'Immp2l', 'Maml3', 'Lrmda', 'Adm', 'Rapgef5', 'Cdh13', 'Pcdh9', 'Wwox', 'Gja1', 'Nav2', 'Ccser1', 'Pgf', 'Errfi1', 'Snx29', 'Slc1a2', 'Ch25h', 'Gm5127', 'Airn', 'Pde4d', 'Igfbp3', 'Cacna1e', '2610307P16Rik', 'Apln', 'Litaf', 'Kcnq1ot1', 'Hivep3', 'Tubb6', 'Prkn', 'Fgf13', 'Kit', 'Ptprk', 'Egr3', 'Grk5', 'Bcl2', 'Lrrc32', 'Tnik', 'Lrg1')
+
+down_genes <- c('Edn1', 'Bc1', 'Gkn3', 'Hspa1a', 'Rgs5', 'Hspa1b', 'Fos', 'Junb', 'Dusp1', 'AY036118', 'Rasd1', 'Zfp36', 'Jun', 'Gm11867', 'Car4', 'Isg15', 'Gadd45g', 'Stmn2', 'Ifit1', 'Vcam1', 'Id2', 'Jund', 'Tmem100', 'Cxcl12', 'Sgk1', 'Gm11290', 'Cdkn1c', 'Ttr', 'Alpl', 'Slc16a1', 'Irf7', 'Ifit3', 'Pdgfa', 'Mgp', 'Sat1', 'Stmn1', 'Apod', 'Tom1', 'Ifi27l2a', 'Htra1', 'Tex14', 'Slc38a5', 'AW112010', 'Cd9', 'Slfn2')
+
+heatmap_genes <- c(up_genes, rev(down_genes))
+```
+
+
+# EACH DAY
+```{r}
+# Filter rows where Name is in the list
+filtered_df_capEC <- subset(df_capEC, row.names(df_capEC) %in% heatmap_genes)
+# get the order
+order <- match(heatmap_genes, row.names(filtered_df_capEC), nomatch=0)
+# reorder the dataframe
+ordered_filtered_df_capEC <- filtered_df_capEC[order, ]
+
+
+filtered_df_vEC <- subset(df_vEC, row.names(df_vEC) %in% heatmap_genes)
+# get the order
+order <- match(heatmap_genes, row.names(filtered_df_vEC), nomatch=0)
+# reorder the dataframe
+ordered_filtered_df_vEC <- filtered_df_vEC[order, ]
+
+
+filtered_df_aEC <- subset(df_aEC, row.names(df_aEC) %in% heatmap_genes)
+# get the order
+order <- match(heatmap_genes, row.names(filtered_df_aEC), nomatch=0)
+# reorder the dataframe
+ordered_filtered_df_aEC <- filtered_df_aEC[order, ]
+
+
+filtered_df_allEC <- subset(df_allEC, row.names(df_allEC) %in% heatmap_genes)
+# get the order
+order <- match(heatmap_genes, row.names(filtered_df_allEC), nomatch=0)
+# reorder the dataframe
+ordered_filtered_df_allEC <- filtered_df_allEC[order, ]
+
+```
+
+
+# EACH CELL TYPE
+```{r}
+# Filter rows where gene is in the list
+filtered_df_day1 <- subset(df_day1, row.names(df_day1) %in% heatmap_genes)
+# get the order
+order <- match(heatmap_genes, row.names(filtered_df_day1), nomatch=0)
+# reorder the dataframe
+ordered_filtered_df_day1 <- filtered_df_day1[order, ]
+
+
+filtered_df_day3 <- subset(df_day3, row.names(df_day3) %in% heatmap_genes)
+# get the order
+order <- match(heatmap_genes, row.names(filtered_df_day3), nomatch=0)
+# reorder the dataframe
+ordered_filtered_df_day3 <- filtered_df_day3[order, ]
+
+
+filtered_df_day7 <- subset(df_day7, row.names(df_day7) %in% heatmap_genes)
+# get the order
+order <- match(heatmap_genes, row.names(filtered_df_day7), nomatch=0)
+# reorder the dataframe
+ordered_filtered_df_day7 <- filtered_df_day7[order, ]
+
+```
+
+
+
+```{r}
+
+filtered_df_vEC <- ordered_filtered_df_vEC
+filtered_df_capEC <- ordered_filtered_df_capEC
+filtered_df_aEC <- ordered_filtered_df_aEC
+filtered_df_allEC <- ordered_filtered_df_allEC
+```
+
+
+
+```{r}
+# 
+expanded_genes <- c(row.names(filtered_df_capEC),row.names(filtered_df_vEC), row.names(filtered_df_aEC), row.names(filtered_df_allEC))
+
+gene_data <- data.frame(
+  Gene <- as.array(unlist(expanded_genes)),
+  Sample <- factor(c(rep("capEC", times = nrow(filtered_df_capEC)),rep("vEC", times = nrow(filtered_df_vEC)), rep("aEC", times = nrow(filtered_df_aEC)), rep("allEC", times = nrow(filtered_df_allEC))), levels = c("allEC", "capEC", "vEC", "aEC")),
+  FC <- c(filtered_df_capEC$avg_log2FC, filtered_df_vEC$avg_log2FC, filtered_df_aEC$avg_log2FC, filtered_df_allEC$avg_log2FC)
+)
+gene_data
+```
+
+
+```{r}
+# 
+expanded_genes <- c(row.names(filtered_df_day1),row.names(filtered_df_day3), row.names(filtered_df_day7))
+
+gene_data <- data.frame(
+  Gene <- as.array(unlist(expanded_genes)),
+  Sample <- factor(c(rep("day 1", times = nrow(filtered_df_day1)),rep("day 3", times = nrow(filtered_df_day3)), rep("day 7", times = nrow(filtered_df_day7))), levels = c("day 1", "day 3", "day 7")),
+  FC <- c(filtered_df_day1$avg_log2FC, filtered_df_day3$avg_log2FC, filtered_df_day7$avg_log2FC)
+)
+gene_data
+```
+
+
+
+
+```{r}
+# day1
+
+library(ggplot2)
+jpeg('heatmap_day1.jpg')
+
+# create heatmap plot
+options(repr.plot.width = 3, repr.plot.height = 6) 
+
+heatmap_plot <- ggplot(gene_data, aes(x = Sample, y = reorder(Gene,FC), fill = FC)) +
+  geom_tile(width = 0.6) +
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +  # Rotate x-axis labels
+  labs(title = "Heatmap for Day 1", fill = "Fold Change")
+
+# save heatmap plot
+print(heatmap_plot)
+dev.off()
+```
+
+```{r}
+# day3
+
+library(ggplot2)
+jpeg('heatmap_day3.jpg')
+
+# create heatmap plot
+heatmap_plot <- ggplot(gene_data, aes(x = Sample, y = reorder(Gene,FC), fill = FC)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +  # Rotate x-axis labels
+  labs(title = "Heatmap for Day 3", fill = "Fold Change")
+
+# save heatmap plot
+print(heatmap_plot)
+dev.off()
+```
+
+
+```{r}
+# day7
+
+library(ggplot2)
+jpeg('heatmap_day7.jpg')
+
+# create heatmap plot
+heatmap_plot <- ggplot(gene_data, aes(x = Sample, y = reorder(Gene, FC), fill = FC)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +  # Rotate x-axis labels
+  labs(title = "Heatmap for Day 7", fill = "Fold Change")
+
+# save heatmap plot
+print(heatmap_plot)
+dev.off()
+```
+```{r}
+# aEC
+
+library(ggplot2)
+jpeg('heatmap_aEC.jpg')
+
+# create heatmap plot
+heatmap_plot <- ggplot(gene_data, aes(x = Sample, y = reorder(Gene, FC), fill = FC)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +  # Rotate x-axis labels
+  labs(title = "Heatmap for Day 7", fill = "Fold Change")
+
+# save heatmap plot
+print(heatmap_plot)
+dev.off()
+```
+
+```{r}
+# capEC
+
+library(ggplot2)
+jpeg('heatmap_capEC.jpg')
+
+# create heatmap plot
+heatmap_plot <- ggplot(gene_data, aes(x = Sample, y = reorder(Gene, FC), fill = FC)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +  # Rotate x-axis labels
+  labs(title = "Heatmap for capEC", fill = "Fold Change")
+
+# save heatmap plot
+print(heatmap_plot)
+dev.off()
+```
+
+
+```{r}
+# vEC
+
+library(ggplot2)
+jpeg('heatmap_vEC.jpg')
+
+# create heatmap plot
+heatmap_plot <- ggplot(gene_data, aes(x = Sample, y = reorder(Gene, FC), fill = FC)) +
+  geom_tile(width = 0.6) +
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +  # Rotate x-axis labels
+  labs(title = "Heatmap for vEC", fill = "Fold Change")
+
+# save heatmap plot
+print(heatmap_plot)
+dev.off()
+```
+
+
+```{r}
+# allEC
+
+library(ggplot2)
+jpeg('heatmap_allEC.jpg')
+
+# create heatmap plot
+heatmap_plot <- ggplot(gene_data, aes(x = Sample, y = reorder(Gene, FC), fill = FC)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +  # Rotate x-axis labels
+  labs(title = "Heatmap for allEC", fill = "Fold Change")
+
+# save heatmap plot
+print(heatmap_plot)
+dev.off()
+```
+
+
+
+## Vocano Plot
+```{r}
+# Replace 'your_file.csv' with the path to your CSV file
+our_degs <- read.csv("928_DEG_allEC_0v1_p02_wilcox_ourdata.csv", header = TRUE)
+```
+
+
+
+```{r}
+# Load the ggplot2 library
+library(ggplot2)
+
+# Sample data
+# Replace this with your own dataset containing p-values and fold changes
+data <- data.frame(
+  Gene = c("Gene1", "Gene2", "Gene3", "Gene4", "Gene5"),
+  FoldChange = c(2.0, -1.5, 0.5, 1.2, -2.5),
+  PValue = c(0.001, 0.05, 0.2, 0.01, 0.0001)
+)
+
+# Create the volcano plot
+ggplot(our_degs, aes(x = avg_log2FC, y = -log10(p_val))) +
+  geom_point(aes(color = ifelse(-log10(p_val) > 1 & abs(avg_log2FC) > 0.05, "red", "black")), size = 1) +
+  scale_color_identity() +
+  geom_hline(yintercept = -log10(0.05), linetype = "dashed", color = "red") +
+  geom_vline(xintercept = c(-0.05, 0.05), linetype = "dashed", color = "blue") +
+  labs(x = "Log2(Fold Change)", y = "-log10(P-Value)", title = "Volcano Plot") +
+  theme_minimal()
+```
+

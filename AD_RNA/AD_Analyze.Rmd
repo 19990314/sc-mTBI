@@ -272,6 +272,7 @@ write.csv(degs, "DEGs_1vs_23_samples", row.names=T)
 ```
 
 
+#dot plot
 ```{r}
 library(ggplot2)
 
@@ -317,3 +318,125 @@ dot_plot <- ggplot(merged_deg, aes(x = gene)) +
 # Show the dot plot
 print(dot_plot)
 ```
+
+
+
+#1/16
+
+```{r}
+#day 1
+deg_day1_a <- rbind(DEG_day1_aEC_up, DEG_day1_aEC_down)
+deg_day1_a$Cell_Type <- rep("aEC", length(deg_day1_a$gene))
+
+deg_day1_v <- rbind(DEG_day1_vEC_up, DEG_day1_vEC_down)
+deg_day1_v$Cell_Type <- rep("vEC", length(deg_day1_v$gene))
+
+deg_day1_cap <- rbind(DEG_day1_capEC_up, DEG_day1_capEC_down)
+deg_day1_cap$Cell_Type <- rep("capEC", length(deg_day1_cap$gene))
+
+deg_day1_acap <- rbind(DEG_day1_acapEC_up, DEG_day1_acapEC_down)
+deg_day1_acap$Cell_Type <- rep("acapEC", length(deg_day1_acap$gene))
+
+deg_day1_vcap <- rbind(DEG_day1_capEC_up, DEG_day1_vcapEC_down)
+deg_day1_vcap$Cell_Type <- rep("vcapEC", length(deg_day1_vcap$gene))
+```
+
+```{r}
+intersection_genes <- Reduce(intersect, list(deg_day1_a$gene, deg_day1_v$gene, deg_day1_cap$gene, deg_day1_vcap$gene, deg_day1_acap$gene))
+```
+
+
+```{r}
+#day 3
+deg_day3_a <- rbind(DEG_day3_aEC_up, DEG_day3_aEC_down)
+deg_day3_a$Cell_Type <- rep("aEC", length(deg_day3_a$gene))
+
+deg_day3_v <- rbind(DEG_day3_vEC_up, DEG_day3_vEC_down)
+deg_day3_v$Cell_Type <- rep("vEC", length(deg_day3_v$gene))
+
+deg_day3_cap <- rbind(DEG_day3_capEC_up, DEG_day3_capEC_down)
+deg_day3_cap$Cell_Type <- rep("capEC", length(deg_day3_cap$gene))
+
+deg_day3_acap <- rbind(DEG_day3_acapEC_up, DEG_day3_acapEC_down)
+deg_day3_acap$Cell_Type <- rep("acapEC", length(deg_day3_acap$gene))
+
+deg_day3_vcap <- rbind(DEG_day3_capEC_up, DEG_day3_vcapEC_down)
+deg_day3_vcap$Cell_Type <- rep("vcapEC", length(deg_day3_vcap$gene))
+```
+
+```{r}
+intersection_genes <- Reduce(intersect, list(deg_day3_a$gene, deg_day3_v$gene, deg_day3_cap$gene, deg_day3_vcap$gene, deg_day3_acap$gene))
+```
+
+```{r}
+#day 7
+deg_day7_a <- rbind(DEG_day7_aEC_up, DEG_day7_aEC_down)
+deg_day7_a$Cell_Type <- rep("aEC", length(deg_day7_a$gene))
+
+deg_day7_v <- rbind(DEG_day7_vEC_up, DEG_day7_vEC_down)
+deg_day7_v$Cell_Type <- rep("vEC", length(deg_day7_v$gene))
+
+deg_day7_cap <- rbind(DEG_day7_capEC_up, DEG_day7_capEC_down)
+deg_day7_cap$Cell_Type <- rep("capEC", length(deg_day7_cap$gene))
+
+deg_day7_acap <- rbind(DEG_day7_acapEC_up, DEG_day7_acapEC_down)
+deg_day7_acap$Cell_Type <- rep("acapEC", length(deg_day7_acap$gene))
+
+deg_day7_vcap <- rbind(DEG_day7_capEC_up, DEG_day7_vcapEC_down)
+deg_day7_vcap$Cell_Type <- rep("vcapEC", length(deg_day7_vcap$gene))
+```
+
+```{r}
+intersection_genes <- Reduce(intersect, list(deg_day7_a$gene, deg_day7_v$gene, deg_day7_cap$gene, deg_day7_vcap$gene, deg_day7_acap$gene))
+```
+
+
+```{r}
+pdf(file= "day7_raw_dot_plot.pdf", onefile = TRUE)
+
+for (i in seq(15, length(intersection_genes), by = 15)) {
+  # data
+  target_genes <- intersection_genes[(i-15):i]
+  
+  final_deg <- rbind(deg_day1_a[deg_day1_a$gene %in% target_genes,], deg_day1_v[deg_day1_v$gene %in% target_genes,])
+  final_deg <- rbind(final_deg, deg_day1_cap[deg_day1_cap$gene %in% target_genes,])
+  final_deg <- rbind(final_deg, deg_day1_vcap[deg_day1_vcap$gene %in% target_genes,])
+  final_deg <- rbind(final_deg, deg_day1_acap[deg_day1_acap$gene %in% target_genes,])
+  
+  # Create a ggplot dot plot
+  plts <- ggplot(final_deg, aes(x = Cell_Type, y = gene, size = -log(p_val_adj), color = avg_log2FC)) +
+    geom_point() +
+    scale_size_continuous(name = "-log(P Value)") +
+    scale_color_gradient(name = "Fold Change", low = "#6C91C2", high = "#CF3D3E") +
+    labs(title = "Differential Expression Dot Plot", x = "Cell Type", y = "Genes") +
+    theme_minimal() +
+    theme(panel.grid = element_blank())  # Remove grid lines
+  
+  print(plts)
+}
+
+# data
+target_genes <- intersection_genes[(i+1):length(intersection_genes)]
+  
+final_deg <- rbind(deg_day1_a[deg_day1_a$gene %in% target_genes,], deg_day1_v[deg_day1_v$gene %in% target_genes,])
+final_deg <- rbind(final_deg, deg_day1_cap[deg_day1_cap$gene %in% target_genes,])
+final_deg <- rbind(final_deg, deg_day1_vcap[deg_day1_vcap$gene %in% target_genes,])
+final_deg <- rbind(final_deg, deg_day1_acap[deg_day1_acap$gene %in% target_genes,])
+  
+# Create a ggplot dot plot
+plts <- ggplot(final_deg, aes(x = Cell_Type, y = gene, size = -log(p_val_adj), color = avg_log2FC)) +
+  geom_point() +
+  scale_size_continuous(name = "-log(P Value)") +
+  scale_color_gradient(name = "Fold Change", low = "#6C91C2", high = "#CF3D3E") +
+  labs(title = "Differential Expression Dot Plot", x = "Cell Type", y = "Genes") +
+  theme_minimal() +
+  theme(panel.grid = element_blank())  # Remove grid lines
+  
+print(plts)
+dev.off()
+```
+
+```{r}
+target_genes<- c()
+```
+

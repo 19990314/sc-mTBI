@@ -36,7 +36,6 @@ DEG_day1_vcapEC_up <- read_csv("./DEG_day1_vcapEC_up_sorted.csv")
 DEG_day1_vcapEC_down <- read_csv("./DEG_day1_vcapEC_down_sorted.csv")
 
 
-
 DEG_day3_aEC_up <- read_csv("./DEG_day3_aEC_up_sorted.csv")
 DEG_day3_aEC_down <- read_csv("./DEG_day3_aEC_down_sorted.csv")
 DEG_day3_capEC_up <- read_csv("./DEG_day3_capEC_up_sorted.csv")
@@ -48,7 +47,6 @@ DEG_day3_acapEC_up <- read_csv("./DEG_day3_acapEC_up_sorted.csv")
 DEG_day3_acapEC_down <- read_csv("./DEG_day3_acapEC_down_sorted.csv")
 DEG_day3_vcapEC_up <- read_csv("./DEG_day3_vcapEC_up_sorted.csv")
 DEG_day3_vcapEC_down <- read_csv("./DEG_day3_vcapEC_down_sorted.csv")
-
 
 
 DEG_day7_aEC_up <- read_csv("./DEG_day7_aEC_up_sorted.csv")
@@ -246,6 +244,7 @@ x <- list(
 ```
 
 ```{r}
+# allEC
 x <- list(
   UCLA = ucla_degs$Gene,
   TBI_Day1 = unique(c(DEG_day1_allEC_up$gene, DEG_day1_allEC_down$gene)),
@@ -255,6 +254,7 @@ x <- list(
 ```
 
 ```{r}
+# capEC
 x <- list(
   UCLA = ucla_degs$Gene,
   TBI_Day1 = unique(c(DEG_day1_capEC_up$gene, DEG_day1_capEC_down$gene)),
@@ -307,13 +307,32 @@ x <- list(
 ```
 
 
+# report shared
+
 ```{r}
+
 Reduce(intersect, list(unique(c(DEG_day1_allEC_up$gene, DEG_day1_allEC_down$gene)), unique(c(DEG_day3_allEC_up$gene, DEG_day3_allEC_down$gene)), unique(c(DEG_day7_allEC_up$gene, DEG_day7_allEC_down$gene))))
 
 Reduce(intersect, list(unique(c(DEG_day1_allEC_up$gene, DEG_day1_allEC_down$gene)), unique(c(DEG_day3_allEC_up$gene, DEG_day3_allEC_down$gene)), unique(c(DEG_day7_allEC_up$gene, DEG_day7_allEC_down$gene)), ucla_degs$Gene))
 
 Reduce(intersect, list(DEG_day1_allEC_up$gene, DEG_day3_allEC_up$gene, DEG_day7_allEC_up$gene))
 Reduce(intersect, list(DEG_day1_allEC_down$gene, DEG_day3_allEC_down$gene, DEG_day7_allEC_down$gene))
+```
+
+```{r}
+# shared by 3 days
+degs_usc <- Reduce(intersect, list(unique(c(DEG_day1_capEC_up$gene, DEG_day1_capEC_down$gene)), unique(c(DEG_day3_capEC_up$gene, DEG_day3_capEC_down$gene)), unique(c(DEG_day7_capEC_up$gene, DEG_day7_capEC_down$gene))))
+
+# shared by 3 days + ucla
+degs_usc_ucla <- Reduce(intersect, list(unique(c(DEG_day1_capEC_up$gene, DEG_day1_capEC_down$gene)), unique(c(DEG_day3_capEC_up$gene, DEG_day3_capEC_down$gene)), unique(c(DEG_day7_capEC_up$gene, DEG_day7_capEC_down$gene)), ucla_degs$Gene))
+
+# up OR down
+Reduce(intersect, list(DEG_day1_allEC_up$gene, DEG_day3_allEC_up$gene, DEG_day7_allEC_up$gene))
+Reduce(intersect, list(DEG_day1_allEC_down$gene, DEG_day3_allEC_down$gene, DEG_day7_allEC_down$gene))
+```
+
+
+```{r}
 
 ```
 

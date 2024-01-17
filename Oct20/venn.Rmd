@@ -3,9 +3,9 @@ title: "R Notebook"
 output: html_notebook
 ---
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+prereq:
+install.packages("ggpolypath")
 
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
 
 ```{r}
 library(readr)
@@ -21,7 +21,7 @@ When you save the notebook, an HTML file containing the code and output will be 
 The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
 
 ```{r}
-setwd("/Users/iris/Downloads/DEGs_filtered_updown_sorted")
+setwd("D:/Shuting_Chen/mTBI_scRNA_seq/Jan12/DEGs_filtered_updown_sorted")
 
 DEG_day1_aEC_up <- read_csv("./DEG_day1_aEC_up_sorted.csv")
 DEG_day1_aEC_down <- read_csv("./DEG_day1_aEC_down_sorted.csv")
@@ -103,12 +103,15 @@ x <- list(
 
 
 ```{r}
-setwd("/Users/iris/Downloads/DEGs_filtered_updown_sorted")
+library(readr)
+ucla_degs <- read_csv("D:\\Shuting_Chen\\code\\sc-mTBI\\ucla.degs.csv", skip = 2)
 
-#ucla_degs <- read_csv("./ucla_degs.csv")
+pv <- 0.05
+fc <- 0.25
+
 ucla_degs <- ucla_degs[ucla_degs$`Cell Type` == "Endothelial",]
-ucla_degs <- ucla_degs[ucla_degs$Log.fold.change > 0.25 | ucla_degs$Log.fold.change < -0.25,]
-ucla_degs <- ucla_degs[ucla_degs$`P Value` > 5e-12,]
+ucla_degs <- ucla_degs[ucla_degs$Log.fold.change > fc | ucla_degs$Log.fold.change < -fc,]
+ucla_degs <- ucla_degs[ucla_degs$`P Value` < pv,]
 ucla_degs <- ucla_degs[(ucla_degs$Log.fold.change > 0 & ucla_degs$PCT.TBI > 0.1) | (ucla_degs$Log.fold.change < 0 & ucla_degs$PCT.Sham > 0.1),]
 ```
 
@@ -233,6 +236,7 @@ dev.off()
 # allEC
 
 ```{r}
+#use all EC
 x <- list(
   UP_US = unique(c(DEG_day1_allEC_up$gene, DEG_day3_allEC_up$gene, DEG_day7_allEC_up$gene)),
   DOWN_US = unique(c(DEG_day1_allEC_down$gene, DEG_day3_allEC_down$gene, DEG_day7_allEC_down$gene)),
@@ -251,7 +255,18 @@ x <- list(
 ```
 
 ```{r}
-pdf("/Users/iris/Downloads/venn/mTBI_3days_withUCLA.pdf")
+x <- list(
+  UCLA = ucla_degs$Gene,
+  TBI_Day1 = unique(c(DEG_day1_capEC_up$gene, DEG_day1_capEC_down$gene)),
+  TBI_Day3 = unique(c(DEG_day3_capEC_up$gene, DEG_day3_capEC_down$gene)),
+  TBI_Day7 = unique(c(DEG_day7_capEC_up$gene, DEG_day7_capEC_down$gene))
+  )
+
+```
+
+
+```{r}
+pdf("mTBI_3days_withUCLA.pdf")
 venn(x, ilab=TRUE, box = FALSE, ggplot = TRUE, size = 0, lty = "blank", zcolor = c("#CC99CC", "#f7cecc", "#9ccfe6", "#CCFF66"), sncs = 1.1, ilcs = 0.9)
 dev.off()
 ```

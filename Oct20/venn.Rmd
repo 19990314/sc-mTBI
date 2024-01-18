@@ -14,11 +14,6 @@ library(ggplot2)
 library(venn) 
 ```
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
-
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
-
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
 
 ```{r}
 setwd("D:/Shuting_Chen/mTBI_scRNA_seq/Jan12/DEGs_filtered_updown_sorted")
@@ -256,21 +251,55 @@ x <- list(
 ```{r}
 # capEC
 x <- list(
-  UCLA = ucla_degs$Gene,
-  TBI_Day1 = unique(c(DEG_day1_capEC_up$gene, DEG_day1_capEC_down$gene)),
-  TBI_Day3 = unique(c(DEG_day3_capEC_up$gene, DEG_day3_capEC_down$gene)),
-  TBI_Day7 = unique(c(DEG_day7_capEC_up$gene, DEG_day7_capEC_down$gene))
+  UCLA = as.character(na.omit(unlist(x$UCLA))),
+  TBI_Day1 = as.character(na.omit(unique(c(DEG_day1_capEC_up$gene, DEG_day1_capEC_down$gene)))),
+  TBI_Day3 = as.character(na.omit(unique(c(DEG_day3_capEC_up$gene, DEG_day3_capEC_down$gene)))),
+  TBI_Day7 = as.character(na.omit(unique(c(DEG_day7_capEC_up$gene, DEG_day7_capEC_down$gene))))
   )
 
 ```
 
+```{r}
+# capEC
+x <- list(
+  UCLA = ucla_degs$Gene,
+  TBI_Day1 = unique(c(DEG_day1_capEC_up$gene, DEG_day1_capEC_down$gene))
+  )
+
+```
 
 ```{r}
-pdf("mTBI_3days_withUCLA.pdf")
+pdf("mTBI_3days_with_UCLA_JAN17.pdf")
 venn(x, ilab=TRUE, box = FALSE, ggplot = TRUE, size = 0, lty = "blank", zcolor = c("#CC99CC", "#f7cecc", "#9ccfe6", "#CCFF66"), sncs = 1.1, ilcs = 0.9)
 dev.off()
 ```
 
+```{r}
+# Helper function to display Venn diagram
+display_venn <- function(x, ...){
+  library(VennDiagram)
+  grid.newpage()
+  venn_object <- venn.diagram(x, filename = NULL, ...)
+  grid.draw(venn_object)
+}
+```
+
+```{r}
+pdf("mTBI_3days_with_UCLA_JAN17.pdf")
+
+display_venn(
+        x,
+        # Circles
+        lty = 'blank',
+        fill = c("#CC99CC", "#f7cecc", "#9ccfe6", "#CCFF66"),
+        # Numbers
+        cex = .9,
+        # Set names
+        cat.cex = 1,
+        cat.default.pos = "outer",
+)
+dev.off()
+```
 
 # pairwise day
 ```{r}
@@ -333,6 +362,49 @@ Reduce(intersect, list(DEG_day1_allEC_down$gene, DEG_day3_allEC_down$gene, DEG_d
 
 
 ```{r}
+# Filter rows where the 'Cell_Type' column is in the list
+deg_day1_cap <- rbind(DEG_day1_capEC_up, DEG_day1_capEC_down)
+deg_day3_cap <- rbind(DEG_day3_capEC_up, DEG_day3_capEC_down)
+deg_day7_cap <- rbind(DEG_day7_capEC_up, DEG_day7_capEC_down)
+```
+
+
+```{r}
+# select columns
+deg_day1_cap <- deg_day1_cap[, !(names(deg_day1_cap) %in% c("Cell_Type", "p_val","pct.1","pct.2"))]
+names(deg_day1_cap)[names(deg_day1_cap) == "p_val_adj"] <- "p_val_adj_from_dpi1"
+names(deg_day1_cap)[names(deg_day1_cap) == "avg_log2FC"] <- "log2FC_from_dpi1"
+
+deg_day3_cap <- deg_day3_cap[, !(names(deg_day3_cap) %in% c("Cell_Type", "p_val","pct.1","pct.2"))]
+names(deg_day3_cap)[names(deg_day3_cap) == "p_val_adj"] <- "p_val_adj_from_dpi3"
+names(deg_day3_cap)[names(deg_day3_cap) == "avg_log2FC"] <- "log2FC_from_dpi3"
+
+deg_day7_cap <- deg_day7_cap[, !(names(deg_day7_cap) %in% c("Cell_Type", "p_val","pct.1","pct.2"))]
+names(deg_day7_cap)[names(deg_day7_cap) == "p_val_adj"] <- "p_val_adj_from_dpi7"
+names(deg_day7_cap)[names(deg_day7_cap) == "avg_log2FC"] <- "log2FC_from_dpi7"
+
+ucla_degs_narrowed <- ucla_degs[, (names(ucla_degs) %in% c("Gene", "P Value","Log.fold.change"))]
+names(ucla_degs_narrowed)[names(ucla_degs_narrowed) == "Gene"] <- "gene"
+names(ucla_degs_narrowed)[names(ucla_degs_narrowed) == "P Value"] <- "p_val_adj_from_ucla"
+names(ucla_degs_narrowed)[names(ucla_degs_narrowed) == "Log.fold.change"] <- "log2FC_from_ucla"
+```
+
+
+```{r}
+# generate new tables
+shared_dpi1to7 <- Reduce(function(x, y) merge(x, y, by = "gene", all = TRUE), list(deg_day1_cap[deg_day1_cap$gene %in% degs_usc, ],deg_day3_cap[deg_day3_cap$gene %in% degs_usc, ], deg_day7_cap[deg_day7_cap$gene %in% degs_usc, ]))
+
+# output
+write.csv(shared_dpi1to7, "venn_intersection_dpi1&3&7.csv", quote = F, row.names = F)
+
+# generate new tables
+shared_dpi1to7_ucla <- Reduce(function(x, y) merge(x, y, by = "gene", all = TRUE), list(deg_day1_cap[deg_day1_cap$gene %in% degs_usc_ucla, ],deg_day3_cap[deg_day3_cap$gene %in% degs_usc_ucla, ], deg_day7_cap[deg_day7_cap$gene %in% degs_usc_ucla, ], ucla_degs_narrowed[ucla_degs_narrowed$gene %in% degs_usc_ucla, ]))
+
+# output
+write.csv(shared_dpi1to7_ucla, "venn_intersection_dpi1&3&7_UCLA.csv", quote = F, row.names = F)
 
 ```
+
+
+
 

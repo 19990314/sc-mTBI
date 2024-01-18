@@ -3358,3 +3358,151 @@
 2024-01-12 16:51:21,222 - CRITICAL - OUTPUT ---> filtration_statistics/DEG_statistics_alldays.csv
 2024-01-12 16:51:22,955 - INFO - Output ---> Fig1g_common_DEGs/up&down_degs_celltype_specific.csv
 2024-01-12 16:51:22,961 - INFO - Output ---> Fig1g_common_DEGs/up&down_degs_temporal_specific.csv
+2024-01-17 18:45:51,269 - CRITICAL - 
+======================================New Pipeline Started======================================
+2024-01-17 18:46:10,268 - CRITICAL - 
+======================================New Pipeline Started======================================
+2024-01-17 18:46:10,269 - INFO - Workspace Created: DEGs_filtered_updown_sorted/ filtration_statistics/ Fig1g_common_DEGs/
+2024-01-17 18:46:10,269 - INFO - *DEGs_filtered_updown_sorted/: DEG tables for each single day and each cell types
+2024-01-17 18:46:10,269 - INFO - *filtration_statistics/: the DEG counts and Tmem252 flag after each filtration step (each single day, each cell types)
+2024-01-17 18:46:10,269 - INFO - *Fig1g_common_DEGs/: common DEGs and counts (each single day, each cell types)
+2024-01-17 18:46:10,269 - INFO - *DEGs_celltype_specific/: DEGs for each cell type
+2024-01-17 18:46:10,269 - CRITICAL - ********************Day 1************************
+2024-01-17 18:46:10,269 - INFO - Day 1: Read 4 DEG files (aEC, vEC, capEC, allEC)
+2024-01-17 18:46:28,644 - CRITICAL - 
+======================================New Pipeline Started======================================
+2024-01-17 18:46:28,644 - INFO - Workspace Created: DEGs_filtered_updown_sorted/ filtration_statistics/ Fig1g_common_DEGs/
+2024-01-17 18:46:28,645 - INFO - *DEGs_filtered_updown_sorted/: DEG tables for each single day and each cell types
+2024-01-17 18:46:28,645 - INFO - *filtration_statistics/: the DEG counts and Tmem252 flag after each filtration step (each single day, each cell types)
+2024-01-17 18:46:28,645 - INFO - *Fig1g_common_DEGs/: common DEGs and counts (each single day, each cell types)
+2024-01-17 18:46:28,645 - INFO - *DEGs_celltype_specific/: DEGs for each cell type
+2024-01-17 18:46:28,645 - CRITICAL - ********************Day 1************************
+2024-01-17 18:46:28,645 - INFO - Day 1: Read 4 DEG files (aEC, vEC, capEC, allEC)
+2024-01-17 18:46:28,830 - INFO - ---- DONE ----
+2024-01-17 18:46:28,830 - INFO - DEG filtration (p-value: 0.05, fc: 0.2, pval-adj: 0.001)
+2024-01-17 18:46:28,849 - INFO - ---- DONE ----
+2024-01-17 18:46:28,849 - INFO - DEG UP or Down (pct: 0.1)
+2024-01-17 18:46:28,849 - INFO - Up- and down- regulated DEGs for each cell type were saved to: DEGs_filtered_updown_sorted/
+2024-01-17 18:46:28,859 - CRITICAL - Output ---> DEGs_filtered_updown_sorted/DEG_day1_capEC_up_sorted.csv
+2024-01-17 18:46:28,864 - CRITICAL - Output ---> DEGs_filtered_updown_sorted/DEG_day1_capEC_down_sorted.csv
+2024-01-17 18:46:28,873 - CRITICAL - Output ---> DEGs_filtered_updown_sorted/DEG_day1_acapEC_up_sorted.csv
+2024-01-17 18:46:28,881 - CRITICAL - Output ---> DEGs_filtered_updown_sorted/DEG_day1_acapEC_down_sorted.csv
+2024-01-17 18:46:28,893 - CRITICAL - Output ---> DEGs_filtered_updown_sorted/DEG_day1_allEC_up_sorted.csv
+2024-01-17 18:46:28,901 - CRITICAL - Output ---> DEGs_filtered_updown_sorted/DEG_day1_allEC_down_sorted.csv
+2024-01-17 18:46:28,916 - CRITICAL - Output ---> DEGs_filtered_updown_sorted/DEG_day1_aEC_up_sorted.csv
+2024-01-17 18:46:28,925 - CRITICAL - Output ---> DEGs_filtered_updown_sorted/DEG_day1_aEC_down_sorted.csv
+2024-01-17 18:46:28,938 - CRITICAL - Output ---> DEGs_filtered_updown_sorted/DEG_day1_vcapEC_up_sorted.csv
+2024-01-17 18:46:28,955 - CRITICAL - Output ---> DEGs_filtered_updown_sorted/DEG_day1_vcapEC_down_sorted.csv
+2024-01-17 18:46:28,960 - CRITICAL - Output ---> DEGs_filtered_updown_sorted/DEG_day1_vEC_up_sorted.csv
+2024-01-17 18:46:28,963 - CRITICAL - Output ---> DEGs_filtered_updown_sorted/DEG_day1_vEC_down_sorted.csv
+2024-01-17 18:46:28,964 - INFO - ---- DONE ----
+2024-01-17 18:46:28,964 - INFO - Find common DEGs for Day1 up- and down-regulated DEGs from its a,v,cap,allEC groups
+2024-01-17 18:46:29,205 - INFO - ---- DONE ----
+2024-01-17 18:46:29,205 - INFO - Find cell-type specific DEGs for Day1 up- and down-regulated DEGs from its a,v,cap groups
+2024-01-17 18:46:29,205 - INFO - Up- and down- regulated DEGs (celltype specific) were saved to: DEGs_celltype_specific/
+2024-01-17 18:46:29,208 - CRITICAL - Output ---> DEGs_celltype_specific/DEG_day1_capEC_up_sorted.csv
+2024-01-17 18:46:29,210 - CRITICAL - Output ---> DEGs_celltype_specific/DEG_day1_capEC_down_sorted.csv
+2024-01-17 18:46:29,211 - CRITICAL - Output ---> DEGs_celltype_specific/DEG_day1_acapEC_up_sorted.csv
+2024-01-17 18:46:29,213 - CRITICAL - Output ---> DEGs_celltype_specific/DEG_day1_acapEC_down_sorted.csv
+2024-01-17 18:46:29,215 - CRITICAL - Output ---> DEGs_celltype_specific/DEG_day1_allEC_up_sorted.csv
+2024-01-17 18:46:29,216 - CRITICAL - Output ---> DEGs_celltype_specific/DEG_day1_allEC_down_sorted.csv
+2024-01-17 18:46:29,217 - CRITICAL - Output ---> DEGs_celltype_specific/DEG_day1_aEC_up_sorted.csv
+2024-01-17 18:46:29,219 - CRITICAL - Output ---> DEGs_celltype_specific/DEG_day1_aEC_down_sorted.csv
+2024-01-17 18:46:29,221 - CRITICAL - Output ---> DEGs_celltype_specific/DEG_day1_vcapEC_up_sorted.csv
+2024-01-17 18:46:29,223 - CRITICAL - Output ---> DEGs_celltype_specific/DEG_day1_vcapEC_down_sorted.csv
+2024-01-17 18:46:29,225 - CRITICAL - Output ---> DEGs_celltype_specific/DEG_day1_vEC_up_sorted.csv
+2024-01-17 18:46:29,226 - CRITICAL - Output ---> DEGs_celltype_specific/DEG_day1_vEC_down_sorted.csv
+2024-01-17 18:46:29,226 - INFO - ---- DONE ----
+2024-01-17 18:46:29,228 - CRITICAL - OUTPUT ---> filtration_statistics/DEG_statistics_day1.csv
+2024-01-17 18:46:29,228 - CRITICAL - ********************Day 3************************
+2024-01-17 18:46:29,228 - INFO - Day 3: Read 4 DEG files (aEC, vEC, capEC, allEC)
+2024-01-17 18:46:29,375 - INFO - ---- DONE ----
+2024-01-17 18:46:29,375 - INFO - DEG filtration (p-value: 0.05, fc: 0.2, pval-adj: 0.001)
+2024-01-17 18:46:29,388 - INFO - ---- DONE ----
+2024-01-17 18:46:29,388 - INFO - DEG UP or Down (pct: 0.1)
+2024-01-17 18:46:29,388 - INFO - Up- and down- regulated DEGs for each cell type were saved to: DEGs_filtered_updown_sorted/
+2024-01-17 18:46:29,392 - CRITICAL - Output ---> DEGs_filtered_updown_sorted/DEG_day3_vEC_up_sorted.csv
+2024-01-17 18:46:29,395 - CRITICAL - Output ---> DEGs_filtered_updown_sorted/DEG_day3_vEC_down_sorted.csv
+2024-01-17 18:46:29,397 - CRITICAL - Output ---> DEGs_filtered_updown_sorted/DEG_day3_acapEC_up_sorted.csv
+2024-01-17 18:46:29,398 - CRITICAL - Output ---> DEGs_filtered_updown_sorted/DEG_day3_acapEC_down_sorted.csv
+2024-01-17 18:46:29,403 - CRITICAL - Output ---> DEGs_filtered_updown_sorted/DEG_day3_allEC_up_sorted.csv
+2024-01-17 18:46:29,405 - CRITICAL - Output ---> DEGs_filtered_updown_sorted/DEG_day3_allEC_down_sorted.csv
+2024-01-17 18:46:29,408 - CRITICAL - Output ---> DEGs_filtered_updown_sorted/DEG_day3_aEC_up_sorted.csv
+2024-01-17 18:46:29,410 - CRITICAL - Output ---> DEGs_filtered_updown_sorted/DEG_day3_aEC_down_sorted.csv
+2024-01-17 18:46:29,413 - CRITICAL - Output ---> DEGs_filtered_updown_sorted/DEG_day3_capEC_up_sorted.csv
+2024-01-17 18:46:29,415 - CRITICAL - Output ---> DEGs_filtered_updown_sorted/DEG_day3_capEC_down_sorted.csv
+2024-01-17 18:46:29,417 - CRITICAL - Output ---> DEGs_filtered_updown_sorted/DEG_day3_vcapEC_up_sorted.csv
+2024-01-17 18:46:29,420 - CRITICAL - Output ---> DEGs_filtered_updown_sorted/DEG_day3_vcapEC_down_sorted.csv
+2024-01-17 18:46:29,421 - INFO - ---- DONE ----
+2024-01-17 18:46:29,421 - INFO - Find common DEGs for Day3 up- and down-regulated DEGs from its a,v,cap,allEC groups
+2024-01-17 18:46:29,478 - INFO - ---- DONE ----
+2024-01-17 18:46:29,479 - INFO - Find cell-type specific DEGs for Day1 up- and down-regulated DEGs from its a,v,cap groups
+2024-01-17 18:46:29,479 - INFO - Up- and down- regulated DEGs (celltype specific) were saved to: DEGs_celltype_specific/
+2024-01-17 18:46:29,487 - CRITICAL - Output ---> DEGs_celltype_specific/DEG_day3_vEC_up_sorted.csv
+2024-01-17 18:46:29,489 - CRITICAL - Output ---> DEGs_celltype_specific/DEG_day3_vEC_down_sorted.csv
+2024-01-17 18:46:29,491 - CRITICAL - Output ---> DEGs_celltype_specific/DEG_day3_acapEC_up_sorted.csv
+2024-01-17 18:46:29,492 - CRITICAL - Output ---> DEGs_celltype_specific/DEG_day3_acapEC_down_sorted.csv
+2024-01-17 18:46:29,493 - CRITICAL - Output ---> DEGs_celltype_specific/DEG_day3_allEC_up_sorted.csv
+2024-01-17 18:46:29,493 - CRITICAL - Output ---> DEGs_celltype_specific/DEG_day3_allEC_down_sorted.csv
+2024-01-17 18:46:29,494 - CRITICAL - Output ---> DEGs_celltype_specific/DEG_day3_aEC_up_sorted.csv
+2024-01-17 18:46:29,495 - CRITICAL - Output ---> DEGs_celltype_specific/DEG_day3_aEC_down_sorted.csv
+2024-01-17 18:46:29,496 - CRITICAL - Output ---> DEGs_celltype_specific/DEG_day3_capEC_up_sorted.csv
+2024-01-17 18:46:29,497 - CRITICAL - Output ---> DEGs_celltype_specific/DEG_day3_capEC_down_sorted.csv
+2024-01-17 18:46:29,498 - CRITICAL - Output ---> DEGs_celltype_specific/DEG_day3_vcapEC_up_sorted.csv
+2024-01-17 18:46:29,499 - CRITICAL - Output ---> DEGs_celltype_specific/DEG_day3_vcapEC_down_sorted.csv
+2024-01-17 18:46:29,499 - INFO - ---- DONE ----
+2024-01-17 18:46:29,501 - CRITICAL - OUTPUT ---> filtration_statistics/DEG_statistics_day3.csv
+2024-01-17 18:46:29,501 - CRITICAL - ********************Day 7************************
+2024-01-17 18:46:29,501 - INFO - Day 3: Read 4 DEG files (aEC, vEC, capEC, allEC)
+2024-01-17 18:46:29,647 - INFO - ---- DONE ----
+2024-01-17 18:46:29,647 - INFO - DEG filtration (p-value: 0.05, fc: 0.2, pval-adj: 0.001)
+2024-01-17 18:46:29,659 - INFO - ---- DONE ----
+2024-01-17 18:46:29,660 - INFO - DEG UP or Down (pct: 0.1)
+2024-01-17 18:46:29,660 - INFO - Up- and down- regulated DEGs for each cell type were saved to: DEGs_filtered_updown_sorted/
+2024-01-17 18:46:29,662 - CRITICAL - Output ---> DEGs_filtered_updown_sorted/DEG_day7_acapEC_up_sorted.csv
+2024-01-17 18:46:29,664 - CRITICAL - Output ---> DEGs_filtered_updown_sorted/DEG_day7_acapEC_down_sorted.csv
+2024-01-17 18:46:29,667 - CRITICAL - Output ---> DEGs_filtered_updown_sorted/DEG_day7_aEC_up_sorted.csv
+2024-01-17 18:46:29,669 - CRITICAL - Output ---> DEGs_filtered_updown_sorted/DEG_day7_aEC_down_sorted.csv
+2024-01-17 18:46:29,672 - CRITICAL - Output ---> DEGs_filtered_updown_sorted/DEG_day7_vEC_up_sorted.csv
+2024-01-17 18:46:29,675 - CRITICAL - Output ---> DEGs_filtered_updown_sorted/DEG_day7_vEC_down_sorted.csv
+2024-01-17 18:46:29,678 - CRITICAL - Output ---> DEGs_filtered_updown_sorted/DEG_day7_vcapEC_up_sorted.csv
+2024-01-17 18:46:29,682 - CRITICAL - Output ---> DEGs_filtered_updown_sorted/DEG_day7_vcapEC_down_sorted.csv
+2024-01-17 18:46:29,686 - CRITICAL - Output ---> DEGs_filtered_updown_sorted/DEG_day7_allEC_up_sorted.csv
+2024-01-17 18:46:29,690 - CRITICAL - Output ---> DEGs_filtered_updown_sorted/DEG_day7_allEC_down_sorted.csv
+2024-01-17 18:46:29,697 - CRITICAL - Output ---> DEGs_filtered_updown_sorted/DEG_day7_capEC_up_sorted.csv
+2024-01-17 18:46:29,699 - CRITICAL - Output ---> DEGs_filtered_updown_sorted/DEG_day7_capEC_down_sorted.csv
+2024-01-17 18:46:29,700 - INFO - ---- DONE ----
+2024-01-17 18:46:29,700 - INFO - Find common DEGs for Day7 up- and down-regulated DEGs from its a,v,cap,allEC groups
+2024-01-17 18:46:29,753 - INFO - ---- DONE ----
+2024-01-17 18:46:29,753 - INFO - Find cell-type specific DEGs for Day1 up- and down-regulated DEGs from its a,v,cap groups
+2024-01-17 18:46:29,753 - INFO - Up- and down- regulated DEGs (celltype specific) were saved to: DEGs_celltype_specific/
+2024-01-17 18:46:29,755 - CRITICAL - Output ---> DEGs_celltype_specific/DEG_day7_acapEC_up_sorted.csv
+2024-01-17 18:46:29,756 - CRITICAL - Output ---> DEGs_celltype_specific/DEG_day7_acapEC_down_sorted.csv
+2024-01-17 18:46:29,758 - CRITICAL - Output ---> DEGs_celltype_specific/DEG_day7_aEC_up_sorted.csv
+2024-01-17 18:46:29,759 - CRITICAL - Output ---> DEGs_celltype_specific/DEG_day7_aEC_down_sorted.csv
+2024-01-17 18:46:29,761 - CRITICAL - Output ---> DEGs_celltype_specific/DEG_day7_vEC_up_sorted.csv
+2024-01-17 18:46:29,762 - CRITICAL - Output ---> DEGs_celltype_specific/DEG_day7_vEC_down_sorted.csv
+2024-01-17 18:46:29,763 - CRITICAL - Output ---> DEGs_celltype_specific/DEG_day7_vcapEC_up_sorted.csv
+2024-01-17 18:46:29,767 - CRITICAL - Output ---> DEGs_celltype_specific/DEG_day7_vcapEC_down_sorted.csv
+2024-01-17 18:46:29,768 - CRITICAL - Output ---> DEGs_celltype_specific/DEG_day7_allEC_up_sorted.csv
+2024-01-17 18:46:29,769 - CRITICAL - Output ---> DEGs_celltype_specific/DEG_day7_allEC_down_sorted.csv
+2024-01-17 18:46:29,770 - CRITICAL - Output ---> DEGs_celltype_specific/DEG_day7_capEC_up_sorted.csv
+2024-01-17 18:46:29,771 - CRITICAL - Output ---> DEGs_celltype_specific/DEG_day7_capEC_down_sorted.csv
+2024-01-17 18:46:29,771 - INFO - ---- DONE ----
+2024-01-17 18:46:29,772 - CRITICAL - OUTPUT ---> filtration_statistics/DEG_statistics_day7.csv
+2024-01-17 18:46:29,772 - CRITICAL - ********************All days************************
+2024-01-17 18:46:29,772 - INFO - Day 3: Read 4 DEG files (aEC, vEC, capEC, allEC)
+2024-01-17 18:46:29,772 - INFO - ---- DONE ----
+2024-01-17 18:46:29,772 - INFO - DEG filtration (p-value: 0.05, fc: 0.2, pval-adj: 0.001)
+2024-01-17 18:46:29,772 - INFO - ---- DONE ----
+2024-01-17 18:46:29,772 - INFO - DEG UP or Down (pct: 0.1)
+2024-01-17 18:46:29,772 - INFO - Up- and down- regulated DEGs for each cell type were saved to: DEGs_filtered_updown_sorted/
+2024-01-17 18:46:29,772 - INFO - ---- DONE ----
+2024-01-17 18:46:29,772 - INFO - Find common DEGs for Day1 up- and down-regulated DEGs from its a,v,cap,allEC groups
+2024-01-17 18:46:29,772 - INFO - ---- DONE ----
+2024-01-17 18:46:29,772 - INFO - Find cell-type specific DEGs for Day1 up- and down-regulated DEGs from its a,v,cap groups
+2024-01-17 18:46:29,772 - INFO - Up- and down- regulated DEGs (celltype specific) were saved to: DEGs_celltype_specific/
+2024-01-17 18:46:29,772 - INFO - ---- DONE ----
+2024-01-17 18:46:29,773 - CRITICAL - OUTPUT ---> filtration_statistics/DEG_statistics_alldays.csv
+2024-01-17 18:46:30,152 - INFO - Output ---> Fig1g_common_DEGs/up&down_degs_celltype_specific.csv
+2024-01-17 18:46:30,155 - INFO - Output ---> Fig1g_common_DEGs/up&down_degs_temporal_specific.csv

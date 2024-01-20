@@ -323,6 +323,93 @@ print(dot_plot)
 
 #1/16
 
+
+```{r}
+#DEGs
+
+setwd("/Users/iris/Downloads/Jan12/DEGs_filtered_updown_sorted_fc25")
+
+DEG_day1_aEC_up <- read_csv("./DEG_day1_aEC_up_sorted.csv")
+DEG_day1_aEC_down <- read_csv("./DEG_day1_aEC_down_sorted.csv")
+DEG_day1_capEC_up <- read_csv("./DEG_day1_capEC_up_sorted.csv")
+DEG_day1_capEC_down <- read_csv("./DEG_day1_capEC_down_sorted.csv")
+DEG_day1_vEC_up <- read_csv("./DEG_day1_vEC_up_sorted.csv")
+DEG_day1_vEC_down <- read_csv("./DEG_day1_vEC_down_sorted.csv")
+
+DEG_day1_acapEC_up <- read_csv("./DEG_day1_acapEC_up_sorted.csv")
+DEG_day1_acapEC_down <- read_csv("./DEG_day1_acapEC_down_sorted.csv")
+DEG_day1_vcapEC_up <- read_csv("./DEG_day1_vcapEC_up_sorted.csv")
+DEG_day1_vcapEC_down <- read_csv("./DEG_day1_vcapEC_down_sorted.csv")
+
+
+DEG_day3_aEC_up <- read_csv("./DEG_day3_aEC_up_sorted.csv")
+DEG_day3_aEC_down <- read_csv("./DEG_day3_aEC_down_sorted.csv")
+DEG_day3_capEC_up <- read_csv("./DEG_day3_capEC_up_sorted.csv")
+DEG_day3_capEC_down <- read_csv("./DEG_day3_capEC_down_sorted.csv")
+DEG_day3_vEC_up <- read_csv("./DEG_day3_vEC_up_sorted.csv")
+DEG_day3_vEC_down <- read_csv("./DEG_day3_vEC_down_sorted.csv")
+
+DEG_day3_acapEC_up <- read_csv("./DEG_day3_acapEC_up_sorted.csv")
+DEG_day3_acapEC_down <- read_csv("./DEG_day3_acapEC_down_sorted.csv")
+DEG_day3_vcapEC_up <- read_csv("./DEG_day3_vcapEC_up_sorted.csv")
+DEG_day3_vcapEC_down <- read_csv("./DEG_day3_vcapEC_down_sorted.csv")
+
+
+DEG_day7_aEC_up <- read_csv("./DEG_day7_aEC_up_sorted.csv")
+DEG_day7_aEC_down <- read_csv("./DEG_day7_aEC_down_sorted.csv")
+DEG_day7_capEC_up <- read_csv("./DEG_day7_capEC_up_sorted.csv")
+DEG_day7_capEC_down <- read_csv("./DEG_day7_capEC_down_sorted.csv")
+DEG_day7_vEC_up <- read_csv("./DEG_day7_vEC_up_sorted.csv")
+DEG_day7_vEC_down <- read_csv("./DEG_day7_vEC_down_sorted.csv")
+
+DEG_day7_acapEC_up <- read_csv("./DEG_day7_acapEC_up_sorted.csv")
+DEG_day7_acapEC_down <- read_csv("./DEG_day7_acapEC_down_sorted.csv")
+DEG_day7_vcapEC_up <- read_csv("./DEG_day7_vcapEC_up_sorted.csv")
+DEG_day7_vcapEC_down <- read_csv("./DEG_day7_vcapEC_down_sorted.csv")
+```
+
+
+```{r}
+#pathway
+
+setwd("D:\\Shuting_Chen\\mTBI_scRNA_seq\\Jan12\\pathway")
+
+pathway_day1_aEC_up <- read_tsv("./dpi1_pathways_a_025_up.txt", skip = 2)
+pathway_day1_aEC_down <- read_tsv("./dpi1_pathways_a_025_down.txt", skip = 2)
+pathway_day1_capEC_up <- read_tsv("./dpi1_pathways_cap_025_up.txt", skip = 2)
+pathway_day1_capEC_down <- read_tsv("./dpi1_pathways_cap_025_down.txt", skip = 2)
+pathway_day1_vEC_up <- read_tsv("./dpi1_pathways_v_025_up.txt", skip = 2)
+pathway_day1_vEC_down <- read_tsv("./dpi1_pathways_v_025_down.txt", skip = 2)
+pathway_day1_acapEC_up <- read_tsv("./dpi1_pathways_acap_025_up.txt", skip = 2)
+pathway_day1_acapEC_down <- read_tsv("./dpi1_pathways_acap_025_down.txt", skip = 2)
+pathway_day1_vcapEC_up <- read_tsv("./dpi1_pathways_vcap_025_up.txt", skip = 2)
+pathway_day1_vcapEC_down <- read_tsv("./dpi1_pathways_vcap_025_down.txt", skip = 2)
+
+
+pathway_day3_aEC_up <- read_tsv("./dpi3_pathways_a_025_up.txt", skip = 2)
+pathway_day3_aEC_down <- read_tsv("./dpi3_pathways_a_025_down.txt", skip = 2)
+pathway_day3_capEC_up <- read_tsv("./dpi3_pathways_cap_025_up.txt", skip = 2)
+pathway_day3_capEC_down <- read_tsv("./dpi3_pathways_cap_025_down.txt", skip = 2)
+pathway_day3_vEC_up <- read_tsv("./dpi3_pathways_v_025_up.txt", skip = 2)
+pathway_day3_vEC_down <- read_tsv("./dpi3_pathways_v_025_down.txt", skip = 2)
+pathway_day3_acapEC_up <- read_tsv("./dpi3_pathways_acap_025_up.txt", skip = 2)
+pathway_day3_acapEC_down <- read_tsv("./dpi3_pathways_acap_025_down.txt", skip = 2)
+pathway_day3_vcapEC_up <- read_tsv("./dpi3_pathways_vcap_025_up.txt", skip = 2)
+pathway_day3_vcapEC_down <- read_tsv("./dpi3_pathways_vcap_025_down.txt", skip = 2)
+
+
+pathway_day7_aEC_up <- read_tsv("./dpi7_pathways_a_025_up.txt", skip = 2)
+pathway_day7_aEC_down <- read_tsv("./dpi7_pathways_a_025_down.txt", skip = 2)
+pathway_day7_capEC_up <- read_tsv("./dpi7_pathways_cap_025_up.txt", skip = 2)
+pathway_day7_capEC_down <- read_tsv("./dpi7_pathways_cap_025_down.txt", skip = 2)
+pathway_day7_vEC_up <- read_tsv("./dpi7_pathways_v_025_up.txt", skip = 2)
+pathway_day7_vEC_down <- read_tsv("./dpi7_pathways_v_025_down.txt", skip = 2)
+pathway_day7_acapEC_up <- read_tsv("./dpi7_pathways_acap_025_up.txt", skip = 2)
+pathway_day7_acapEC_down <- read_tsv("./dpi7_pathways_acap_025_down.txt", skip = 2)
+pathway_day7_vcapEC_up <- read_tsv("./dpi7_pathways_vcap_025_up.txt", skip = 2)
+pathway_day7_vcapEC_down <- read_tsv("./dpi7_pathways_vcap_025_down.txt", skip = 2)
+```
+
 ```{r}
 #day 1
 deg_day1_a <- rbind(DEG_day1_aEC_up, DEG_day1_aEC_down)
@@ -339,11 +426,7 @@ deg_day1_acap$Cell_Type <- rep("acapEC", length(deg_day1_acap$gene))
 
 deg_day1_vcap <- rbind(DEG_day1_vcapEC_up, DEG_day1_vcapEC_down)
 deg_day1_vcap$Cell_Type <- rep("vcapEC", length(deg_day1_vcap$gene))
-```
 
-
-
-```{r}
 #day 3
 deg_day3_a <- rbind(DEG_day3_aEC_up, DEG_day3_aEC_down)
 deg_day3_a$Cell_Type <- rep("aEC", length(deg_day3_a$gene))
@@ -359,10 +442,7 @@ deg_day3_acap$Cell_Type <- rep("acapEC", length(deg_day3_acap$gene))
 
 deg_day3_vcap <- rbind(DEG_day3_vcapEC_up, DEG_day3_vcapEC_down)
 deg_day3_vcap$Cell_Type <- rep("vcapEC", length(deg_day3_vcap$gene))
-```
 
-
-```{r}
 #day 7
 deg_day7_a <- rbind(DEG_day7_aEC_up, DEG_day7_aEC_down)
 deg_day7_a$Cell_Type <- rep("aEC", length(deg_day7_a$gene))
@@ -378,6 +458,45 @@ deg_day7_acap$Cell_Type <- rep("acapEC", length(deg_day7_acap$gene))
 
 deg_day7_vcap <- rbind(DEG_day7_vcapEC_up, DEG_day7_vcapEC_down)
 deg_day7_vcap$Cell_Type <- rep("vcapEC", length(deg_day7_vcap$gene))
+```
+
+
+```{r}
+#day 1
+pathway_day1_a <- rbind(pathway_day1_aEC_up, pathway_day1_aEC_down)
+pathway_day1_a$Cell_Type <- rep("aEC", length(pathway_day1_a$"Ingenuity Canonical Pathways"))
+pathway_day1_v <- rbind(pathway_day1_vEC_up, pathway_day1_vEC_down)
+pathway_day1_v$Cell_Type <- rep("vEC", length(pathway_day1_v$"Ingenuity Canonical Pathways"))
+pathway_day1_cap <- rbind(pathway_day1_capEC_up, pathway_day1_capEC_down)
+pathway_day1_cap$Cell_Type <- rep("capEC", length(pathway_day1_cap$"Ingenuity Canonical Pathways"))
+pathway_day1_acap <- rbind(pathway_day1_acapEC_up, pathway_day1_acapEC_down)
+pathway_day1_acap$Cell_Type <- rep("acapEC", length(pathway_day1_acap$"Ingenuity Canonical Pathways"))
+pathway_day1_vcap <- rbind(pathway_day1_vcapEC_up, pathway_day1_vcapEC_down)
+pathway_day1_vcap$Cell_Type <- rep("vcapEC", length(pathway_day1_vcap$"Ingenuity Canonical Pathways"))
+
+#day 3
+pathway_day3_a <- rbind(pathway_day3_aEC_up, pathway_day3_aEC_down)
+pathway_day3_a$Cell_Type <- rep("aEC", length(pathway_day3_a$"Ingenuity Canonical Pathways"))
+pathway_day3_v <- rbind(pathway_day3_vEC_up, pathway_day3_vEC_down)
+pathway_day3_v$Cell_Type <- rep("vEC", length(pathway_day3_v$"Ingenuity Canonical Pathways"))
+pathway_day3_cap <- rbind(pathway_day3_capEC_up, pathway_day3_capEC_down)
+pathway_day3_cap$Cell_Type <- rep("capEC", length(pathway_day3_cap$"Ingenuity Canonical Pathways"))
+pathway_day3_acap <- rbind(pathway_day3_acapEC_up, pathway_day3_acapEC_down)
+pathway_day3_acap$Cell_Type <- rep("acapEC", length(pathway_day3_acap$"Ingenuity Canonical Pathways"))
+pathway_day3_vcap <- rbind(pathway_day3_vcapEC_up, pathway_day3_vcapEC_down)
+pathway_day3_vcap$Cell_Type <- rep("vcapEC", length(pathway_day3_vcap$"Ingenuity Canonical Pathways"))
+
+#day 7
+pathway_day7_a <- rbind(pathway_day7_aEC_up, pathway_day7_aEC_down)
+pathway_day7_a$Cell_Type <- rep("aEC", length(pathway_day7_a$"Ingenuity Canonical Pathways"))
+pathway_day7_v <- rbind(pathway_day7_vEC_up, pathway_day7_vEC_down)
+pathway_day7_v$Cell_Type <- rep("vEC", length(pathway_day7_v$"Ingenuity Canonical Pathways"))
+pathway_day7_cap <- rbind(pathway_day7_capEC_up, pathway_day7_capEC_down)
+pathway_day7_cap$Cell_Type <- rep("capEC", length(pathway_day7_cap$"Ingenuity Canonical Pathways"))
+pathway_day7_acap <- rbind(pathway_day7_acapEC_up, pathway_day7_acapEC_down)
+pathway_day7_acap$Cell_Type <- rep("acapEC", length(pathway_day7_acap$"Ingenuity Canonical Pathways"))
+pathway_day7_vcap <- rbind(pathway_day7_vcapEC_up, pathway_day7_vcapEC_down)
+pathway_day7_vcap$Cell_Type <- rep("vcapEC", length(pathway_day7_vcap$"Ingenuity Canonical Pathways"))
 ```
 
 

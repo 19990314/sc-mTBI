@@ -337,13 +337,10 @@ deg_day1_cap$Cell_Type <- rep("capEC", length(deg_day1_cap$gene))
 deg_day1_acap <- rbind(DEG_day1_acapEC_up, DEG_day1_acapEC_down)
 deg_day1_acap$Cell_Type <- rep("acapEC", length(deg_day1_acap$gene))
 
-deg_day1_vcap <- rbind(DEG_day1_capEC_up, DEG_day1_vcapEC_down)
+deg_day1_vcap <- rbind(DEG_day1_vcapEC_up, DEG_day1_vcapEC_down)
 deg_day1_vcap$Cell_Type <- rep("vcapEC", length(deg_day1_vcap$gene))
 ```
 
-```{r}
-intersection_genes <- Reduce(intersect, list(deg_day1_a$gene, deg_day1_v$gene, deg_day1_cap$gene, deg_day1_vcap$gene, deg_day1_acap$gene))
-```
 
 
 ```{r}
@@ -360,13 +357,10 @@ deg_day3_cap$Cell_Type <- rep("capEC", length(deg_day3_cap$gene))
 deg_day3_acap <- rbind(DEG_day3_acapEC_up, DEG_day3_acapEC_down)
 deg_day3_acap$Cell_Type <- rep("acapEC", length(deg_day3_acap$gene))
 
-deg_day3_vcap <- rbind(DEG_day3_capEC_up, DEG_day3_vcapEC_down)
+deg_day3_vcap <- rbind(DEG_day3_vcapEC_up, DEG_day3_vcapEC_down)
 deg_day3_vcap$Cell_Type <- rep("vcapEC", length(deg_day3_vcap$gene))
 ```
 
-```{r}
-intersection_genes <- Reduce(intersect, list(deg_day3_a$gene, deg_day3_v$gene, deg_day3_cap$gene, deg_day3_vcap$gene, deg_day3_acap$gene))
-```
 
 ```{r}
 #day 7
@@ -382,61 +376,164 @@ deg_day7_cap$Cell_Type <- rep("capEC", length(deg_day7_cap$gene))
 deg_day7_acap <- rbind(DEG_day7_acapEC_up, DEG_day7_acapEC_down)
 deg_day7_acap$Cell_Type <- rep("acapEC", length(deg_day7_acap$gene))
 
-deg_day7_vcap <- rbind(DEG_day7_capEC_up, DEG_day7_vcapEC_down)
+deg_day7_vcap <- rbind(DEG_day7_vcapEC_up, DEG_day7_vcapEC_down)
 deg_day7_vcap$Cell_Type <- rep("vcapEC", length(deg_day7_vcap$gene))
+```
+
+
+```{r}
+raw_dots <- function(a, v, cap, vcap, acap, intersection_genes, filename_pdf){
+  pdf(file= filename_pdf, onefile = TRUE)
+
+  for (i in seq(15, length(intersection_genes), by = 15)) {
+    # data
+    target_genes <- intersection_genes[(i-15):i]
+    
+    final_deg <- rbind(a[a$gene %in% target_genes,], v[v$gene %in% target_genes,])
+    final_deg <- rbind(final_deg, cap[cap$gene %in% target_genes,])
+    final_deg <- rbind(final_deg, vcap[vcap$gene %in% target_genes,])
+    final_deg <- rbind(final_deg, acap[acap$gene %in% target_genes,])
+    final_deg$p_val_adj <-  final_deg$p_val_adj + 0.0000000000000000000000000000000000000001
+    
+    # Create a ggplot dot plot
+    plts <- ggplot(final_deg, aes(x = factor(Cell_Type,levels = c("aEC", "acapEC", "capEC", "vcapEC", "vEC")), y = gene, size = -log(p_val_adj), color = avg_log2FC)) +
+      geom_point() +
+      scale_size_continuous(name = "-log(P Value)") +
+      scale_color_gradient2(name = "Fold Change", midpoint = 0, low = "#403990", high = "#C52A20") +
+      labs(x = "Cell Type", y = "Genes") +
+      theme_minimal() +
+      theme(panel.grid = element_blank())  # Remove grid lines
+    
+    print(plts)
+  }
+  
+  # data
+  target_genes <- intersection_genes[(i+1):length(intersection_genes)]
+    
+  final_deg <- rbind(a[a$gene %in% target_genes,], v[v$gene %in% target_genes,])
+  final_deg <- rbind(final_deg, cap[cap$gene %in% target_genes,])
+  final_deg <- rbind(final_deg, vcap[vcap$gene %in% target_genes,])
+  final_deg <- rbind(final_deg, acap[acap$gene %in% target_genes,])
+  final_deg$p_val_adj <-  final_deg$p_val_adj + 0.000000000000000000000000000000000000001
+    
+  # Create a ggplot dot plot
+  plts <- ggplot(final_deg, aes(x = factor(Cell_Type,levels = c("aEC", "acapEC", "capEC", "vcapEC", "vEC")), y = gene, size = -log(p_val_adj), color = avg_log2FC)) +
+    geom_point() +
+    scale_size_continuous(name = "-log(P Value)") +
+    scale_color_gradient2(name = "Fold Change", midpoint = 0, low = "#403990", high = "#C52A20") +
+    labs(x = "Cell Type", y = "Genes") +
+    theme_minimal() +
+    theme(panel.grid = element_blank())  # Remove grid lines
+    
+  print(plts)
+  dev.off()
+}
+```
+
+```{r}
+intersection_genes <- Reduce(intersect, list(deg_day1_a$gene, deg_day1_v$gene, deg_day1_cap$gene, deg_day1_vcap$gene, deg_day1_acap$gene))
+raw_dots(deg_day1_a, deg_day1_v, deg_day1_cap, deg_day1_vcap, deg_day1_acap, intersection_genes, "day1_raw_dot_plot.pdf")
+```
+
+```{r}
+intersection_genes <- Reduce(intersect, list(deg_day3_a$gene, deg_day3_v$gene, deg_day3_cap$gene, deg_day3_vcap$gene, deg_day3_acap$gene))
+raw_dots(deg_day3_a, deg_day3_v, deg_day3_cap, deg_day3_vcap, deg_day3_acap, intersection_genes, "day3_raw_dot_plot.pdf")
 ```
 
 ```{r}
 intersection_genes <- Reduce(intersect, list(deg_day7_a$gene, deg_day7_v$gene, deg_day7_cap$gene, deg_day7_vcap$gene, deg_day7_acap$gene))
+raw_dots(deg_day7_a, deg_day7_v, deg_day7_cap, deg_day7_vcap, deg_day7_acap, intersection_genes, "day7_raw_dot_plot.pdf")
 ```
 
-
 ```{r}
-pdf(file= "day7_raw_dot_plot.pdf", onefile = TRUE)
-
-for (i in seq(15, length(intersection_genes), by = 15)) {
+final_dots <- function(a, v, cap, vcap, acap, target_genes, filename_pdf){
+  pdf(file= filename_pdf, onefile = TRUE, width = 4.2, height = 4.2)
   # data
-  target_genes <- intersection_genes[(i-15):i]
-  
-  final_deg <- rbind(deg_day1_a[deg_day1_a$gene %in% target_genes,], deg_day1_v[deg_day1_v$gene %in% target_genes,])
-  final_deg <- rbind(final_deg, deg_day1_cap[deg_day1_cap$gene %in% target_genes,])
-  final_deg <- rbind(final_deg, deg_day1_vcap[deg_day1_vcap$gene %in% target_genes,])
-  final_deg <- rbind(final_deg, deg_day1_acap[deg_day1_acap$gene %in% target_genes,])
-  
+  final_deg <- rbind(a[a$gene %in% target_genes,], v[v$gene %in% target_genes,])
+  final_deg <- rbind(final_deg, cap[cap$gene %in% target_genes,])
+  final_deg <- rbind(final_deg, vcap[vcap$gene %in% target_genes,])
+  final_deg <- rbind(final_deg, acap[acap$gene %in% target_genes,])
+  final_deg$p_val_adj <-  final_deg$p_val_adj + 0.0000000000000000000000000000000000000001
+
+  print(final_deg)
   # Create a ggplot dot plot
-  plts <- ggplot(final_deg, aes(x = Cell_Type, y = gene, size = -log(p_val_adj), color = avg_log2FC)) +
+  plts <- ggplot(final_deg, aes(x = factor(Cell_Type,levels = c("aEC", "acapEC", "capEC", "vcapEC", "vEC")), y = factor(gene, levels = target_genes), size = -log(p_val_adj), color = avg_log2FC)) +
     geom_point() +
     scale_size_continuous(name = "-log(P Value)") +
-    scale_color_gradient(name = "Fold Change", low = "#6C91C2", high = "#CF3D3E") +
-    labs(title = "Differential Expression Dot Plot", x = "Cell Type", y = "Genes") +
+    scale_color_gradient2(name = "Fold Change", midpoint = 0, low = "#403990", high = "#C52A20",limits = c(-2.9, 2.6)) +
+    labs(x = "Cell Type", y = "Genes") +
     theme_minimal() +
     theme(panel.grid = element_blank())  # Remove grid lines
-  
+    
   print(plts)
+  dev.off()
 }
+```
 
-# data
-target_genes <- intersection_genes[(i+1):length(intersection_genes)]
+
+```{r}
+# for the top 14 degs
+additional_dots <- function(dpi1, dpi3, dpi7, ucla, target_genes, filename_pdf){
+  pdf(file= filename_pdf, onefile = TRUE, width = 4.2, height = 4.2)
+  # data
   
-final_deg <- rbind(deg_day1_a[deg_day1_a$gene %in% target_genes,], deg_day1_v[deg_day1_v$gene %in% target_genes,])
-final_deg <- rbind(final_deg, deg_day1_cap[deg_day1_cap$gene %in% target_genes,])
-final_deg <- rbind(final_deg, deg_day1_vcap[deg_day1_vcap$gene %in% target_genes,])
-final_deg <- rbind(final_deg, deg_day1_acap[deg_day1_acap$gene %in% target_genes,])
-  
-# Create a ggplot dot plot
-plts <- ggplot(final_deg, aes(x = Cell_Type, y = gene, size = -log(p_val_adj), color = avg_log2FC)) +
-  geom_point() +
-  scale_size_continuous(name = "-log(P Value)") +
-  scale_color_gradient(name = "Fold Change", low = "#6C91C2", high = "#CF3D3E") +
-  labs(title = "Differential Expression Dot Plot", x = "Cell Type", y = "Genes") +
-  theme_minimal() +
-  theme(panel.grid = element_blank())  # Remove grid lines
-  
-print(plts)
-dev.off()
+  print(colnames(dpi1))
+  print(colnames(dpi3))
+  print(colnames(dpi7))
+  print(colnames(ucla))
+
+  final_deg <- rbind(dpi1[dpi1$gene %in% target_genes,], dpi3[dpi3$gene %in% target_genes,])
+  final_deg <- rbind(final_deg, dpi7[dpi7$gene %in% target_genes,])
+  final_deg <- rbind(final_deg, ucla[ucla$gene %in% target_genes,])
+  final_deg$p_val_adj <-  final_deg$p_val_adj + 0.0000000000000000000000000000000000000001
+
+  print(final_deg)
+  # Create a ggplot dot plot
+  plts <- ggplot(final_deg, aes(x = factor(source,levels = c("dpi1", "dpi3", "dpi7", "UCLA")), y = factor(gene, levels = target_genes), size = -log(p_val_adj), color = avg_log2FC)) +
+    geom_point() +
+    scale_size_continuous(name = "-log(P Value)") +
+    scale_color_gradient2(name = "Fold Change", midpoint = 0, low = "#403990", high = "#C52A20",limits = c(-2.9, 2.6)) +
+    labs(x = "Cell Type", y = "Genes") +
+    theme_minimal() +
+    theme(panel.grid = element_blank())  # Remove grid lines
+    
+  print(plts)
+  dev.off()
+}
 ```
 
 ```{r}
-target_genes<- c()
+desired_order <- c("Gm26672","Dysf","Mfsd4a","Zeb1", "Rapgef5", "Cst3", "Apoe","Tuba1a","Plxdc2","Edn1")
+final_dots(deg_day1_a, deg_day1_v, deg_day1_cap, deg_day1_vcap, deg_day1_acap, rev(desired_order), "day1_final_dot_plot.pdf")
 ```
+
+```{r}
+desired_order <- c("Depp1","Cdkn1a","Fam117b", "Tmem204","Cttnbp2nl","Camk2n1","Fryl", "Btg1","Edn1", "Plxdc2")
+final_dots(deg_day3_a, deg_day3_v, deg_day3_cap, deg_day3_vcap, deg_day3_acap, rev(desired_order), "day3_final_dot_plot.pdf")
+```
+
+```{r}
+desired_order <- c("Angptl4","Trp53inp1","Snrk","Timp3", "Slc7a5", "Itm2a","Pcp4l1","Maoa","Lama4", "Fosb")
+final_dots(deg_day7_a, deg_day7_v, deg_day7_cap, deg_day7_vcap, deg_day7_acap, rev(desired_order), "day7_final_dot_plot.pdf")
+```
+
+```{r}
+# specific genes
+desired_order <- c("Tmem252", "Smad1", "Wasf2","Rgcc", "Tsc22d3", "Akap12", "Rps29","Tsc22d1", "Hspa1b", "Cldn5","Jund",  "Fosb","Csrp2", "Itm2a")
+deg_day1_cap$source <- "dpi1"
+deg_day3_cap$source <- "dpi3"
+deg_day7_cap$source <- "dpi7"
+ucla_for_rbind <- ucla_degs[, c("Gene", "Log.fold.change","PCT.TBI","PCT.Sham", "P Value", "Cell Type")]
+ucla_for_rbind$source <- "UCLA"
+colnames(ucla_for_rbind) <- colnames(deg_day1_cap[, !(names(deg_day1_cap) %in% c("p_val"))])
+
+additional_dots(deg_day1_cap[, !(names(deg_day1_cap) %in% c("p_val"))], deg_day3_cap[, !(names(deg_day3_cap) %in% c("p_val"))], deg_day7_cap[, !(names(deg_day7_cap) %in% c("p_val"))], ucla_for_rbind, rev(desired_order), "top14_shared_degs_dot_plot.pdf")
+```
+
+
+# Pathways
+```{r}
+
+```
+
 

@@ -4,13 +4,14 @@ import pandas as pd
 # global variabless
 
 # output_directory
-output_dir = "../../mTBI_scRNA_seq/Jan12/"
+#output_dir = "../../mTBI_scRNA_seq/Jan12/"
+output_dir = "/Users/iris/Downloads/Jan12/"
 updown_DEG_dir = output_dir + "DEGs_filtered_updown_sorted/"
 
 # thresholds
 p_adj = 0.05 #
 pv = 0.05
-fc = 0.25
+fc = 0.5
 chaos_pct = 0.5
 
 cell_types = ["aEC", "vEC", "capEC","acapEC","vcapEC"]

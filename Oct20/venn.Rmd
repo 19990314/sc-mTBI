@@ -16,7 +16,7 @@ library(venn)
 
 
 ```{r}
-setwd("D:/Shuting_Chen/mTBI_scRNA_seq/Jan12/DEGs_filtered_updown_sorted")
+setwd("/Users/iris/Downloads/Jan12/DEGs_filtered_updown_sorted_fc25")
 
 DEG_day1_aEC_up <- read_csv("./DEG_day1_aEC_up_sorted.csv")
 DEG_day1_aEC_down <- read_csv("./DEG_day1_aEC_down_sorted.csv")

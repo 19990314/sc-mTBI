@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Version info: R 4.2.2, Biobase 2.58.0, GEOquery 2.66.0, limma 3.54.0
 ################################################################
 
@@ -857,4 +858,492 @@ down_path <- c("RAR Activation", "MHC class II antigen presentation", "Molecular
 
 desired_order <- c("Eicosanoid Signaling","RHO GTPase cycle","Estrogen Receptor Signaling","ERK/MAPK Signaling","Endothelin−1 Signaling", "Dopamine−DARPP32 Feedback in cAMP Signaling", "Serotonin Receptor Signaling", "CXCR4 Signaling","Glutaminergic Receptor Signaling Pathway (Enhanced)","Pancreatic Secretion Signaling Pathway","RAR Activation", "MHC class II antigen presentation", "Molecular Mechanisms of Cancer", "Pulmonary Fibrosis Idiopathic Signaling Pathway")
 final_dots(rbind(pathway_day1_aEC_up[pathway_day1_aEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day1_aEC_down[pathway_day1_aEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day1_vEC_up[pathway_day1_vEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day1_vEC_down[pathway_day1_vEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day1_capEC_up[pathway_day1_capEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day1_capEC_down[pathway_day1_capEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day1_vcapEC_up[pathway_day1_vcapEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day1_vcapEC_down[pathway_day1_vcapEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day1_acapEC_up[pathway_day1_acapEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day1_acapEC_down[pathway_day1_acapEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rev(desired_order), "dot_plot_pathways_day1.pdf")
+=======
+# Version info: R 4.2.2, Biobase 2.58.0, GEOquery 2.66.0, limma 3.54.0
+################################################################
+
+```{r}
+BiocManager::install("GEOquery")
+
+```
+
+
+```{r}
+#   Data plots for selected GEO samples
+library(GEOquery)
+library(limma)
+library(umap)
+library(Biobase)
+```
+
+
+```{r}
+# load series and platform data from GEO
+
+gset <- getGEO("GSE101689", GSEMatrix =TRUE, getGPL=FALSE)
+if (length(gset) > 1) idx <- grep("GPL23811", attr(gset, "names")) else idx <- 1
+gset <- gset[[idx]]
+
+ex <- exprs(gset)
+ex <- log2(ex)  # log2 transformation
+
+# box-and-whisker plot
+
+#dev.new(width=3+ncol(gset)/6, height=5)
+par(mar=c(7,4,2,1))
+title <- paste ("GSE101689", "/", annotation(gset), sep ="")
+boxplot(ex, boxwex=0.7, notch=T, main=title, outline=FALSE, las=2)
+#dev.off()
+```
+
+
+
+```{r}
+
+# expression value distribution plot
+par(mar=c(4,4,2,1))
+title <- paste ("GSE101689", "/", annotation(gset), " value distribution", sep ="")
+plotDensities(ex, main=title, legend=F)
+
+# mean-variance trend
+ex <- na.omit(ex) # eliminate rows with NAs
+plotSA(lmFit(ex), main="Mean variance trend, GSE101689")
+
+# UMAP plot (multi-dimensional scaling)
+ex <- ex[!duplicated(ex), ]  # remove duplicates
+ump <- umap(t(ex), n_neighbors = 15, random_state = 123)
+plot(ump$layout, main="UMAP plot, nbrs=15", xlab="", ylab="", pch=20, cex=1.5)
+library("maptools")  # point labels without overlaps
+pointLabel(ump$layout, labels = rownames(ump$layout), method="SANN", cex=0.6)
+
+```
+
+```{r}
+ex <- exprs(GSE101689)
+ex <- ex[which(ex <= 0)] <- NaN
+ex <- log2(ex)  # log2 transformation
+```
+
+
+```{r}
+# box-and-whisker plot
+dev.new(width=3+ncol(GSE101689)/6, height=5)
+par(mar=c(7,4,2,1))
+title <- paste ("GSE101689", "/", annotation(GSE101689), sep ="")
+boxplot(ex, boxwex=0.7, notch=T, main=title, outline=FALSE, las=2)
+dev.off()
+```
+
+
+# Synapse
+```{r}
+library(synapser) 
+library(synapserutils) 
+ 
+synLogin('xiashang', 'Synapse2022!') 
+files <- synapserutils::syncFromSynapse('syn51272688') 
+```
+
+
+
+# Nature: GSE98969
+```{r}
+
+#setwd("D:/Shuting_Chen/AD_RNA")
+#read
+
+gse <- getGEO("GSE98969", GSEMatrix=TRUE)
+gse  <- gse[[1]]
+
+# filePaths = getGEOSuppFiles("GSE98969")
+```
+
+```{r}
+sample_info <- pData(gse)
+```
+
+
+
+```{r}
+gse <- exprs(gse)
+```
+
+
+
+```{r}
+library(GEOquery)
+library(DESeq2)
+```
+
+
+```{r}
+# Create a DESeqDataSet object
+dds <- DESeqDataSetFromMatrix(countData = gse, colData = sample_info, design = ~ group)
+```
+
+
+```{r}
+# Specify the GEO dataset accession number
+geo_dataset <- "GSE12345"  # Replace with the actual dataset accession number
+
+# Download the data using GEOquery
+geo_data <- getGEO(geo_dataset, GSEMatrix = TRUE)
+
+# Extract expression data
+expression_data <- exprs(geo_data[[1]])
+
+# Load sample information (replace "GSM12345" with the actual sample names)
+sample_info <- pData(geo_data[[1]])
+
+# Create a DESeqDataSet object
+dds <- DESeqDataSetFromMatrix(countData = expression_data,
+                              colData = sample_info,
+                              design = ~ group)
+
+# Run DESeq2 analysis
+dds <- DESeq(dds)
+
+# Perform differential expression analysis (replace "case" and "control" with actual group names)
+results <- results(dds, contrast = c("group", "case", "control"))
+
+# Display the top differentially expressed genes
+top_genes <- head(rownames(results[order(results$pvalue), ]), 10)
+print(top_genes)
+
+# Save the results to a CSV file
+write.csv(results, "differential_expression_results.csv")
+```
+
+
+# GSE98969: Process from raw data
+```{r}
+library(DropletUtils)
+
+# importing the raw count data
+sce <- read10xCounts("D:/Shuting_Chen/AD_RNA/98969/GSE98969_RAW")
+```
+
+
+
+```{r}
+library(dplyr)
+library(Seurat)
+library(patchwork)
+library(cowplot)
+library(ggplot2)
+```
+
+
+```{r}
+AD00301 <- subset(AD00301,idents = c("Microglia"))
+AD00303 <- subset(AD00303,idents = c("Microglia"))
+```
+
+
+```{r}
+AD00303@meta.data$orig.ident <- "Alzheimer's Disease"
+```
+
+
+```{r}
+##Perform integration
+anchors <- FindIntegrationAnchors(object.list = list(AD00301, AD00303), dims = 1:30, k.anchor = 30)
+AD_study <- IntegrateData(anchorset = anchors, dims = 1:30)
+
+#Perform an integrated analysis
+DefaultAssay(AD_study) <- "integrated"
+```
+
+
+```{r}
+# Run the standard workflow for visualization and clustering
+AD_study <- ScaleData(AD_study, verbose = FALSE)
+AD_study <- RunPCA(AD_study, npcs = 30, verbose = FALSE)
+# t-SNE and Clustering
+AD_study <- RunUMAP(AD_study, reduction = "pca", dims = 1:30)
+AD_study <- FindNeighbors(AD_study, reduction = "pca", dims = 1:30)
+AD_study <- FindClusters(AD_study, resolution = 0.8)
+AD_study
+
+# overall Visualization
+DimPlot(AD_study, reduction = "umap", group.by = "orig.ident")
+DimPlot(AD_study, reduction = "umap", label = TRUE)
+```
+
+```{r}
+DefaultAssay(AD_study) <- "RNA"
+my_features <- c("B2m", "Ifngr1", "Ifngr2", "Irf3", "Irf8", "Ptpn1")
+
+```
+
+
+```{r}
+# B2M,CAMK2A,CAMK2B,CAMK2D,CAMK2G,HLAA,ICAM1,IFNGR1,IFNGR2,IRF2,IRF3,IRF8,JAK1,NCAM1,PIAS1,PRKCD,PTPN1,SMAD7,TRIM14,TRIM2,TRIM26,TRIM35,TRIM5
+
+
+my_features <- c("B2m", "Ifngr1", "Ifngr2", "Irf3", "Irf8", "Ptpn1")
+#my_features <- c("B2m", "PTPN1")
+
+DotPlot(AD_study, features = my_features, group.by = "orig.ident") + coord_flip()
+
+
+```
+
+```{r}
+DotPlot(AD_study, features = my_features) + coord_flip()
+
+```
+
+```{r}
+DotPlot(AD_study, features = my_features, split.by = "orig.ident") + coord_flip()
+ 
+```
+```{r}
+AD_study_delete <- AD_study
+```
+
+
+```{r}
+Idents(AD_study_delete) <- AD_study_delete$orig.ident
+```
+
+
+
+```{r}
+DefaultAssay(AD_study_delete) <- "RNA"
+
+DoHeatmap(AD_study_delete, features = my_features, size = 3)
+
+```
+
+```{r}
+DefaultAssay(AD_study_delete) <- "RNA"
+#day1
+degs_AD_WT <- FindMarkers(AD_study_delete, ident.1 = "healthy", ident.2 = "Alzheimer's Disease", logfc.threshold = 0.1, verbose = FALSE)
+write.csv(degs, "DEGs_AD_vs_WT_samples", row.names=T)
+```
+
+
+
+```{r}
+DefaultAssay(AD_study) <- "RNA"
+#day1
+degs <- FindMarkers(AD_study, ident.1 = "1", ident.2 = c("2", "3"), logfc.threshold = 0.1, verbose = FALSE)
+write.csv(degs, "DEGs_1vs_23_samples", row.names=T)
+```
+
+
+#dot plot
+```{r}
+library(ggplot2)
+
+# Sample data generation (replace with your actual data)
+set.seed(123)
+deg_table1 <- data.frame(
+  Gene = c("Gene1", "Gene2", "Gene3", "Gene4", "Gene5", "Gene6"),
+  P_Value = runif(6, 0, 0.05),
+  Fold_Change = rnorm(6)
+)
+
+deg_table2 <- data.frame(
+  Gene = c("Gene1", "Gene2", "Gene3", "Gene4", "Gene5", "Gene6"),
+  P_Value = runif(6, 0, 0.05),
+  Fold_Change = rnorm(6)
+)
+```
+
+
+```{r}
+# Merging data frames
+merged_deg <- merge(degs_AD_WT[degs_AD_WT$gene %in% my_features,], degs[degs$gene %in% my_features,], by = "gene", suffixes = c("_AD_vs_Healthy", "_Cluster1_vs_2and3"))
+```
+
+```{r}
+p_value_range <- range(c(merged_deg$p_val_AD_vs_Healthy, merged_deg$p_val_Cluster1_vs_2and3))
+
+```
+
+
+```{r}
+# Dot plot using ggplot2
+dot_plot <- ggplot(merged_deg, aes(x = gene)) +
+  geom_point(aes(y = "AD vs Healthy", size = p_val_AD_vs_Healthy, color = p_val_AD_vs_Healthy), shape = 16) +
+  geom_point(aes(y = "Cluster1 vs 2+3", size = avg_log2FC_Cluster1_vs_2and3, color = avg_log2FC_Cluster1_vs_2and3), shape = 16) +
+  scale_size_continuous(name = "p_val", range = c(2,  10), limits = p_value_range) + #range = c(2,  10), 
+  scale_color_continuous(name = "avg_log2FC") +
+  labs(title = "Differentially Expressed Genes across studies", x = "DEGs", y = NULL) +
+  theme_minimal() +
+  theme(legend.position = "right") + coord_flip()
+
+
+# Show the dot plot
+print(dot_plot)
+```
+
+
+
+#1/16
+
+```{r}
+#day 1
+deg_day1_a <- rbind(DEG_day1_aEC_up, DEG_day1_aEC_down)
+deg_day1_a$Cell_Type <- rep("aEC", length(deg_day1_a$gene))
+
+deg_day1_v <- rbind(DEG_day1_vEC_up, DEG_day1_vEC_down)
+deg_day1_v$Cell_Type <- rep("vEC", length(deg_day1_v$gene))
+
+deg_day1_cap <- rbind(DEG_day1_capEC_up, DEG_day1_capEC_down)
+deg_day1_cap$Cell_Type <- rep("capEC", length(deg_day1_cap$gene))
+
+deg_day1_acap <- rbind(DEG_day1_acapEC_up, DEG_day1_acapEC_down)
+deg_day1_acap$Cell_Type <- rep("acapEC", length(deg_day1_acap$gene))
+
+deg_day1_vcap <- rbind(DEG_day1_vcapEC_up, DEG_day1_vcapEC_down)
+deg_day1_vcap$Cell_Type <- rep("vcapEC", length(deg_day1_vcap$gene))
+```
+
+
+
+```{r}
+#day 3
+deg_day3_a <- rbind(DEG_day3_aEC_up, DEG_day3_aEC_down)
+deg_day3_a$Cell_Type <- rep("aEC", length(deg_day3_a$gene))
+
+deg_day3_v <- rbind(DEG_day3_vEC_up, DEG_day3_vEC_down)
+deg_day3_v$Cell_Type <- rep("vEC", length(deg_day3_v$gene))
+
+deg_day3_cap <- rbind(DEG_day3_capEC_up, DEG_day3_capEC_down)
+deg_day3_cap$Cell_Type <- rep("capEC", length(deg_day3_cap$gene))
+
+deg_day3_acap <- rbind(DEG_day3_acapEC_up, DEG_day3_acapEC_down)
+deg_day3_acap$Cell_Type <- rep("acapEC", length(deg_day3_acap$gene))
+
+deg_day3_vcap <- rbind(DEG_day3_vcapEC_up, DEG_day3_vcapEC_down)
+deg_day3_vcap$Cell_Type <- rep("vcapEC", length(deg_day3_vcap$gene))
+```
+
+
+```{r}
+#day 7
+deg_day7_a <- rbind(DEG_day7_aEC_up, DEG_day7_aEC_down)
+deg_day7_a$Cell_Type <- rep("aEC", length(deg_day7_a$gene))
+
+deg_day7_v <- rbind(DEG_day7_vEC_up, DEG_day7_vEC_down)
+deg_day7_v$Cell_Type <- rep("vEC", length(deg_day7_v$gene))
+
+deg_day7_cap <- rbind(DEG_day7_capEC_up, DEG_day7_capEC_down)
+deg_day7_cap$Cell_Type <- rep("capEC", length(deg_day7_cap$gene))
+
+deg_day7_acap <- rbind(DEG_day7_acapEC_up, DEG_day7_acapEC_down)
+deg_day7_acap$Cell_Type <- rep("acapEC", length(deg_day7_acap$gene))
+
+deg_day7_vcap <- rbind(DEG_day7_vcapEC_up, DEG_day7_vcapEC_down)
+deg_day7_vcap$Cell_Type <- rep("vcapEC", length(deg_day7_vcap$gene))
+```
+
+
+```{r}
+raw_dots <- function(a, v, cap, vcap, acap, intersection_genes, filename_pdf){
+  pdf(file= filename_pdf, onefile = TRUE)
+
+  for (i in seq(15, length(intersection_genes), by = 15)) {
+    # data
+    target_genes <- intersection_genes[(i-15):i]
+    
+    final_deg <- rbind(a[a$gene %in% target_genes,], v[v$gene %in% target_genes,])
+    final_deg <- rbind(final_deg, cap[cap$gene %in% target_genes,])
+    final_deg <- rbind(final_deg, vcap[vcap$gene %in% target_genes,])
+    final_deg <- rbind(final_deg, acap[acap$gene %in% target_genes,])
+    final_deg$p_val_adj <-  final_deg$p_val_adj + 0.0000000000000000000000000000000000000001
+    
+    # Create a ggplot dot plot
+    plts <- ggplot(final_deg, aes(x = factor(Cell_Type,levels = c("aEC", "acapEC", "capEC", "vcapEC", "vEC")), y = gene, size = -log(p_val_adj), color = avg_log2FC)) +
+      geom_point() +
+      scale_size_continuous(name = "-log(P Value)") +
+      scale_color_gradient2(name = "Fold Change", midpoint = 0, low = "#403990", high = "#C52A20") +
+      labs(x = "Cell Type", y = "Genes") +
+      theme_minimal() +
+      theme(panel.grid = element_blank())  # Remove grid lines
+    
+    print(plts)
+  }
+  
+  # data
+  target_genes <- intersection_genes[(i+1):length(intersection_genes)]
+    
+  final_deg <- rbind(a[a$gene %in% target_genes,], v[v$gene %in% target_genes,])
+  final_deg <- rbind(final_deg, cap[cap$gene %in% target_genes,])
+  final_deg <- rbind(final_deg, vcap[vcap$gene %in% target_genes,])
+  final_deg <- rbind(final_deg, acap[acap$gene %in% target_genes,])
+  final_deg$p_val_adj <-  final_deg$p_val_adj + 0.000000000000000000000000000000000000001
+    
+  # Create a ggplot dot plot
+  plts <- ggplot(final_deg, aes(x = factor(Cell_Type,levels = c("aEC", "acapEC", "capEC", "vcapEC", "vEC")), y = gene, size = -log(p_val_adj), color = avg_log2FC)) +
+    geom_point() +
+    scale_size_continuous(name = "-log(P Value)") +
+    scale_color_gradient2(name = "Fold Change", midpoint = 0, low = "#403990", high = "#C52A20") +
+    labs(x = "Cell Type", y = "Genes") +
+    theme_minimal() +
+    theme(panel.grid = element_blank())  # Remove grid lines
+    
+  print(plts)
+  dev.off()
+}
+```
+
+```{r}
+intersection_genes <- Reduce(intersect, list(deg_day1_a$gene, deg_day1_v$gene, deg_day1_cap$gene, deg_day1_vcap$gene, deg_day1_acap$gene))
+raw_dots(deg_day1_a, deg_day1_v, deg_day1_cap, deg_day1_vcap, deg_day1_acap, intersection_genes, "day1_raw_dot_plot.pdf")
+```
+
+```{r}
+intersection_genes <- Reduce(intersect, list(deg_day3_a$gene, deg_day3_v$gene, deg_day3_cap$gene, deg_day3_vcap$gene, deg_day3_acap$gene))
+raw_dots(deg_day3_a, deg_day3_v, deg_day3_cap, deg_day3_vcap, deg_day3_acap, intersection_genes, "day3_raw_dot_plot.pdf")
+```
+
+```{r}
+intersection_genes <- Reduce(intersect, list(deg_day7_a$gene, deg_day7_v$gene, deg_day7_cap$gene, deg_day7_vcap$gene, deg_day7_acap$gene))
+raw_dots(deg_day7_a, deg_day7_v, deg_day7_cap, deg_day7_vcap, deg_day7_acap, intersection_genes, "day7_raw_dot_plot.pdf")
+```
+
+```{r}
+final_dots <- function(a, v, cap, vcap, acap, target_genes, filename_pdf){
+  pdf(file= filename_pdf, onefile = TRUE, width = 4.2, height = 4.2)
+  # data
+  final_deg <- rbind(a[a$gene %in% target_genes,], v[v$gene %in% target_genes,])
+  final_deg <- rbind(final_deg, cap[cap$gene %in% target_genes,])
+  final_deg <- rbind(final_deg, vcap[vcap$gene %in% target_genes,])
+  final_deg <- rbind(final_deg, acap[acap$gene %in% target_genes,])
+  final_deg$p_val_adj <-  final_deg$p_val_adj + 0.0000000000000000000000000000000000000001
+
+  print(final_deg)
+  # Create a ggplot dot plot
+  plts <- ggplot(final_deg, aes(x = factor(Cell_Type,levels = c("aEC", "acapEC", "capEC", "vcapEC", "vEC")), y = factor(gene, levels = target_genes), size = -log(p_val_adj), color = avg_log2FC)) +
+    geom_point() +
+    scale_size_continuous(name = "-log(P Value)") +
+    scale_color_gradient2(name = "Fold Change", midpoint = 0, low = "#403990", high = "#C52A20",limits = c(-2.9, 2.6)) +
+    labs(x = "Cell Type", y = "Genes") +
+    theme_minimal() +
+    theme(panel.grid = element_blank())  # Remove grid lines
+    
+  print(plts)
+  dev.off()
+}
+```
+
+
+```{r}
+desired_order <- c("Gm26672","Dysf","Mfsd4a","Zeb1", "Rapgef5", "Cst3", "Apoe","Tuba1a","Plxdc2","Edn1")
+final_dots(deg_day1_a, deg_day1_v, deg_day1_cap, deg_day1_vcap, deg_day1_acap, rev(desired_order), "day1_final_dot_plot.pdf")
+```
+
+```{r}
+desired_order <- c("Depp1","Cdkn1a","Fam117b", "Tmem204","Cttnbp2nl","Camk2n1","Fryl", "Btg1","Edn1", "Plxdc2")
+final_dots(deg_day3_a, deg_day3_v, deg_day3_cap, deg_day3_vcap, deg_day3_acap, rev(desired_order), "day3_final_dot_plot.pdf")
+```
+
+```{r}
+desired_order <- c("Angptl4","Trp53inp1","Snrk","Timp3", "Slc7a5", "Itm2a","Pcp4l1","Maoa","Lama4", "Fosb")
+final_dots(deg_day7_a, deg_day7_v, deg_day7_cap, deg_day7_vcap, deg_day7_acap, rev(desired_order), "day7_final_dot_plot.pdf")
+>>>>>>> 99ffdd72709521c5839c3b5b077ddd2f4073d1bf
 ```

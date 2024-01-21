@@ -499,7 +499,54 @@ pathway_day7_vcap <- rbind(pathway_day7_vcapEC_up, pathway_day7_vcapEC_down)
 pathway_day7_vcap$Cell_Type <- rep("vcapEC", length(pathway_day7_vcap$"Ingenuity Canonical Pathways"))
 ```
 
+```{r}
+# Or
 
+#day 1
+pathway_day1_aEC_up$Cell_Type <- rep("aEC", length(pathway_day1_aEC_up$"Ingenuity Canonical Pathways"))
+pathway_day1_vEC_up$Cell_Type <- rep("vEC", length(pathway_day1_vEC_up$"Ingenuity Canonical Pathways"))
+pathway_day1_capEC_up$Cell_Type <- rep("capEC", length(pathway_day1_capEC_up$"Ingenuity Canonical Pathways"))
+pathway_day1_acapEC_up$Cell_Type <- rep("acapEC", length(pathway_day1_acapEC_up$"Ingenuity Canonical Pathways"))
+pathway_day1_vcapEC_up$Cell_Type <- rep("vcapEC", length(pathway_day1_vcapEC_up$"Ingenuity Canonical Pathways"))
+
+#day 3
+pathway_day3_aEC_up$Cell_Type <- rep("aEC", length(pathway_day3_aEC_up$"Ingenuity Canonical Pathways"))
+pathway_day3_vEC_up$Cell_Type <- rep("vEC", length(pathway_day3_vEC_up$"Ingenuity Canonical Pathways"))
+pathway_day3_capEC_up$Cell_Type <- rep("capEC", length(pathway_day3_capEC_up$"Ingenuity Canonical Pathways"))
+pathway_day3_acapEC_up$Cell_Type <- rep("acapEC", length(pathway_day3_acapEC_up$"Ingenuity Canonical Pathways"))
+pathway_day3_vcapEC_up$Cell_Type <- rep("vcapEC", length(pathway_day3_vcapEC_up$"Ingenuity Canonical Pathways"))
+
+#day 7
+pathway_day7_aEC_up$Cell_Type <- rep("aEC", length(pathway_day7_aEC_up$"Ingenuity Canonical Pathways"))
+pathway_day7_vEC_up$Cell_Type <- rep("vEC", length(pathway_day7_vEC_up$"Ingenuity Canonical Pathways"))
+pathway_day7_capEC_up$Cell_Type <- rep("capEC", length(pathway_day7_capEC_up$"Ingenuity Canonical Pathways"))
+pathway_day7_acapEC_up$Cell_Type <- rep("acapEC", length(pathway_day7_acapEC_up$"Ingenuity Canonical Pathways"))
+pathway_day7_vcapEC_up$Cell_Type <- rep("vcapEC", length(pathway_day7_vcapEC_up$"Ingenuity Canonical Pathways"))
+
+#day 1
+pathway_day1_aEC_down$Cell_Type <- rep("aEC", length(pathway_day1_aEC_down$"Ingenuity Canonical Pathways"))
+pathway_day1_vEC_down$Cell_Type <- rep("vEC", length(pathway_day1_vEC_down$"Ingenuity Canonical Pathways"))
+pathway_day1_capEC_down$Cell_Type <- rep("capEC", length(pathway_day1_capEC_down$"Ingenuity Canonical Pathways"))
+pathway_day1_acapEC_down$Cell_Type <- rep("acapEC", length(pathway_day1_acapEC_down$"Ingenuity Canonical Pathways"))
+pathway_day1_vcapEC_down$Cell_Type <- rep("vcapEC", length(pathway_day1_vcapEC_down$"Ingenuity Canonical Pathways"))
+
+#day 3
+pathway_day3_aEC_down$Cell_Type <- rep("aEC", length(pathway_day3_aEC_down$"Ingenuity Canonical Pathways"))
+pathway_day3_vEC_down$Cell_Type <- rep("vEC", length(pathway_day3_vEC_down$"Ingenuity Canonical Pathways"))
+pathway_day3_capEC_down$Cell_Type <- rep("capEC", length(pathway_day3_capEC_down$"Ingenuity Canonical Pathways"))
+pathway_day3_acapEC_down$Cell_Type <- rep("acapEC", length(pathway_day3_acapEC_down$"Ingenuity Canonical Pathways"))
+pathway_day3_vcapEC_down$Cell_Type <- rep("vcapEC", length(pathway_day3_vcapEC_down$"Ingenuity Canonical Pathways"))
+
+#day 7
+pathway_day7_aEC_down$Cell_Type <- rep("aEC", length(pathway_day7_aEC_down$"Ingenuity Canonical Pathways"))
+pathway_day7_vEC_down$Cell_Type <- rep("vEC", length(pathway_day7_vEC_down$"Ingenuity Canonical Pathways"))
+pathway_day7_capEC_down$Cell_Type <- rep("capEC", length(pathway_day7_capEC_down$"Ingenuity Canonical Pathways"))
+pathway_day7_acapEC_down$Cell_Type <- rep("acapEC", length(pathway_day7_acapEC_down$"Ingenuity Canonical Pathways"))
+pathway_day7_vcapEC_down$Cell_Type <- rep("vcapEC", length(pathway_day7_vcapEC_down$"Ingenuity Canonical Pathways"))
+```
+
+
+# DEG dot plots
 ```{r}
 raw_dots <- function(a, v, cap, vcap, acap, intersection_genes, filename_pdf){
   pdf(file= filename_pdf, onefile = TRUE)
@@ -639,9 +686,12 @@ final_dots(deg_day7_a, deg_day7_v, deg_day7_cap, deg_day7_vcap, deg_day7_acap, r
 ```{r}
 # specific genes
 desired_order <- c("Tmem252", "Smad1", "Wasf2","Rgcc", "Tsc22d3", "Akap12", "Rps29","Tsc22d1", "Hspa1b", "Cldn5","Jund",  "Fosb","Csrp2", "Itm2a")
+
+# 
 deg_day1_cap$source <- "dpi1"
 deg_day3_cap$source <- "dpi3"
 deg_day7_cap$source <- "dpi7"
+
 ucla_for_rbind <- ucla_degs[, c("Gene", "Log.fold.change","PCT.TBI","PCT.Sham", "P Value", "Cell Type")]
 ucla_for_rbind$source <- "UCLA"
 colnames(ucla_for_rbind) <- colnames(deg_day1_cap[, !(names(deg_day1_cap) %in% c("p_val"))])
@@ -650,9 +700,161 @@ additional_dots(deg_day1_cap[, !(names(deg_day1_cap) %in% c("p_val"))], deg_day3
 ```
 
 
-# Pathways
+# Pathways dot plots
 ```{r}
-
+raw_dots <- function(a, v, cap, vcap, acap, intersection_pathways, filename_pdf){
+  pdf(file= filename_pdf, onefile = TRUE)
+  
+  if (length(intersection_pathways) > 15) {
+    
+    for (i in seq(15, length(intersection_pathways), by = 15)) {
+      # data
+      target_pathways <- intersection_pathways[(i-15):i]
+      
+      final_deg <- rbind(a[a$"Ingenuity Canonical Pathways" %in% target_pathways,], v[v$"Ingenuity Canonical Pathways" %in% target_pathways,])
+      final_deg <- rbind(final_deg, cap[cap$"Ingenuity Canonical Pathways" %in% target_pathways,])
+      final_deg <- rbind(final_deg, vcap[vcap$"Ingenuity Canonical Pathways" %in% target_pathways,])
+      final_deg <- rbind(final_deg, acap[acap$"Ingenuity Canonical Pathways" %in% target_pathways,])
+      final_deg$"-log(p-value)" <- as.numeric(final_deg$"-log(p-value)")
+      
+      #colnames
+      colnames(final_deg)[colnames(final_deg) == "-log(p-value)"] <- "p_val"
+      colnames(final_deg)[colnames(final_deg) == "z-score"] <- "z_score"
+      colnames(final_deg)[colnames(final_deg) == "Ingenuity Canonical Pathways"] <- "pathways"
+      final_deg$p_val <-  final_deg$p_val + 0.0000000000000000000000000000000000000001
+      
+      # Create a ggplot dot plot
+      plts <- ggplot(final_deg, aes(x = factor(Cell_Type, levels = c("aEC", "acapEC", "capEC", "vcapEC", "vEC")), y = pathways, size = p_val, color = z_score)) +
+        geom_point() +
+        scale_size_continuous(name = "-log(P Value)") +
+        scale_color_gradient2(name = "z score", midpoint = 0, low = "#403990", high = "#C52A20") +
+        labs(x = "Cell Type", y = "Pathways") +
+        theme_minimal() +
+        theme(panel.grid = element_blank())  # Remove grid lines
+      
+      print(plts)
+    }
+  }
+  else{
+    i = 0
+  }
+  
+  # data
+  target_pathways <- intersection_pathways[(i+1):length(intersection_pathways)]
+    
+  final_deg <- rbind(a[a$"Ingenuity Canonical Pathways" %in% target_pathways,], v[v$"Ingenuity Canonical Pathways" %in% target_pathways,])
+  final_deg <- rbind(final_deg, cap[cap$"Ingenuity Canonical Pathways" %in% target_pathways,])
+  final_deg <- rbind(final_deg, vcap[vcap$"Ingenuity Canonical Pathways" %in% target_pathways,])
+  final_deg <- rbind(final_deg, acap[acap$"Ingenuity Canonical Pathways" %in% target_pathways,])
+  final_deg$"-log(p-value)" <- as.numeric(final_deg$"-log(p-value)")
+  colnames(final_deg)[colnames(final_deg) == "-log(p-value)"] <- "p_val"
+  colnames(final_deg)[colnames(final_deg) == "z-score"] <- "z_score"
+  colnames(final_deg)[colnames(final_deg) == "Ingenuity Canonical Pathways"] <- "pathways"
+  final_deg$p_val <-  final_deg$p_val + 0.000000000000000000000000000000000000001
+    
+  # Create a ggplot dot plot
+  plts <- ggplot(final_deg, aes(x = factor(Cell_Type, levels = c("aEC", "acapEC", "capEC", "vcapEC", "vEC")), y = pathways, size = p_val, color = z_score)) +
+    geom_point() +
+    scale_size_continuous(name = "-log(P Value)") +
+    scale_color_gradient2(name = "Fold Change", midpoint = 0, low = "#403990", high = "#C52A20") +
+    labs(x = "Cell Type", y = "Pathways") +
+    theme_minimal() +
+    theme(panel.grid = element_blank())  # Remove grid lines
+    
+  print(plts)
+  
+  # close the file
+  dev.off()
+}
 ```
 
 
+```{r}
+#1
+# pathways showing up at least 4 times
+element_counts <- table(unlist(list(pathway_day1_aEC_up$"Ingenuity Canonical Pathways", pathway_day1_vEC_up$"Ingenuity Canonical Pathways", pathway_day1_capEC_up$"Ingenuity Canonical Pathways", pathway_day1_vcapEC_up$"Ingenuity Canonical Pathways", pathway_day1_acapEC_up$"Ingenuity Canonical Pathways")))
+intersection_pathways <- names(element_counts[element_counts >= 4])
+
+#intersection_pathways <- Reduce(intersect, list(pathway_day1_aEC_up$"Ingenuity Canonical Pathways", pathway_day1_vEC_up$"Ingenuity Canonical Pathways", pathway_day1_capEC_up$"Ingenuity Canonical Pathways", pathway_day1_vcapEC_up$"Ingenuity Canonical Pathways", pathway_day1_acapEC_up$"Ingenuity Canonical Pathways"))
+raw_dots(pathway_day1_aEC_up, pathway_day1_vEC_up, pathway_day1_capEC_up, pathway_day1_vcapEC_up, pathway_day1_acapEC_up, intersection_pathways, "raw_dot_plot_pathway_day1_up.pdf")
+
+element_counts <- table(unlist(list(pathway_day1_aEC_up$"Ingenuity Canonical Pathways", pathway_day1_vEC_up$"Ingenuity Canonical Pathways", pathway_day1_capEC_up$"Ingenuity Canonical Pathways", pathway_day1_vcapEC_up$"Ingenuity Canonical Pathways", pathway_day1_acapEC_up$"Ingenuity Canonical Pathways")))
+intersection_pathways <- names(element_counts[element_counts >= 4])
+#intersection_pathways <- Reduce(intersect, list(pathway_day1_aEC_down$"Ingenuity Canonical Pathways", pathway_day1_vEC_down$"Ingenuity Canonical Pathways", pathway_day1_capEC_down$"Ingenuity Canonical Pathways", pathway_day1_vcapEC_down$"Ingenuity Canonical Pathways", pathway_day1_acapEC_down$"Ingenuity Canonical Pathways"))
+raw_dots(pathway_day1_aEC_down, pathway_day1_vEC_down, pathway_day1_capEC_down, pathway_day1_vcapEC_down, pathway_day1_acapEC_down, intersection_pathways, "raw_dot_plot_pathway_day1_down.pdf")
+
+#3
+element_counts <- table(unlist(list(pathway_day3_aEC_up$"Ingenuity Canonical Pathways", pathway_day3_vEC_up$"Ingenuity Canonical Pathways", pathway_day3_capEC_up$"Ingenuity Canonical Pathways", pathway_day3_vcapEC_up$"Ingenuity Canonical Pathways", pathway_day3_acapEC_up$"Ingenuity Canonical Pathways")))
+intersection_pathways <- names(element_counts[element_counts >= 4])
+
+intersection_pathways <- Reduce(intersect, list(pathway_day3_aEC_up$"Ingenuity Canonical Pathways", pathway_day3_vEC_up$"Ingenuity Canonical Pathways", pathway_day3_capEC_up$"Ingenuity Canonical Pathways", pathway_day3_vcapEC_up$"Ingenuity Canonical Pathways", pathway_day3_acapEC_up$"Ingenuity Canonical Pathways"))
+raw_dots(pathway_day3_aEC_up, pathway_day3_vEC_up, pathway_day3_capEC_up, pathway_day3_vcapEC_up, pathway_day3_acapEC_up, intersection_pathways, "raw_dot_plot_pathway_day3_up.pdf")
+
+intersection_pathways <- Reduce(intersect, list(pathway_day3_aEC_down$"Ingenuity Canonical Pathways", pathway_day3_vEC_down$"Ingenuity Canonical Pathways", pathway_day3_capEC_down$"Ingenuity Canonical Pathways", pathway_day3_vcapEC_down$"Ingenuity Canonical Pathways", pathway_day3_acapEC_down$"Ingenuity Canonical Pathways"))
+raw_dots(pathway_day3_aEC_down, pathway_day3_vEC_down, pathway_day3_capEC_down, pathway_day3_vcapEC_down, pathway_day3_acapEC_down, intersection_pathways, "raw_dot_plot_pathway_day3_down.pdf")
+
+#7
+intersection_pathways <- Reduce(intersect, list(pathway_day7_aEC_up$"Ingenuity Canonical Pathways", pathway_day7_vEC_up$"Ingenuity Canonical Pathways", pathway_day7_capEC_up$"Ingenuity Canonical Pathways", pathway_day7_vcapEC_up$"Ingenuity Canonical Pathways", pathway_day7_acapEC_up$"Ingenuity Canonical Pathways"))
+raw_dots(pathway_day7_aEC_up, pathway_day7_vEC_up, pathway_day7_capEC_up, pathway_day7_vcapEC_up, pathway_day7_acapEC_up, intersection_pathways, "raw_dot_plot_pathway_day7_up.pdf")
+
+intersection_pathways <- Reduce(intersect, list(pathway_day7_aEC_down$"Ingenuity Canonical Pathways", pathway_day7_vEC_down$"Ingenuity Canonical Pathways", pathway_day7_capEC_down$"Ingenuity Canonical Pathways", pathway_day7_vcapEC_down$"Ingenuity Canonical Pathways", pathway_day7_acapEC_down$"Ingenuity Canonical Pathways"))
+raw_dots(pathway_day7_aEC_down, pathway_day1_vEC_down, pathway_day7_capEC_down, pathway_day7_vcapEC_down, pathway_day7_acapEC_down, intersection_pathways, "raw_dot_plot_pathway_day7_down.pdf")
+```
+
+
+```{r}
+final_dots <- function(a, v, cap, vcap, acap, target_pathways, filename_pdf){
+  
+  pdf(file= filename_pdf, onefile = TRUE)
+  
+  final_deg <- rbind(a[a$"Ingenuity Canonical Pathways" %in% target_pathways,], v[v$"Ingenuity Canonical Pathways" %in% target_pathways,])
+  final_deg <- rbind(final_deg, cap[cap$"Ingenuity Canonical Pathways" %in% target_pathways,])
+  final_deg <- rbind(final_deg, vcap[vcap$"Ingenuity Canonical Pathways" %in% target_pathways,])
+  final_deg <- rbind(final_deg, acap[acap$"Ingenuity Canonical Pathways" %in% target_pathways,])
+  final_deg$"-log(p-value)" <- as.numeric(final_deg$"-log(p-value)")
+  colnames(final_deg)[colnames(final_deg) == "-log(p-value)"] <- "p_val"
+  colnames(final_deg)[colnames(final_deg) == "z-score"] <- "z_score"
+  colnames(final_deg)[colnames(final_deg) == "Ingenuity Canonical Pathways"] <- "pathways"
+  final_deg$p_val <-  final_deg$p_val + 0.000000000000000000000000000000000000001
+  
+    
+  # Create a ggplot dot plot
+  plts <- ggplot(final_deg, aes(x = factor(Cell_Type, levels = c("aEC", "acapEC", "capEC", "vcapEC", "vEC")), y = factor(pathways, levels = target_pathways),size = p_val, color = z_score)) +
+    geom_point() +
+    scale_size_continuous(name = "-log(P Value)") +
+    scale_color_gradient2(name = "Fold Change", midpoint = 0, low = "#403990", high = "#C52A20") +
+    labs(x = "Cell Type", y = "Pathways") +
+    theme_minimal() +
+    theme(panel.grid = element_blank())  # Remove grid lines
+    
+  print(plts)
+  dev.off()
+}
+```
+
+
+```{r}
+up_path <- c("Eicosanoid Signaling","RHO GTPase cycle","Estrogen Receptor Signaling","ERK/MAPK Signaling","Endothelin−1 Signaling", "Dopamine−DARPP32 Feedback in cAMP Signaling", "Serotonin Receptor Signaling", "CXCR4 Signaling","Glutaminergic Receptor Signaling Pathway (Enhanced)","Pancreatic Secretion Signaling Pathway")
+down_path <- c("RAR Activation", "MHC class II antigen presentation", "Molecular Mechanisms of Cancer", "Pulmonary Fibrosis Idiopathic Signaling Pathway")
+
+desired_order <- c("Eicosanoid Signaling","RHO GTPase cycle","Estrogen Receptor Signaling","ERK/MAPK Signaling","Endothelin−1 Signaling", "Dopamine−DARPP32 Feedback in cAMP Signaling", "Serotonin Receptor Signaling", "CXCR4 Signaling","Glutaminergic Receptor Signaling Pathway (Enhanced)","Pancreatic Secretion Signaling Pathway","RAR Activation", "MHC class II antigen presentation", "Molecular Mechanisms of Cancer", "Pulmonary Fibrosis Idiopathic Signaling Pathway")
+final_dots(rbind(pathway_day1_aEC_up[pathway_day1_aEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day1_aEC_down[pathway_day1_aEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day1_vEC_up[pathway_day1_vEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day1_vEC_down[pathway_day1_vEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day1_capEC_up[pathway_day1_capEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day1_capEC_down[pathway_day1_capEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day1_vcapEC_up[pathway_day1_vcapEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day1_vcapEC_down[pathway_day1_vcapEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day1_acapEC_up[pathway_day1_acapEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day1_acapEC_down[pathway_day1_acapEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rev(desired_order), "dot_plot_pathways_day1.pdf")
+```
+
+```{r}
+up_path <- c("Eicosanoid Signaling","RHO GTPase cycle","Estrogen Receptor Signaling","ERK/MAPK Signaling","Endothelin−1 Signaling", "Dopamine−DARPP32 Feedback in cAMP Signaling", "Serotonin Receptor Signaling", "CXCR4 Signaling","Glutaminergic Receptor Signaling Pathway (Enhanced)","Pancreatic Secretion Signaling Pathway")
+down_path <- c("RAR Activation", "MHC class II antigen presentation", "Molecular Mechanisms of Cancer", "Pulmonary Fibrosis Idiopathic Signaling Pathway")
+
+desired_order <- c("Eicosanoid Signaling","RHO GTPase cycle","Estrogen Receptor Signaling","ERK/MAPK Signaling","Endothelin−1 Signaling", "Dopamine−DARPP32 Feedback in cAMP Signaling", "Serotonin Receptor Signaling", "CXCR4 Signaling","Glutaminergic Receptor Signaling Pathway (Enhanced)","Pancreatic Secretion Signaling Pathway","RAR Activation", "MHC class II antigen presentation", "Molecular Mechanisms of Cancer", "Pulmonary Fibrosis Idiopathic Signaling Pathway")
+final_dots(rbind(pathway_day1_aEC_up[pathway_day1_aEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day1_aEC_down[pathway_day1_aEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day1_vEC_up[pathway_day1_vEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day1_vEC_down[pathway_day1_vEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day1_capEC_up[pathway_day1_capEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day1_capEC_down[pathway_day1_capEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day1_vcapEC_up[pathway_day1_vcapEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day1_vcapEC_down[pathway_day1_vcapEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day1_acapEC_up[pathway_day1_acapEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day1_acapEC_down[pathway_day1_acapEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rev(desired_order), "dot_plot_pathways_day1.pdf")
+```
+
+
+
+```{r}
+up_path <- c("Eicosanoid Signaling","RHO GTPase cycle","Estrogen Receptor Signaling","ERK/MAPK Signaling","Endothelin−1 Signaling", "Dopamine−DARPP32 Feedback in cAMP Signaling", "Serotonin Receptor Signaling", "CXCR4 Signaling","Glutaminergic Receptor Signaling Pathway (Enhanced)","Pancreatic Secretion Signaling Pathway")
+down_path <- c("RAR Activation", "MHC class II antigen presentation", "Molecular Mechanisms of Cancer", "Pulmonary Fibrosis Idiopathic Signaling Pathway")
+
+desired_order <- c("Eicosanoid Signaling","RHO GTPase cycle","Estrogen Receptor Signaling","ERK/MAPK Signaling","Endothelin−1 Signaling", "Dopamine−DARPP32 Feedback in cAMP Signaling", "Serotonin Receptor Signaling", "CXCR4 Signaling","Glutaminergic Receptor Signaling Pathway (Enhanced)","Pancreatic Secretion Signaling Pathway","RAR Activation", "MHC class II antigen presentation", "Molecular Mechanisms of Cancer", "Pulmonary Fibrosis Idiopathic Signaling Pathway")
+final_dots(rbind(pathway_day1_aEC_up[pathway_day1_aEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day1_aEC_down[pathway_day1_aEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day1_vEC_up[pathway_day1_vEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day1_vEC_down[pathway_day1_vEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day1_capEC_up[pathway_day1_capEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day1_capEC_down[pathway_day1_capEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day1_vcapEC_up[pathway_day1_vcapEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day1_vcapEC_down[pathway_day1_vcapEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day1_acapEC_up[pathway_day1_acapEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day1_acapEC_down[pathway_day1_acapEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rev(desired_order), "dot_plot_pathways_day1.pdf")
+```

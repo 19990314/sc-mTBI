@@ -371,10 +371,15 @@ DEG_day7_vcapEC_down <- read_csv("./DEG_day7_vcapEC_down_sorted.csv")
 
 
 ```{r}
-#pathway
 
-setwd("D:\\Shuting_Chen\\mTBI_scRNA_seq\\Jan12\\pathway")
+library(readr)
+#library(ggplot2)
 
+
+#setwd("D:\\Shuting_Chen\\mTBI_scRNA_seq\\Jan12\\library(ggplot2)")
+setwd("/Users/iris/Downloads/Jan12/pathways")
+
+library(ggplot2)
 pathway_day1_aEC_up <- read_tsv("./dpi1_pathways_a_025_up.txt", skip = 2)
 pathway_day1_aEC_down <- read_tsv("./dpi1_pathways_a_025_down.txt", skip = 2)
 pathway_day1_capEC_up <- read_tsv("./dpi1_pathways_cap_025_up.txt", skip = 2)
@@ -788,18 +793,30 @@ raw_dots(pathway_day1_aEC_down, pathway_day1_vEC_down, pathway_day1_capEC_down, 
 element_counts <- table(unlist(list(pathway_day3_aEC_up$"Ingenuity Canonical Pathways", pathway_day3_vEC_up$"Ingenuity Canonical Pathways", pathway_day3_capEC_up$"Ingenuity Canonical Pathways", pathway_day3_vcapEC_up$"Ingenuity Canonical Pathways", pathway_day3_acapEC_up$"Ingenuity Canonical Pathways")))
 intersection_pathways <- names(element_counts[element_counts >= 4])
 
-intersection_pathways <- Reduce(intersect, list(pathway_day3_aEC_up$"Ingenuity Canonical Pathways", pathway_day3_vEC_up$"Ingenuity Canonical Pathways", pathway_day3_capEC_up$"Ingenuity Canonical Pathways", pathway_day3_vcapEC_up$"Ingenuity Canonical Pathways", pathway_day3_acapEC_up$"Ingenuity Canonical Pathways"))
+#intersection_pathways <- Reduce(intersect, list(pathway_day3_aEC_up$"Ingenuity Canonical Pathways", pathway_day3_vEC_up$"Ingenuity Canonical Pathways", pathway_day3_capEC_up$"Ingenuity Canonical Pathways", pathway_day3_vcapEC_up$"Ingenuity Canonical Pathways", pathway_day3_acapEC_up$"Ingenuity Canonical Pathways"))
 raw_dots(pathway_day3_aEC_up, pathway_day3_vEC_up, pathway_day3_capEC_up, pathway_day3_vcapEC_up, pathway_day3_acapEC_up, intersection_pathways, "raw_dot_plot_pathway_day3_up.pdf")
 
-intersection_pathways <- Reduce(intersect, list(pathway_day3_aEC_down$"Ingenuity Canonical Pathways", pathway_day3_vEC_down$"Ingenuity Canonical Pathways", pathway_day3_capEC_down$"Ingenuity Canonical Pathways", pathway_day3_vcapEC_down$"Ingenuity Canonical Pathways", pathway_day3_acapEC_down$"Ingenuity Canonical Pathways"))
+
+element_counts <- table(unlist(list(pathway_day3_aEC_down$"Ingenuity Canonical Pathways", pathway_day3_vEC_down$"Ingenuity Canonical Pathways", pathway_day3_capEC_down$"Ingenuity Canonical Pathways", pathway_day3_vcapEC_down$"Ingenuity Canonical Pathways", pathway_day3_acapEC_down$"Ingenuity Canonical Pathways")))
+intersection_pathways <- names(element_counts[element_counts >= 4])
+
+#intersection_pathways <- Reduce(intersect, list(pathway_day3_aEC_down$"Ingenuity Canonical Pathways", pathway_day3_vEC_down$"Ingenuity Canonical Pathways", pathway_day3_capEC_down$"Ingenuity Canonical Pathways", pathway_day3_vcapEC_down$"Ingenuity Canonical Pathways", pathway_day3_acapEC_down$"Ingenuity Canonical Pathways"))
 raw_dots(pathway_day3_aEC_down, pathway_day3_vEC_down, pathway_day3_capEC_down, pathway_day3_vcapEC_down, pathway_day3_acapEC_down, intersection_pathways, "raw_dot_plot_pathway_day3_down.pdf")
 
 #7
-intersection_pathways <- Reduce(intersect, list(pathway_day7_aEC_up$"Ingenuity Canonical Pathways", pathway_day7_vEC_up$"Ingenuity Canonical Pathways", pathway_day7_capEC_up$"Ingenuity Canonical Pathways", pathway_day7_vcapEC_up$"Ingenuity Canonical Pathways", pathway_day7_acapEC_up$"Ingenuity Canonical Pathways"))
+
+element_counts <- table(unlist(list(pathway_day7_aEC_up$"Ingenuity Canonical Pathways", pathway_day7_vEC_up$"Ingenuity Canonical Pathways", pathway_day7_capEC_up$"Ingenuity Canonical Pathways", pathway_day7_vcapEC_up$"Ingenuity Canonical Pathways", pathway_day7_acapEC_up$"Ingenuity Canonical Pathways")))
+intersection_pathways <- names(element_counts[element_counts >= 4])
+
+#intersection_pathways <- Reduce(intersect, list(pathway_day7_aEC_up$"Ingenuity Canonical Pathways", pathway_day7_vEC_up$"Ingenuity Canonical Pathways", pathway_day7_capEC_up$"Ingenuity Canonical Pathways", pathway_day7_vcapEC_up$"Ingenuity Canonical Pathways", pathway_day7_acapEC_up$"Ingenuity Canonical Pathways"))
 raw_dots(pathway_day7_aEC_up, pathway_day7_vEC_up, pathway_day7_capEC_up, pathway_day7_vcapEC_up, pathway_day7_acapEC_up, intersection_pathways, "raw_dot_plot_pathway_day7_up.pdf")
 
-intersection_pathways <- Reduce(intersect, list(pathway_day7_aEC_down$"Ingenuity Canonical Pathways", pathway_day7_vEC_down$"Ingenuity Canonical Pathways", pathway_day7_capEC_down$"Ingenuity Canonical Pathways", pathway_day7_vcapEC_down$"Ingenuity Canonical Pathways", pathway_day7_acapEC_down$"Ingenuity Canonical Pathways"))
-raw_dots(pathway_day7_aEC_down, pathway_day1_vEC_down, pathway_day7_capEC_down, pathway_day7_vcapEC_down, pathway_day7_acapEC_down, intersection_pathways, "raw_dot_plot_pathway_day7_down.pdf")
+
+element_counts <- table(unlist(list(pathway_day7_aEC_down$"Ingenuity Canonical Pathways", pathway_day7_vEC_down$"Ingenuity Canonical Pathways", pathway_day7_capEC_down$"Ingenuity Canonical Pathways", pathway_day7_vcapEC_down$"Ingenuity Canonical Pathways", pathway_day7_acapEC_down$"Ingenuity Canonical Pathways")))
+intersection_pathways <- names(element_counts[element_counts >= 4])
+
+#intersection_pathways <- Reduce(intersect, list(pathway_day7_aEC_down$"Ingenuity Canonical Pathways", pathway_day7_vEC_down$"Ingenuity Canonical Pathways", pathway_day7_capEC_down$"Ingenuity Canonical Pathways", pathway_day7_vcapEC_down$"Ingenuity Canonical Pathways", pathway_day7_acapEC_down$"Ingenuity Canonical Pathways"))
+raw_dots(pathway_day7_aEC_down, pathway_day7_vEC_down, pathway_day7_capEC_down, pathway_day7_vcapEC_down, pathway_day7_acapEC_down, intersection_pathways, "raw_dot_plot_pathway_day7_down.pdf")
 ```
 
 
@@ -835,36 +852,34 @@ final_dots <- function(a, v, cap, vcap, acap, target_pathways, filename_pdf){
 
 
 ```{r}
-up_path <- c("Eicosanoid Signaling","RHO GTPase cycle","Estrogen Receptor Signaling","ERK/MAPK Signaling","Endothelin−1 Signaling", "Dopamine−DARPP32 Feedback in cAMP Signaling", "Serotonin Receptor Signaling", "CXCR4 Signaling","Glutaminergic Receptor Signaling Pathway (Enhanced)","Pancreatic Secretion Signaling Pathway")
-down_path <- c("RAR Activation", "MHC class II antigen presentation", "Molecular Mechanisms of Cancer", "Pulmonary Fibrosis Idiopathic Signaling Pathway")
+up_path <- c("Acetylcholine Receptor Signaling Pathway", "14−3−3−mediated Signaling", "Aldosterone Signaling in Epithelial Cells", "Adrenomedullin signaling pathway", "Acute Myeloid Leukemia Signaling", "Apelin Cardiomyocyte Signaling Pathway", "CCR3 Signaling in Eosinophils", "CREB Signaling in Neurons", "Deubiquitination", "Dopamine−DARPP32 Feedback in cAMP Signaling", "Endothelin−1 Signaling", "G Beta Gamma Signaling", "Glutaminergic Receptor Signaling Pathway (Enhanced)", "Glioma Signaling", "RHO GTPase cycle")
 
-desired_order <- c("Eicosanoid Signaling","RHO GTPase cycle","Estrogen Receptor Signaling","ERK/MAPK Signaling","Endothelin−1 Signaling", "Dopamine−DARPP32 Feedback in cAMP Signaling", "Serotonin Receptor Signaling", "CXCR4 Signaling","Glutaminergic Receptor Signaling Pathway (Enhanced)","Pancreatic Secretion Signaling Pathway","RAR Activation", "MHC class II antigen presentation", "Molecular Mechanisms of Cancer", "Pulmonary Fibrosis Idiopathic Signaling Pathway")
+down_path <- c("Amino acids regulate mTORC1", "C−type lectin receptors (CLRs)", "Cell Cycle Checkpoints", "Cellular response to hypoxia", "EIF2 Signaling", "Gap Junction Signaling", "GNRH Signaling", "Neutrophil degranulation", "Oxidative Phosphorylation", "Regulation of Apoptosis", "Synthesis of DNA")
+
+desired_order <- c("RHO GTPase cycle", "Acetylcholine Receptor Signaling Pathway", "14−3−3−mediated Signaling", "Aldosterone Signaling in Epithelial Cells", "Adrenomedullin signaling pathway", "Acute Myeloid Leukemia Signaling", "Apelin Cardiomyocyte Signaling Pathway", "CCR3 Signaling in Eosinophils", "CREB Signaling in Neurons", "Deubiquitination", "Dopamine−DARPP32 Feedback in cAMP Signaling", "Endothelin−1 Signaling", "G Beta Gamma Signaling", "Glutaminergic Receptor Signaling Pathway (Enhanced)", "Glioma Signaling", "Amino acids regulate mTORC1", "C−type lectin receptors (CLRs)", "Cell Cycle Checkpoints", "Cellular response to hypoxia", "EIF2 Signaling", "Gap Junction Signaling", "GNRH Signaling", "Neutrophil degranulation", "Oxidative Phosphorylation", "Regulation of Apoptosis", "Synthesis of DNA")
+
 final_dots(rbind(pathway_day1_aEC_up[pathway_day1_aEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day1_aEC_down[pathway_day1_aEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day1_vEC_up[pathway_day1_vEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day1_vEC_down[pathway_day1_vEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day1_capEC_up[pathway_day1_capEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day1_capEC_down[pathway_day1_capEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day1_vcapEC_up[pathway_day1_vcapEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day1_vcapEC_down[pathway_day1_vcapEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day1_acapEC_up[pathway_day1_acapEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day1_acapEC_down[pathway_day1_acapEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rev(desired_order), "dot_plot_pathways_day1.pdf")
 ```
 
 ```{r}
-up_path <- c("Eicosanoid Signaling","RHO GTPase cycle","Estrogen Receptor Signaling","ERK/MAPK Signaling","Endothelin−1 Signaling", "Dopamine−DARPP32 Feedback in cAMP Signaling", "Serotonin Receptor Signaling", "CXCR4 Signaling","Glutaminergic Receptor Signaling Pathway (Enhanced)","Pancreatic Secretion Signaling Pathway")
-down_path <- c("RAR Activation", "MHC class II antigen presentation", "Molecular Mechanisms of Cancer", "Pulmonary Fibrosis Idiopathic Signaling Pathway")
+up_path <- c("CXCR4 Signaling", "EIF2 Signaling", "G alpha (12/13) signalling events", "Hepatic Fibrosis Signaling Pathway", "Nonsense−Mediated Decay (NMD)", "Oxidative Phosphorylation", "TP53 Regulates Transcription of Cell Cycle Genes", "SRP−dependent cotranslational protein targeting to membrane")
+down_path <- c("Endothelin−1 Signaling", "Ferroptosis Signaling Pathway", "GNRH Signaling", "Neutrophil degranulation", "Orexin Signaling Pathway", "Pathways
+Pulmonary Fibrosis Idiopathic Signaling Pathway", "RAF/MAP kinase cascade", "RHO GTPase cycle")
 
-desired_order <- c("Eicosanoid Signaling","RHO GTPase cycle","Estrogen Receptor Signaling","ERK/MAPK Signaling","Endothelin−1 Signaling", "Dopamine−DARPP32 Feedback in cAMP Signaling", "Serotonin Receptor Signaling", "CXCR4 Signaling","Glutaminergic Receptor Signaling Pathway (Enhanced)","Pancreatic Secretion Signaling Pathway","RAR Activation", "MHC class II antigen presentation", "Molecular Mechanisms of Cancer", "Pulmonary Fibrosis Idiopathic Signaling Pathway")
-final_dots(rbind(pathway_day1_aEC_up[pathway_day1_aEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day1_aEC_down[pathway_day1_aEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day1_vEC_up[pathway_day1_vEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day1_vEC_down[pathway_day1_vEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day1_capEC_up[pathway_day1_capEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day1_capEC_down[pathway_day1_capEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day1_vcapEC_up[pathway_day1_vcapEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day1_vcapEC_down[pathway_day1_vcapEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day1_acapEC_up[pathway_day1_acapEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day1_acapEC_down[pathway_day1_acapEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rev(desired_order), "dot_plot_pathways_day1.pdf")
+desired_order <- c("EIF2 Signaling", "CXCR4 Signaling", "G alpha (12/13) signalling events", "Hepatic Fibrosis Signaling Pathway", "Nonsense−Mediated Decay (NMD)", "Oxidative Phosphorylation", "TP53 Regulates Transcription of Cell Cycle Genes", "SRP−dependent cotranslational protein targeting to membrane", "Endothelin−1 Signaling", "Ferroptosis Signaling Pathway", "GNRH Signaling", "Neutrophil degranulation", "Orexin Signaling Pathway", "Pathways
+Pulmonary Fibrosis Idiopathic Signaling Pathway", "RAF/MAP kinase cascade", "RHO GTPase cycle")
+
+final_dots(rbind(pathway_day3_aEC_up[pathway_day3_aEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day3_aEC_down[pathway_day3_aEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day3_vEC_up[pathway_day3_vEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day3_vEC_down[pathway_day3_vEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day3_capEC_up[pathway_day3_capEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day3_capEC_down[pathway_day3_capEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day3_vcapEC_up[pathway_day3_vcapEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day3_vcapEC_down[pathway_day3_vcapEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day3_acapEC_up[pathway_day3_acapEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day3_acapEC_down[pathway_day3_acapEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rev(desired_order), "dot_plot_pathways_day3.pdf")
 ```
 
 
 
 ```{r}
-up_path <- c("Eicosanoid Signaling","RHO GTPase cycle","Estrogen Receptor Signaling","ERK/MAPK Signaling","Endothelin−1 Signaling", "Dopamine−DARPP32 Feedback in cAMP Signaling", "Serotonin Receptor Signaling", "CXCR4 Signaling","Glutaminergic Receptor Signaling Pathway (Enhanced)","Pancreatic Secretion Signaling Pathway")
-down_path <- c("RAR Activation", "MHC class II antigen presentation", "Molecular Mechanisms of Cancer", "Pulmonary Fibrosis Idiopathic Signaling Pathway")
+up_path <- c("Cachexia Signaling Pathway", "BAG2 Signaling Pathway", "Cellular response to heat stress", "EIF2 Signaling", "Hepatic Fibrosis Signaling Pathway", "Immunogenic Cell Death Signaling Pathway", "Interferon alpha/beta signaling", "RHO GTPase cycle")
+down_path <- c("Cholecystokinin/Gastrin−mediated Signaling", "Cell surface interactions at the vascular wall", "Deubiquitination", "ESR−mediated signaling", "ID1 Signaling Pathway", "MicroRNA Biogenesis Signaling Pathway", "STAT3 Pathway", "Interleukin−4 and Interleukin−13 signaling")
 
-desired_order <- c("Eicosanoid Signaling","RHO GTPase cycle","Estrogen Receptor Signaling","ERK/MAPK Signaling","Endothelin−1 Signaling", "Dopamine−DARPP32 Feedback in cAMP Signaling", "Serotonin Receptor Signaling", "CXCR4 Signaling","Glutaminergic Receptor Signaling Pathway (Enhanced)","Pancreatic Secretion Signaling Pathway","RAR Activation", "MHC class II antigen presentation", "Molecular Mechanisms of Cancer", "Pulmonary Fibrosis Idiopathic Signaling Pathway")
-final_dots(rbind(pathway_day1_aEC_up[pathway_day1_aEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day1_aEC_down[pathway_day1_aEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day1_vEC_up[pathway_day1_vEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day1_vEC_down[pathway_day1_vEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day1_capEC_up[pathway_day1_capEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day1_capEC_down[pathway_day1_capEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day1_vcapEC_up[pathway_day1_vcapEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day1_vcapEC_down[pathway_day1_vcapEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day1_acapEC_up[pathway_day1_acapEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day1_acapEC_down[pathway_day1_acapEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rev(desired_order), "dot_plot_pathways_day1.pdf")
-=======
-# Version info: R 4.2.2, Biobase 2.58.0, GEOquery 2.66.0, limma 3.54.0
-################################################################
-
-```{r}
-BiocManager::install("GEOquery")
-
+desired_order <- c("RHO GTPase cycle", "Cachexia Signaling Pathway", "BAG2 Signaling Pathway", "Cellular response to heat stress", "EIF2 Signaling", "Hepatic Fibrosis Signaling Pathway", "Immunogenic Cell Death Signaling Pathway", "Interferon alpha/beta signaling", "Cholecystokinin/Gastrin−mediated Signaling", "Cell surface interactions at the vascular wall", "Deubiquitination", "ESR−mediated signaling", "ID1 Signaling Pathway", "MicroRNA Biogenesis Signaling Pathway", "STAT3 Pathway", "Interleukin−4 and Interleukin−13 signaling")
+final_dots(rbind(pathway_day7_aEC_up[pathway_day7_aEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day7_aEC_down[pathway_day7_aEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day7_vEC_up[pathway_day7_vEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day7_vEC_down[pathway_day7_vEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day7_capEC_up[pathway_day7_capEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day7_capEC_down[pathway_day7_capEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day7_vcapEC_up[pathway_day7_vcapEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day7_vcapEC_down[pathway_day7_vcapEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day7_acapEC_up[pathway_day7_acapEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day7_acapEC_down[pathway_day7_acapEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rev(desired_order), "dot_plot_pathways_day7.pdf")
 ```
 
 
@@ -1135,6 +1150,9 @@ write.csv(degs, "DEGs_1vs_23_samples", row.names=T)
 
 #dot plot
 ```{r}
+library(ggplot2)
+library(ggplot2)
+library(ggplot2)
 library(ggplot2)
 
 # Sample data generation (replace with your actual data)

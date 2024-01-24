@@ -1,0 +1,6 @@
+"Ingenuity Canonical Pathways","-log(p-value)","Ratio","z-score","Molecules","...6","Cell_Type"
+"Wax and plasmalogen biosynthesis",0.798,0.25,NA,"FAR2",NA,"aEC"
+"Aspartate and asparagine metabolism",0.421,0.0909,NA,"SLC25A12",NA,"aEC"
+"Digestion",0.224,0.0476,NA,"PIR",NA,"aEC"
+"Spermine Biosynthesis",1.03,0.5,NA,"AMD1",NA,"aEC"
+"Spermidine Biosynthesis I",1.03,0.5,NA,"AMD1",NA,"aEC"

@@ -1,0 +1,3 @@
+"Ingenuity Canonical Pathways","-log(p-value)","Ratio","z-score","Molecules","...6","Cell_Type"
+"FOXO-mediated transcription of cell death genes",0.843,0.0625,NA,"FOXO3",NA,"acapEC"
+"Telomere Maintenance",0.295,0.0137,NA,"NOP10",NA,"acapEC"

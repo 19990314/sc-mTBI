@@ -1,0 +1,8 @@
+"Ingenuity Canonical Pathways","-log(p-value)","Ratio","z-score","Molecules","...6","Cell_Type"
+"Molybdenum Cofactor Biosynthesis",1.57,0.25,NA,"GPHN",NA,"acapEC"
+"Xanthine and Xanthosine Salvage",1.82,0.5,NA,"PNP",NA,"acapEC"
+"Guanine and Guanosine Salvage I",1.65,0.333,NA,"PNP",NA,"acapEC"
+"Rapoport-Luebering Glycolytic Shunt",1.52,0.25,NA,"PGAM1",NA,"acapEC"
+"Arsenate Detoxification I (Glutaredoxin)",1.43,0.2,NA,"PNP",NA,"acapEC"
+"Adenine and Adenosine Salvage III",1.29,0.143,NA,"PNP",NA,"acapEC"
+"Mitochondrial iron-sulfur cluster biogenesis",1.03,0.0769,NA,"ISCA2",NA,"acapEC"

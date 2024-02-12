@@ -18,12 +18,14 @@ our_df = our_df.dropna(subset=['avg_log2FC', 'p_val','Log10 P'])
 
 
 # input
-log = 0.02
+log = 0.5
 p = 0.05
 
 p = st.slider('Choose your p threshold', 0.0, 0.2, 0.05)
 st.write("You selected: ", p)
 
+p = st.slider('Choose your (absolute) fold-change threshold', 0.0, max(our_df['avg_log2FC']), 0.2)
+st.write("You selected: ", log)
 
 # Create a scatter plot
 st.title("Volcano Plot")
@@ -39,8 +41,8 @@ plt.axvline(log,color="grey",linestyle="--")
 plt.axhline(-np.log10(p),color="grey",linestyle="--")
 
 # find down- or up- regulated genes
-down = our_df[(our_df['avg_log2FC']<=-log)&(our_df['P Value']<=p)]
-up = our_df[(our_df['avg_log2FC']>=log)&(our_df['P Value']<=p)]
+down = our_df[(our_df['avg_log2FC']<=-log)&(our_df['Log10 P']<=p)]
+up = our_df[(our_df['avg_log2FC']>=log)&(our_df['Log10 P']<=p)]
 
 # highlight genes on plot
 if len(down) >0:
@@ -51,16 +53,16 @@ if len(up) > 0:
 
 # label names
 for i,r in up.iterrows():
-    plt.text(s=r['Gene'], x=r['Log.fold.change'], y=r["Log10 P"])
+    plt.text(s=r['Gene'], x=r['avg_log2FC'], y=r["Log10 P"])
 for i,r in down.iterrows():
-    plt.text(s=r['Gene'], x=r['Log.fold.change'], y=r["Log10 P"])
+    plt.text(s=r['Gene'], x=r['avg_log2FC'], y=r["Log10 P"])
 
 # final plot
 st.pyplot(plt)
 
 
 st.write("Up-regulated: ")
-st.dataframe(up[['Gene', 'Log.fold.change', 'P Value']])
+st.dataframe(up[['Gene', 'avg_log2FC', 'Log10 P']])
 
 st.write("Down-regulated: ")
-st.dataframe(down[['Gene', 'Log.fold.change', 'P Value']])
+st.dataframe(down[['Gene', 'avg_log2FC', 'Log10 P']])

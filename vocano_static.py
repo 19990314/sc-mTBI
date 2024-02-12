@@ -27,6 +27,8 @@ st.write("You selected: ", p)
 log = st.slider('Choose your (absolute) fold-change threshold', 0.0, max(our_df['avg_log2FC']), 2.5)
 st.write("You selected: ", log)
 
+gene_name = st.checkbox('Display Gene Names')
+
 # realtime color
 #colr = np.where((((our_df['Log10 P'] < p) & (our_df['avg_log2FC'] < -log)) | ((our_df['Log10 P'] < p) & (our_df['avg_log2FC'] > log))),"red", "grey")
 
@@ -56,10 +58,11 @@ if len(up) > 0:
     plt.scatter(x=up['avg_log2FC'], y=up["Log10 P"], s=8, label="Up-regulated", color="red")
 
 # label names
-for i, r in up.iterrows():
-    plt.text(s=r['Gene'], x=r['avg_log2FC'], y=r["p_val"])
-for i, r in down.iterrows():
-    plt.text(s=r['Gene'], x=r['avg_log2FC'], y=r["p_val"])
+if gene_name:
+    for i, r in up.iterrows():
+        plt.text(s=r['Gene'], x=r['avg_log2FC'], y=r["p_val"])
+    for i, r in down.iterrows():
+        plt.text(s=r['Gene'], x=r['avg_log2FC'], y=r["p_val"])
 
 # final plot
 st.pyplot(plt)

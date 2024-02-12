@@ -496,7 +496,7 @@ raw_dots(deg_day7_a, deg_day7_v, deg_day7_cap, deg_day7_vcap, deg_day7_acap, int
 
 ```{r}
 final_dots <- function(a, v, cap, vcap, acap, target_genes, filename_pdf){
-  pdf(file= filename_pdf, onefile = TRUE, width = 4.2, height = 4.2)
+  pdf(file= filename_pdf, onefile = TRUE, width = 5, height = 5)
   # data
   final_deg <- rbind(a[a$gene %in% target_genes,], v[v$gene %in% target_genes,])
   final_deg <- rbind(final_deg, cap[cap$gene %in% target_genes,])
@@ -551,6 +551,7 @@ additional_dots <- function(dpi1, dpi3, dpi7, ucla, target_genes, filename_pdf){
 }
 ```
 
+# DEG: selected genes (shared)
 ```{r}
 desired_order <- c("Gm26672","Dysf","Mfsd4a","Zeb1", "Rapgef5", "Cst3", "Apoe","Tuba1a","Plxdc2","Edn1")
 final_dots(deg_day1_a, deg_day1_v, deg_day1_cap, deg_day1_vcap, deg_day1_acap, rev(desired_order), "day1_final_dot_plot.pdf")
@@ -566,8 +567,9 @@ desired_order <- c("Angptl4","Trp53inp1","Snrk","Timp3", "Slc7a5", "Itm2a","Pcp4
 final_dots(deg_day7_a, deg_day7_v, deg_day7_cap, deg_day7_vcap, deg_day7_acap, rev(desired_order), "day7_final_dot_plot.pdf")
 ```
 
+# shared with UCLA
 ```{r}
-# specific genes
+# shared genes with UCLA
 desired_order <- c("Tmem252", "Smad1", "Wasf2","Rgcc", "Tsc22d3", "Akap12", "Rps29","Tsc22d1", "Hspa1b", "Cldn5","Jund",  "Fosb","Csrp2", "Itm2a")
 
 # 
@@ -580,6 +582,97 @@ ucla_for_rbind$source <- "UCLA"
 colnames(ucla_for_rbind) <- colnames(deg_day1_cap[, !(names(deg_day1_cap) %in% c("p_val"))])
 
 additional_dots(deg_day1_cap[, !(names(deg_day1_cap) %in% c("p_val"))], deg_day3_cap[, !(names(deg_day3_cap) %in% c("p_val"))], deg_day7_cap[, !(names(deg_day7_cap) %in% c("p_val"))], ucla_for_rbind, rev(desired_order), "top14_shared_degs_dot_plot.pdf")
+```
+
+# DEG: specific genes
+```{r}
+day1_specific_degs <- c()
+
+# day1
+degs <- deg_day1_a$gene[!(deg_day1_a$gene %in% c(deg_day1_acap$gene, deg_day1_cap$gene, deg_day1_vcap$gene, deg_day1_v$gene))]
+write.csv(deg_day1_a[deg_day1_a$gene %in% degs, ], "specific_deg_day1_a.csv", row.names = FALSE)
+deg_day1_a <- deg_day1_a[order(abs(deg_day1_a$avg_log2FC), decreasing = TRUE), ]
+day1_specific_degs <- c(day1_specific_degs, deg_day1_a$gene[!(deg_day1_a$gene %in% c(deg_day1_acap$gene, deg_day1_cap$gene, deg_day1_vcap$gene, deg_day1_v$gene))][1:5])
+
+degs <- deg_day1_acap$gene[!(deg_day1_acap$gene %in% c(deg_day1_a$gene, deg_day1_cap$gene, deg_day1_vcap$gene, deg_day1_v$gene))]
+write.csv(deg_day1_acap[deg_day1_acap$gene %in% degs, ], "specific_deg_day1_acap.csv", row.names = FALSE)
+deg_day1_acap <- deg_day1_acap[order(abs(deg_day1_acap$avg_log2FC), decreasing = TRUE), ]
+day1_specific_degs <- c(day1_specific_degs, deg_day1_acap$gene[!(deg_day1_acap$gene %in% c(deg_day1_a$gene, deg_day1_cap$gene, deg_day1_vcap$gene, deg_day1_v$gene))][1:5])
+
+degs <- deg_day1_cap$gene[!(deg_day1_cap$gene %in% c(deg_day1_a$gene, deg_day1_acap$gene, deg_day1_vcap$gene, deg_day1_v$gene))]
+write.csv(deg_day1_cap[deg_day1_cap$gene %in% degs, ], "specific_deg_day1_cap.csv", row.names = FALSE)
+deg_day1_cap <- deg_day1_cap[order(abs(deg_day1_cap$avg_log2FC), decreasing = TRUE), ]
+day1_specific_degs <- c(day1_specific_degs, deg_day1_cap$gene[!(deg_day1_cap$gene %in% c(deg_day1_a$gene, deg_day1_acap$gene, deg_day1_vcap$gene, deg_day1_v$gene))][1:5])
+
+degs <- deg_day1_vcap$gene[!(deg_day1_vcap$gene %in% c(deg_day1_a$gene, deg_day1_acap$gene, deg_day1_cap$gene, deg_day1_v$gene))]
+write.csv(deg_day1_vcap[deg_day1_vcap$gene %in% degs, ], "specific_deg_day1_vcap.csv", row.names = FALSE)
+deg_day1_vcap <- deg_day1_vcap[order(abs(deg_day1_vcap$avg_log2FC), decreasing = TRUE), ]
+day1_specific_degs <- c(day1_specific_degs, deg_day1_vcap$gene[!(deg_day1_vcap$gene %in% c(deg_day1_a$gene, deg_day1_acap$gene, deg_day1_cap$gene, deg_day1_v$gene))][1:5])
+
+degs <- deg_day1_v$gene[!(deg_day1_v$gene %in% c(deg_day1_a$gene, deg_day1_acap$gene, deg_day1_cap$gene, deg_day1_vcap$gene))]
+write.csv(deg_day1_v[deg_day1_v$gene %in% degs, ], "specific_deg_day1_v.csv", row.names = FALSE)
+deg_day1_v <- deg_day1_v[order(abs(deg_day1_v$avg_log2FC), decreasing = TRUE), ]
+day1_specific_degs <- c(day1_specific_degs, deg_day1_v$gene[!(deg_day1_v$gene %in% c(deg_day1_a$gene, deg_day1_acap$gene, deg_day1_cap$gene, deg_day1_vcap$gene))][1:5])
+```
+
+```{r}
+day3_specific_degs <- c()
+
+# day3
+degs <- deg_day3_a$gene[!(deg_day3_a$gene %in% c(deg_day3_acap$gene, deg_day3_cap$gene, deg_day3_vcap$gene, deg_day3_v$gene))]
+write.csv(deg_day3_a[deg_day3_a$gene %in% degs, ], "specific_deg_day3_a.csv", row.names = FALSE)
+deg_day3_a <- deg_day3_a[order(abs(deg_day3_a$avg_log2FC), decreasing = TRUE), ]
+day3_specific_degs <- c(day3_specific_degs, deg_day3_a$gene[!(deg_day3_a$gene %in% c(deg_day3_acap$gene, deg_day3_cap$gene, deg_day3_vcap$gene, deg_day3_v$gene))][1:5])
+
+degs <- deg_day3_acap$gene[!(deg_day3_acap$gene %in% c(deg_day3_a$gene, deg_day3_cap$gene, deg_day3_vcap$gene, deg_day3_v$gene))]
+write.csv(deg_day3_acap[deg_day3_acap$gene %in% degs, ], "specific_deg_day3_acap.csv", row.names = FALSE)
+deg_day3_acap <- deg_day3_acap[order(abs(deg_day3_acap$avg_log2FC), decreasing = TRUE), ]
+day3_specific_degs <- c(day3_specific_degs, deg_day3_acap$gene[!(deg_day3_acap$gene %in% c(deg_day3_a$gene, deg_day3_cap$gene, deg_day3_vcap$gene, deg_day3_v$gene))][1:5])
+
+degs <- deg_day3_cap$gene[!(deg_day3_cap$gene %in% c(deg_day3_a$gene, deg_day3_acap$gene, deg_day3_vcap$gene, deg_day3_v$gene))]
+write.csv(deg_day3_cap[deg_day3_cap$gene %in% degs, ], "specific_deg_day3_cap.csv", row.names = FALSE)
+deg_day3_cap <- deg_day3_cap[order(abs(deg_day3_cap$avg_log2FC), decreasing = TRUE), ]
+day3_specific_degs <- c(day3_specific_degs, deg_day3_cap$gene[!(deg_day3_cap$gene %in% c(deg_day3_a$gene, deg_day3_acap$gene, deg_day3_vcap$gene, deg_day3_v$gene))][1:5])
+
+degs <- deg_day3_vcap$gene[!(deg_day3_vcap$gene %in% c(deg_day3_a$gene, deg_day3_acap$gene, deg_day3_cap$gene, deg_day3_v$gene))]
+write.csv(deg_day3_vcap[deg_day3_vcap$gene %in% degs, ], "specific_deg_day3_vcap.csv", row.names = FALSE)
+deg_day3_vcap <- deg_day3_vcap[order(abs(deg_day3_vcap$avg_log2FC), decreasing = TRUE), ]
+day3_specific_degs <- c(day3_specific_degs, deg_day3_vcap$gene[!(deg_day3_vcap$gene %in% c(deg_day3_a$gene, deg_day3_acap$gene, deg_day3_cap$gene, deg_day3_v$gene))][1:5])
+
+degs <- deg_day3_v$gene[!(deg_day3_v$gene %in% c(deg_day3_a$gene, deg_day3_acap$gene, deg_day3_cap$gene, deg_day3_vcap$gene))]
+write.csv(deg_day3_v[deg_day3_v$gene %in% degs, ], "specific_deg_day3_v.csv", row.names = FALSE)
+deg_day3_v <- deg_day3_v[order(abs(deg_day3_v$avg_log2FC), decreasing = TRUE), ]
+day3_specific_degs <- c(day3_specific_degs, deg_day3_v$gene[!(deg_day3_v$gene %in% c(deg_day3_a$gene, deg_day3_acap$gene, deg_day3_cap$gene, deg_day3_vcap$gene))][1:5])
+```
+
+```{r}
+day7_specific_degs <- c()
+
+# day7
+degs <- deg_day7_a$gene[!(deg_day7_a$gene %in% c(deg_day7_acap$gene, deg_day7_cap$gene, deg_day7_vcap$gene, deg_day7_v$gene))]
+write.csv(deg_day7_a[deg_day7_a$gene %in% degs, ], "specific_deg_day7_a.csv", row.names = FALSE)
+deg_day7_a <- deg_day7_a[order(abs(deg_day7_a$avg_log2FC), decreasing = TRUE), ]
+day7_specific_degs <- c(day7_specific_degs, deg_day7_a$gene[!(deg_day7_a$gene %in% c(deg_day7_acap$gene, deg_day7_cap$gene, deg_day7_vcap$gene, deg_day7_v$gene))][1:5])
+
+degs <- deg_day7_acap$gene[!(deg_day7_acap$gene %in% c(deg_day7_a$gene, deg_day7_cap$gene, deg_day7_vcap$gene, deg_day7_v$gene))]
+write.csv(deg_day7_acap[deg_day7_acap$gene %in% degs, ], "specific_deg_day7_acap.csv", row.names = FALSE)
+deg_day7_acap <- deg_day7_acap[order(abs(deg_day7_acap$avg_log2FC), decreasing = TRUE), ]
+day7_specific_degs <- c(day7_specific_degs, deg_day7_acap$gene[!(deg_day7_acap$gene %in% c(deg_day7_a$gene, deg_day7_cap$gene, deg_day7_vcap$gene, deg_day7_v$gene))][1:5])
+
+degs <- deg_day7_cap$gene[!(deg_day7_cap$gene %in% c(deg_day7_a$gene, deg_day7_acap$gene, deg_day7_vcap$gene, deg_day7_v$gene))]
+write.csv(deg_day7_cap[deg_day7_cap$gene %in% degs, ], "specific_deg_day7_cap.csv", row.names = FALSE)
+deg_day7_cap <- deg_day7_cap[order(abs(deg_day7_cap$avg_log2FC), decreasing = TRUE), ]
+day7_specific_degs <- c(day7_specific_degs, deg_day7_cap$gene[!(deg_day7_cap$gene %in% c(deg_day7_a$gene, deg_day7_acap$gene, deg_day7_vcap$gene, deg_day7_v$gene))][1:5])
+
+degs <- deg_day7_vcap$gene[!(deg_day7_vcap$gene %in% c(deg_day7_a$gene, deg_day7_acap$gene, deg_day7_cap$gene, deg_day7_v$gene))]
+write.csv(deg_day7_vcap[deg_day7_vcap$gene %in% degs, ], "specific_deg_day7_vcap.csv", row.names = FALSE)
+deg_day7_vcap <- deg_day7_vcap[order(abs(deg_day7_vcap$avg_log2FC), decreasing = TRUE), ]
+day7_specific_degs <- c(day7_specific_degs, deg_day7_vcap$gene[!(deg_day7_vcap$gene %in% c(deg_day7_a$gene, deg_day7_acap$gene, deg_day7_cap$gene, deg_day7_v$gene))][1:5])
+
+degs <- deg_day7_v$gene[!(deg_day7_v$gene %in% c(deg_day7_a$gene, deg_day7_acap$gene, deg_day7_cap$gene, deg_day7_vcap$gene))]
+write.csv(deg_day7_v[deg_day7_v$gene %in% degs, ], "specific_deg_day7_v.csv", row.names = FALSE)
+deg_day7_v <- deg_day7_v[order(abs(deg_day7_v$avg_log2FC), decreasing = TRUE), ]
+day7_specific_degs <- c(day7_specific_degs, deg_day7_v$gene[!(deg_day7_v$gene %in% c(deg_day7_a$gene, deg_day7_acap$gene, deg_day7_cap$gene, deg_day7_vcap$gene))][1:5])
 ```
 
 
@@ -729,22 +822,24 @@ final_dots <- function(a, v, cap, vcap, acap, target_pathways, filename_pdf){
 
 
 ```{r}
-up_path <- c("Acetylcholine Receptor Signaling Pathway", "14−3−3−mediated Signaling", "Aldosterone Signaling in Epithelial Cells", "Adrenomedullin signaling pathway", "Acute Myeloid Leukemia Signaling", "Apelin Cardiomyocyte Signaling Pathway", "CCR3 Signaling in Eosinophils", "CREB Signaling in Neurons", "Deubiquitination", "Dopamine−DARPP32 Feedback in cAMP Signaling", "Endothelin−1 Signaling", "G Beta Gamma Signaling", "Glutaminergic Receptor Signaling Pathway (Enhanced)", "Glioma Signaling", "RHO GTPase cycle")
+#day1
+
+up_path <- c("Acetylcholine Receptor Signaling Pathway", "14−3−3−mediated Signaling", "Aldosterone Signaling in Epithelial Cells", "Acute Myeloid Leukemia Signaling", "Apelin Cardiomyocyte Signaling Pathway", "CREB Signaling in Neurons", "Deubiquitination", "Dopamine−DARPP32 Feedback in cAMP Signaling", "Endothelin−1 Signaling", "G Beta Gamma Signaling", "Glutaminergic Receptor Signaling Pathway (Enhanced)", "Glioma Signaling", "RHO GTPase cycle")
 
 down_path <- c("Amino acids regulate mTORC1", "C−type lectin receptors (CLRs)", "Cell Cycle Checkpoints", "Cellular response to hypoxia", "EIF2 Signaling", "Gap Junction Signaling", "GNRH Signaling", "Neutrophil degranulation", "Oxidative Phosphorylation", "Regulation of Apoptosis", "Synthesis of DNA")
 
-desired_order <- c("RHO GTPase cycle", "Acetylcholine Receptor Signaling Pathway", "14−3−3−mediated Signaling", "Aldosterone Signaling in Epithelial Cells", "Adrenomedullin signaling pathway", "Acute Myeloid Leukemia Signaling", "Apelin Cardiomyocyte Signaling Pathway", "CCR3 Signaling in Eosinophils", "CREB Signaling in Neurons", "Deubiquitination", "Dopamine−DARPP32 Feedback in cAMP Signaling", "Endothelin−1 Signaling", "G Beta Gamma Signaling", "Glutaminergic Receptor Signaling Pathway (Enhanced)", "Glioma Signaling", "Amino acids regulate mTORC1", "C−type lectin receptors (CLRs)", "Cell Cycle Checkpoints", "Cellular response to hypoxia", "EIF2 Signaling", "Gap Junction Signaling", "GNRH Signaling", "Neutrophil degranulation", "Oxidative Phosphorylation", "Regulation of Apoptosis", "Synthesis of DNA")
+desired_order <- c("RHO GTPase cycle", "Acetylcholine Receptor Signaling Pathway", "14−3−3−mediated Signaling", "Aldosterone Signaling in Epithelial Cells", "Acute Myeloid Leukemia Signaling", "Apelin Cardiomyocyte Signaling Pathway", "CREB Signaling in Neurons", "Deubiquitination", "Dopamine−DARPP32 Feedback in cAMP Signaling", "Endothelin−1 Signaling", "G Beta Gamma Signaling", "Glutaminergic Receptor Signaling Pathway (Enhanced)", "Glioma Signaling", "Amino acids regulate mTORC1", "C−type lectin receptors (CLRs)", "Cell Cycle Checkpoints", "Gap Junction Signaling", "GNRH Signaling", "Synthesis of DNA","Neutrophil degranulation", "Regulation of Apoptosis",  "Cellular response to hypoxia",  "Oxidative Phosphorylation", "EIF2 Signaling")
 
 final_dots(rbind(pathway_day1_aEC_up[pathway_day1_aEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day1_aEC_down[pathway_day1_aEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day1_vEC_up[pathway_day1_vEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day1_vEC_down[pathway_day1_vEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day1_capEC_up[pathway_day1_capEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day1_capEC_down[pathway_day1_capEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day1_vcapEC_up[pathway_day1_vcapEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day1_vcapEC_down[pathway_day1_vcapEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day1_acapEC_up[pathway_day1_acapEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day1_acapEC_down[pathway_day1_acapEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rev(desired_order), "dot_plot_pathways_day1.pdf")
 ```
 
 ```{r}
-up_path <- c("CXCR4 Signaling", "EIF2 Signaling", "G alpha (12/13) signalling events", "Hepatic Fibrosis Signaling Pathway", "Nonsense−Mediated Decay (NMD)", "Oxidative Phosphorylation", "TP53 Regulates Transcription of Cell Cycle Genes", "SRP−dependent cotranslational protein targeting to membrane")
-down_path <- c("Endothelin−1 Signaling", "Ferroptosis Signaling Pathway", "GNRH Signaling", "Neutrophil degranulation", "Orexin Signaling Pathway", "Pathways
-Pulmonary Fibrosis Idiopathic Signaling Pathway", "RAF/MAP kinase cascade", "RHO GTPase cycle")
+#day3
 
-desired_order <- c("EIF2 Signaling", "CXCR4 Signaling", "G alpha (12/13) signalling events", "Hepatic Fibrosis Signaling Pathway", "Nonsense−Mediated Decay (NMD)", "Oxidative Phosphorylation", "TP53 Regulates Transcription of Cell Cycle Genes", "SRP−dependent cotranslational protein targeting to membrane", "Endothelin−1 Signaling", "Ferroptosis Signaling Pathway", "GNRH Signaling", "Neutrophil degranulation", "Orexin Signaling Pathway", "Pathways
-Pulmonary Fibrosis Idiopathic Signaling Pathway", "RAF/MAP kinase cascade", "RHO GTPase cycle")
+up_path <- c("Signaling by Rho Family GTPases", "Selenoamino acid metabolism","CXCR4 Signaling", "EIF2 Signaling", "G alpha (12/13) signalling events", "Hepatic Fibrosis Signaling Pathway", "Nonsense−Mediated Decay (NMD)", "Oxidative Phosphorylation", "TP53 Regulates Transcription of Cell Cycle Genes", "SRP−dependent cotranslational protein targeting to membrane")
+down_path <- c("Ferroptosis Signaling Pathway", "GNRH Signaling", "Neutrophil degranulation", "Orexin Signaling Pathway", "Pathways Pulmonary Fibrosis Idiopathic Signaling Pathway", "RAF/MAP kinase cascade", "RHO GTPase cycle", "Apelin Endothelial Signaling Pathway", "Endothelin−1 Signaling", "Ferroptosis Signaling Pathway", "Interleukin−4 and Interleukin−13 signaling", "Myelination Signaling Pathway", "Serotonin Receptor Signaling", "Wound Healing Signaling Pathway")
+
+desired_order <- c("Selenoamino acid metabolism", "EIF2 Signaling", "Oxidative Phosphorylation", "Signaling by Rho Family GTPases", "CXCR4 Signaling",  "G alpha (12/13) signalling events", "Hepatic Fibrosis Signaling Pathway", "Nonsense−Mediated Decay (NMD)", "TP53 Regulates Transcription of Cell Cycle Genes", "SRP−dependent cotranslational protein targeting to membrane", "Ferroptosis Signaling Pathway", "Neutrophil degranulation", "Orexin Signaling Pathway", "Pathways Pulmonary Fibrosis Idiopathic Signaling Pathway", "Endothelin−1 Signaling",  "Interleukin−4 and Interleukin−13 signaling", "Myelination Signaling Pathway", "Wound Healing Signaling Pathway","GNRH Signaling","Apelin Endothelial Signaling Pathway", "RAF/MAP kinase cascade", "Serotonin Receptor Signaling", "RHO GTPase cycle")
 
 final_dots(rbind(pathway_day3_aEC_up[pathway_day3_aEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day3_aEC_down[pathway_day3_aEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day3_vEC_up[pathway_day3_vEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day3_vEC_down[pathway_day3_vEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day3_capEC_up[pathway_day3_capEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day3_capEC_down[pathway_day3_capEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day3_vcapEC_up[pathway_day3_vcapEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day3_vcapEC_down[pathway_day3_vcapEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day3_acapEC_up[pathway_day3_acapEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day3_acapEC_down[pathway_day3_acapEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rev(desired_order), "dot_plot_pathways_day3.pdf")
 ```
@@ -752,14 +847,16 @@ final_dots(rbind(pathway_day3_aEC_up[pathway_day3_aEC_up$`Ingenuity Canonical Pa
 
 
 ```{r}
-up_path <- c("Cachexia Signaling Pathway", "BAG2 Signaling Pathway", "Cellular response to heat stress", "EIF2 Signaling", "Hepatic Fibrosis Signaling Pathway", "Immunogenic Cell Death Signaling Pathway", "Interferon alpha/beta signaling", "RHO GTPase cycle")
-down_path <- c("Cholecystokinin/Gastrin−mediated Signaling", "Cell surface interactions at the vascular wall", "Deubiquitination", "ESR−mediated signaling", "ID1 Signaling Pathway", "MicroRNA Biogenesis Signaling Pathway", "STAT3 Pathway", "Interleukin−4 and Interleukin−13 signaling")
+#day7
 
-desired_order <- c("RHO GTPase cycle", "Cachexia Signaling Pathway", "BAG2 Signaling Pathway", "Cellular response to heat stress", "EIF2 Signaling", "Hepatic Fibrosis Signaling Pathway", "Immunogenic Cell Death Signaling Pathway", "Interferon alpha/beta signaling", "Cholecystokinin/Gastrin−mediated Signaling", "Cell surface interactions at the vascular wall", "Deubiquitination", "ESR−mediated signaling", "ID1 Signaling Pathway", "MicroRNA Biogenesis Signaling Pathway", "STAT3 Pathway", "Interleukin−4 and Interleukin−13 signaling")
+up_path <- c("Cachexia Signaling Pathway",  "Cellular response to heat stress", "EIF2 Signaling", "Immunogenic Cell Death Signaling Pathway", "Interferon alpha/beta signaling", "RHO GTPase cycle", "Fcgamma receptor (FCGR) dependent phagocytosis", "Neuroinflammation Signaling Pathway", "Phagosome Formation", "PI3K/AKT Signaling", "Selenoamino acid metabolism")
+down_path <- c("Cholecystokinin/Gastrin−mediated Signaling", "Cell surface interactions at the vascular wall", "Deubiquitination", "ESR−mediated signaling", "ID1 Signaling Pathway", "MicroRNA Biogenesis Signaling Pathway", "STAT3 Pathway", "Interleukin−4 and Interleukin−13 signaling", "Myelination Signaling Pathway", "Gap Junction Signaling", "Serotonin Receptor Signaling", "Ferroptosis Signaling Pathway")
+
+desired_order <- c("RHO GTPase cycle", "Selenoamino acid metabolism","Interferon alpha/beta signaling", "EIF2 Signaling", "Cachexia Signaling Pathway",  "Cellular response to heat stress","PI3K/AKT Signaling",  "Fcgamma receptor (FCGR) dependent phagocytosis", "Immunogenic Cell Death Signaling Pathway", "Neuroinflammation Signaling Pathway", "Phagosome Formation", "Cholecystokinin/Gastrin−mediated Signaling", "Cell surface interactions at the vascular wall", "Ferroptosis Signaling Pathway", "Deubiquitination",  "ESR−mediated signaling", "MicroRNA Biogenesis Signaling Pathway","ID1 Signaling Pathway", "Interleukin−4 and Interleukin−13 signaling", "STAT3 Pathway",  "Myelination Signaling Pathway",  "Gap Junction Signaling","Serotonin Receptor Signaling")
 final_dots(rbind(pathway_day7_aEC_up[pathway_day7_aEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day7_aEC_down[pathway_day7_aEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day7_vEC_up[pathway_day7_vEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day7_vEC_down[pathway_day7_vEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day7_capEC_up[pathway_day7_capEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day7_capEC_down[pathway_day7_capEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day7_vcapEC_up[pathway_day7_vcapEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day7_vcapEC_down[pathway_day7_vcapEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rbind(pathway_day7_acapEC_up[pathway_day7_acapEC_up$`Ingenuity Canonical Pathways`%in% up_path,],pathway_day7_acapEC_down[pathway_day7_acapEC_down$`Ingenuity Canonical Pathways`%in% down_path,]), rev(desired_order), "dot_plot_pathways_day7.pdf")
 ```
 
-
+# pathway: specific
 ```{r}
 # day1
 paths <- pathway_day1_a$`Ingenuity Canonical Pathways`[!(pathway_day1_a$`Ingenuity Canonical Pathways` %in% c(pathway_day1_acap$`Ingenuity Canonical Pathways`, pathway_day1_cap$`Ingenuity Canonical Pathways`, pathway_day1_vcap$`Ingenuity Canonical Pathways`, pathway_day1_v$`Ingenuity Canonical Pathways`))]
@@ -875,56 +972,6 @@ print(dot_plot)
 
 #1/16
 
-
-```{r}
-raw_dots <- function(a, v, cap, vcap, acap, intersection_genes, filename_pdf){
-  pdf(file= filename_pdf, onefile = TRUE)
-
-  for (i in seq(15, length(intersection_genes), by = 15)) {
-    # data
-    target_genes <- intersection_genes[(i-15):i]
-    
-    final_deg <- rbind(a[a$gene %in% target_genes,], v[v$gene %in% target_genes,])
-    final_deg <- rbind(final_deg, cap[cap$gene %in% target_genes,])
-    final_deg <- rbind(final_deg, vcap[vcap$gene %in% target_genes,])
-    final_deg <- rbind(final_deg, acap[acap$gene %in% target_genes,])
-    final_deg$p_val_adj <-  final_deg$p_val_adj + 0.0000000000000000000000000000000000000001
-    
-    # Create a ggplot dot plot
-    plts <- ggplot(final_deg, aes(x = factor(Cell_Type,levels = c("aEC", "acapEC", "capEC", "vcapEC", "vEC")), y = gene, size = -log(p_val_adj), color = avg_log2FC)) +
-      geom_point() +
-      scale_size_continuous(name = "-log(P Value)") +
-      scale_color_gradient2(name = "Fold Change", midpoint = 0, low = "#403990", high = "#C52A20") +
-      labs(x = "Cell Type", y = "Genes") +
-      theme_minimal() +
-      theme(panel.grid = element_blank())  # Remove grid lines
-    
-    print(plts)
-  }
-  
-  # data
-  target_genes <- intersection_genes[(i+1):length(intersection_genes)]
-    
-  final_deg <- rbind(a[a$gene %in% target_genes,], v[v$gene %in% target_genes,])
-  final_deg <- rbind(final_deg, cap[cap$gene %in% target_genes,])
-  final_deg <- rbind(final_deg, vcap[vcap$gene %in% target_genes,])
-  final_deg <- rbind(final_deg, acap[acap$gene %in% target_genes,])
-  final_deg$p_val_adj <-  final_deg$p_val_adj + 0.000000000000000000000000000000000000001
-    
-  # Create a ggplot dot plot
-  plts <- ggplot(final_deg, aes(x = factor(Cell_Type,levels = c("aEC", "acapEC", "capEC", "vcapEC", "vEC")), y = gene, size = -log(p_val_adj), color = avg_log2FC)) +
-    geom_point() +
-    scale_size_continuous(name = "-log(P Value)") +
-    scale_color_gradient2(name = "Fold Change", midpoint = 0, low = "#403990", high = "#C52A20") +
-    labs(x = "Cell Type", y = "Genes") +
-    theme_minimal() +
-    theme(panel.grid = element_blank())  # Remove grid lines
-    
-  print(plts)
-  dev.off()
-}
-```
-
 ```{r}
 intersection_genes <- Reduce(intersect, list(deg_day1_a$gene, deg_day1_v$gene, deg_day1_cap$gene, deg_day1_vcap$gene, deg_day1_acap$gene))
 raw_dots(deg_day1_a, deg_day1_v, deg_day1_cap, deg_day1_vcap, deg_day1_acap, intersection_genes, "day1_raw_dot_plot.pdf")
@@ -955,7 +1002,7 @@ final_dots <- function(a, v, cap, vcap, acap, target_genes, filename_pdf){
   plts <- ggplot(final_deg, aes(x = factor(Cell_Type,levels = c("aEC", "acapEC", "capEC", "vcapEC", "vEC")), y = factor(gene, levels = target_genes), size = -log(p_val_adj), color = avg_log2FC)) +
     geom_point() +
     scale_size_continuous(name = "-log(P Value)") +
-    scale_color_gradient2(name = "Fold Change", midpoint = 0, low = "#403990", high = "#C52A20",limits = c(-2.9, 2.6)) +
+    scale_color_gradient2(name = "Fold Change", midpoint = 0, low = "#403990", high = "#C52A20") +
     labs(x = "Cell Type", y = "Genes") +
     theme_minimal() +
     theme(panel.grid = element_blank())  # Remove grid lines
@@ -968,15 +1015,22 @@ final_dots <- function(a, v, cap, vcap, acap, target_genes, filename_pdf){
 
 ```{r}
 desired_order <- c("Gm26672","Dysf","Mfsd4a","Zeb1", "Rapgef5", "Cst3", "Apoe","Tuba1a","Plxdc2","Edn1")
-final_dots(deg_day1_a, deg_day1_v, deg_day1_cap, deg_day1_vcap, deg_day1_acap, rev(desired_order), "day1_final_dot_plot.pdf")
+
+desired_order <- day1_specific_degs 
+final_dots(deg_day1_a, deg_day1_v, deg_day1_cap, deg_day1_vcap, deg_day1_acap, rev(desired_order), "day1_specific_dot_plot.pdf")
 ```
 
 ```{r}
 desired_order <- c("Depp1","Cdkn1a","Fam117b", "Tmem204","Cttnbp2nl","Camk2n1","Fryl", "Btg1","Edn1", "Plxdc2")
-final_dots(deg_day3_a, deg_day3_v, deg_day3_cap, deg_day3_vcap, deg_day3_acap, rev(desired_order), "day3_final_dot_plot.pdf")
+desired_order <- day3_specific_degs 
+
+final_dots(deg_day3_a, deg_day3_v, deg_day3_cap, deg_day3_vcap, deg_day3_acap, rev(desired_order), "day3_specific_dot_plot.pdf")
 ```
 
 ```{r}
+
 desired_order <- c("Angptl4","Trp53inp1","Snrk","Timp3", "Slc7a5", "Itm2a","Pcp4l1","Maoa","Lama4", "Fosb")
-final_dots(deg_day7_a, deg_day7_v, deg_day7_cap, deg_day7_vcap, deg_day7_acap, rev(desired_order), "day7_final_dot_plot.pdf")
+desired_order <- day7_specific_degs 
+
+final_dots(deg_day7_a, deg_day7_v, deg_day7_cap, deg_day7_vcap, deg_day7_acap, rev(desired_order), "day7_specific_dot_plot.pdf")
 ```

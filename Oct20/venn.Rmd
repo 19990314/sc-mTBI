@@ -16,6 +16,7 @@ library(venn)
 
 
 ```{r}
+# read DEGs
 setwd("/Users/iris/Downloads/Jan12/DEGs_filtered_updown_sorted_fc25")
 
 DEG_day1_aEC_up <- read_csv("./DEG_day1_aEC_up_sorted.csv")
@@ -107,8 +108,6 @@ ucla_degs <- ucla_degs[ucla_degs$Log.fold.change > fc | ucla_degs$Log.fold.chang
 ucla_degs <- ucla_degs[ucla_degs$`P Value` < pv,]
 ucla_degs <- ucla_degs[(ucla_degs$Log.fold.change > 0 & ucla_degs$PCT.TBI > 0.1) | (ucla_degs$Log.fold.change < 0 & ucla_degs$PCT.Sham > 0.1),]
 ```
-
-
 
 
 

@@ -57,15 +57,6 @@ write.csv(results, "differential_expression_results.csv")
 ```
 
 
-# GSE98969: Process from raw data
-```{r}
-library(DropletUtils)
-
-# importing the raw count data
-sce <- read10xCounts("D:/Shuting_Chen/AD_RNA/98969/GSE98969_RAW")
-```
-
-
 
 ```{r}
 library(dplyr)
@@ -124,11 +115,7 @@ my_features <- c("B2m", "Ifngr1", "Ifngr2", "Irf3", "Irf8", "Ptpn1")
 
 
 my_features <- c("B2m", "Ifngr1", "Ifngr2", "Irf3", "Irf8", "Ptpn1")
-#my_features <- c("B2m", "PTPN1")
-
 DotPlot(AD_study, features = my_features, group.by = "orig.ident") + coord_flip()
-
-
 ```
 
 ```{r}
@@ -199,10 +186,38 @@ print(dot_plot)
 ```
 
 
+```{r}
+# Merging data frames
+merged_deg <- merge(degs_AD_WT[degs_AD_WT$gene %in% my_features,], degs[degs$gene %in% my_features,], by = "gene", suffixes = c("_AD_vs_Healthy", "_Cluster1_vs_2and3"))
+```
 
-#1/16
+```{r}
+p_value_range <- range(c(merged_deg$p_val_AD_vs_Healthy, merged_deg$p_val_Cluster1_vs_2and3))
+
+```
 
 
+```{r}
+# Dot plot using ggplot2
+dot_plot <- ggplot(merged_deg, aes(x = gene)) +
+  geom_point(aes(y = "AD vs Healthy", size = p_val_AD_vs_Healthy, color = p_val_AD_vs_Healthy), shape = 16) +
+  geom_point(aes(y = "Cluster1 vs 2+3", size = avg_log2FC_Cluster1_vs_2and3, color = avg_log2FC_Cluster1_vs_2and3), shape = 16) +
+  scale_size_continuous(name = "p_val", range = c(2,  10), limits = p_value_range) + #range = c(2,  10), 
+  scale_color_continuous(name = "avg_log2FC") +
+  labs(title = "Differentially Expressed Genes across studies", x = "DEGs", y = NULL) +
+  theme_minimal() +
+  theme(legend.position = "right") + coord_flip()
+
+
+# Show the dot plot
+print(dot_plot)
+```
+
+
+
+
+# 1/16 
+# Tmem252 proj
 ```{r}
 #DEGs
 
@@ -343,6 +358,29 @@ deg_day7_vcap <- rbind(DEG_day7_vcapEC_up, DEG_day7_vcapEC_down)
 deg_day7_vcap$Cell_Type <- rep("vcapEC", length(deg_day7_vcap$gene))
 ```
 
+```{r}
+deg_day1_a$day <- rep("a_day1", length(deg_day1_a$gene))
+deg_day1_acap$day <- rep("acap_day1", length(deg_day1_acap$gene))
+deg_day1_cap$day <- rep("cap_day1", length(deg_day1_cap$gene))
+deg_day1_vcap$day <- rep("vcap_day1", length(deg_day1_vcap$gene))
+deg_day1_v$day <- rep("v_day1", length(deg_day1_v$gene))
+
+
+deg_day3_a$day <- rep("a_day3", length(deg_day3_a$gene))
+deg_day3_acap$day <- rep("acap_day3", length(deg_day3_acap$gene))
+deg_day3_cap$day <- rep("cap_day3", length(deg_day3_cap$gene))
+deg_day3_vcap$day <- rep("vcap_day3", length(deg_day3_vcap$gene))
+deg_day3_v$day <- rep("v_day3", length(deg_day3_v$gene))
+
+
+deg_day7_a$day <- rep("a_day7", length(deg_day7_a$gene))
+deg_day7_acap$day <- rep("acap_day7", length(deg_day7_acap$gene))
+deg_day7_cap$day <- rep("cap_day7", length(deg_day7_cap$gene))
+deg_day7_vcap$day <- rep("vcap_day7", length(deg_day7_vcap$gene))
+deg_day7_v$day <- rep("v_day7", length(deg_day7_v$gene))
+
+```
+
 
 ```{r}
 #day 1
@@ -479,6 +517,123 @@ raw_dots <- function(a, v, cap, vcap, acap, intersection_genes, filename_pdf){
 }
 ```
 
+
+```{r}
+raw_dots_for_each_cell_type <- function(day1, day3, day7, intersection_genes, celltype, filename_pdf){
+  pdf(file= filename_pdf, onefile = TRUE)
+
+  for (i in seq(15, length(intersection_genes), by = 15)) {
+    # data
+    target_genes <- intersection_genes[(i-15):i]
+    
+    final_deg <- rbind(day1[day1$gene %in% target_genes,], day3[day3$gene %in% target_genes,])
+    final_deg <- rbind(final_deg, day7[day7$gene %in% target_genes,])
+    final_deg$p_val_adj <- final_deg$p_val_adj + 0.0000000000000000000000000000000000000001
+    
+    # Create a ggplot dot plot
+    plts <- ggplot(final_deg, aes(x = factor(day, levels = c(paste(celltype,"day1",sep = "_"), paste(celltype,"day3",sep = "_"), paste(celltype,"day7",sep = "_"))), y = gene, size = -log(p_val_adj), color = avg_log2FC)) +
+      geom_point() +
+      scale_size_continuous(name = "-log(P Value)") +
+      scale_color_gradient2(name = "Fold Change", midpoint = 0, low = "#403990", high = "#C52A20") +
+      labs(x = "Cell Type", y = "Genes") +
+      theme_minimal() +
+      theme(panel.grid = element_blank())  # Remove grid lines
+    
+    print(plts)
+  }
+  
+  # data
+  target_genes <- intersection_genes[(i+1):length(intersection_genes)]
+    
+  final_deg <- rbind(day1[day1$gene %in% target_genes,], day3[day3$gene %in% target_genes,])
+  final_deg <- rbind(final_deg, day7[day7$gene %in% target_genes,])
+  final_deg$p_val_adj <- final_deg$p_val_adj + 0.0000000000000000000000000000000000000001
+    
+    # Create a ggplot dot plot
+  plts <- ggplot(final_deg, aes(x = factor(day,levels = c(paste(celltype,"day1",sep = "_"), paste(celltype,"day3",sep = "_"), paste(celltype,"day7",sep = "_"))), y = gene, size = -log(p_val_adj), color = avg_log2FC)) +
+    geom_point() +
+    scale_size_continuous(name = "-log(P Value)") +
+    scale_color_gradient2(name = "Fold Change", midpoint = 0, low = "#403990", high = "#C52A20") +
+    labs(x = "Cell Type", y = "Genes") +
+    theme_minimal() +
+    theme(panel.grid = element_blank())  # Remove grid lines
+    
+  print(plts)
+  dev.off()
+}
+```
+
+```{r}
+# multiple pages
+final_dots_celltype_specific <- function(day1, day3, day7, target_genes, filename_pdf){
+  pdf(file= filename_pdf, onefile = TRUE)
+  
+  for (i in seq(15, length(intersection_genes), by = 15)) {
+    # data
+    target_genes <- intersection_genes[(i-15):i]
+    
+    final_deg <- rbind(day1[day1$gene %in% target_genes,], day3[day3$gene %in% target_genes,])
+    final_deg <- rbind(final_deg, day7[day7$gene %in% target_genes,])
+    final_deg$p_val_adj <- final_deg$p_val_adj + 0.0000000000000000000000000000000000000001
+    
+    # Create a ggplot dot plot
+    plts <- ggplot(final_deg, aes(x = factor(day, levels = c("a_day1", "a_day3", "a_day7", "acap_day1", "acap_day3", "acap_day7", "cap_day1", "cap_day3", "cap_day7", "vcap_day1", "vcap_day3", "vcap_day7", "v_day1", "v_day3", "v_day7")), y = factor(gene, levels = target_genes), size = -log(p_val_adj), color = avg_log2FC)) +
+      geom_point() +
+      scale_size_continuous(name = "-log(P Value)") +
+      scale_color_gradient2(name = "Fold Change", midpoint = 0, low = "#403990", high = "#C52A20") +
+      labs(x = "Cell Type", y = "Genes") +
+      theme_minimal() +
+      theme(panel.grid = element_blank())  # Remove grid lines
+    
+    print(plts)
+  }
+  
+  
+  # data
+  final_deg <- rbind(day1[day1$gene %in% target_genes,], day3[day3$gene %in% target_genes,])
+  final_deg <- rbind(final_deg, day7[day7$gene %in% target_genes,])
+  final_deg$p_val_adj <- final_deg$p_val_adj + 0.0000000000000000000000000000000000000001
+
+  print(final_deg)
+  # Create a ggplot dot plot
+  plts <- ggplot(final_deg, aes(x = factor(day, levels = c("a_day1", "a_day3", "a_day7", "acap_day1", "acap_day3", "acap_day7", "cap_day1", "cap_day3", "cap_day7", "vcap_day1", "vcap_day3", "vcap_day7", "v_day1", "v_day3", "v_day7")), y = factor(gene, levels = target_genes), size = -log(p_val_adj), color = avg_log2FC)) +
+    geom_point() +
+    scale_size_continuous(name = "-log(P Value)") +
+    scale_color_gradient2(name = "Fold Change", midpoint = 0, low = "#403990", high = "#C52A20",limits = c(-2.9, 2.6)) +
+    labs(x = "Cell Type", y = "Genes") +
+    theme_minimal() +
+    theme(panel.grid = element_blank())  # Remove grid lines
+    
+  print(plts)
+  dev.off()
+}
+
+
+# single page
+final_dots_celltype_specific <- function(day1, day3, day7, target_genes, filename_pdf){
+  pdf(file= filename_pdf, onefile = TRUE, width = 11.5, height = 8.7)
+  # data
+  final_deg <- rbind(day1[day1$gene %in% target_genes,], day3[day3$gene %in% target_genes,])
+  final_deg <- rbind(final_deg, day7[day7$gene %in% target_genes,])
+  final_deg$p_val_adj <- final_deg$p_val_adj + 0.0000000000000000000000000000000000000001
+
+  print(final_deg)
+  # Create a ggplot dot plot
+  plts <- ggplot(final_deg, aes(x = factor(day, levels = c("a_day1", "a_day3", "a_day7", "acap_day1", "acap_day3", "acap_day7", "cap_day1", "cap_day3", "cap_day7", "vcap_day1", "vcap_day3", "vcap_day7", "v_day1", "v_day3", "v_day7")), y = factor(gene, levels = target_genes), size = -log(p_val_adj), color = avg_log2FC)) +
+    geom_point() +
+    scale_size_continuous(name = "-log(P Value)") +
+    scale_color_gradient2(name = "Fold Change", midpoint = 0, low = "#403990", high = "#C52A20",limits = c(-2.9, 2.6)) +
+    labs(x = "Cell Type", y = "Genes") +
+    theme_minimal() +
+    theme(panel.grid = element_blank())  # Remove grid lines
+    
+  print(plts)
+  dev.off()
+}
+```
+
+
+# all the DEGs for each day
 ```{r}
 intersection_genes <- Reduce(intersect, list(deg_day1_a$gene, deg_day1_v$gene, deg_day1_cap$gene, deg_day1_vcap$gene, deg_day1_acap$gene))
 raw_dots(deg_day1_a, deg_day1_v, deg_day1_cap, deg_day1_vcap, deg_day1_acap, intersection_genes, "day1_raw_dot_plot.pdf")
@@ -494,9 +649,82 @@ intersection_genes <- Reduce(intersect, list(deg_day7_a$gene, deg_day7_v$gene, d
 raw_dots(deg_day7_a, deg_day7_v, deg_day7_cap, deg_day7_vcap, deg_day7_acap, intersection_genes, "day7_raw_dot_plot.pdf")
 ```
 
+# shared by each cell type
+```{r}
+intersection_genes_a <- Reduce(intersect, list(deg_day1_a$gene, deg_day3_a$gene, deg_day7_a$gene))
+intersection_genes_acap <- Reduce(intersect, list(deg_day1_acap$gene, deg_day3_acap$gene, deg_day7_acap$gene))
+intersection_genes_cap <- Reduce(intersect, list(deg_day1_cap$gene, deg_day3_cap$gene, deg_day7_cap$gene))
+intersection_genes_vcap <- Reduce(intersect, list(deg_day1_vcap$gene, deg_day3_vcap$gene, deg_day7_vcap$gene))
+intersection_genes_v <- Reduce(intersect, list(deg_day1_v$gene, deg_day3_v$gene, deg_day7_v$gene))
+
+union_genes_a <- Reduce(union, list(deg_day1_a$gene, deg_day3_a$gene, deg_day7_a$gene))
+union_genes_acap <- Reduce(union, list(deg_day1_acap$gene, deg_day3_acap$gene, deg_day7_acap$gene))
+union_genes_cap <- Reduce(union, list(deg_day1_cap$gene, deg_day3_cap$gene, deg_day7_cap$gene))
+union_genes_vcap <- Reduce(union, list(deg_day1_vcap$gene, deg_day3_vcap$gene, deg_day7_vcap$gene))
+union_genes_v <- Reduce(union, list(deg_day1_v$gene, deg_day3_v$gene, deg_day7_v$gene))
+
+raw_dots_for_each_cell_type(deg_day1_a, deg_day3_a, deg_day7_a, a_specific, "a", "aEC_raw_dot_plot_specific.pdf")
+raw_dots_for_each_cell_type(deg_day1_a, deg_day3_a, deg_day7_a, a_specific, "acap", "acapEC_raw_dot_plot_specific.pdf")
+raw_dots_for_each_cell_type(deg_day1_a, deg_day3_a, deg_day7_a, a_specific, "cap", "capEC_raw_dot_plot_specific.pdf")
+raw_dots_for_each_cell_type(deg_day1_a, deg_day3_a, deg_day7_a, a_specific, "vcap", "vcapEC_raw_dot_plot_specific.pdf")
+raw_dots_for_each_cell_type(deg_day1_a, deg_day3_a, deg_day7_a, a_specific, "v", "vEC_raw_dot_plot_specific.pdf")
+
+```
+
+```{r}
+## no longer used
+a_specific <- setdiff(intersection_genes_a, intersect(intersection_genes_a, Reduce(union, list(intersection_genes_acap,intersection_genes_cap, intersection_genes_vcap, intersection_genes_v))))
+acap_specific <- setdiff(intersection_genes_acap, intersect(intersection_genes_acap, Reduce(union, list(intersection_genes_a,intersection_genes_cap, intersection_genes_vcap, intersection_genes_v))))
+cap_specific <- setdiff(intersection_genes_cap, intersect(intersection_genes_cap, Reduce(union, list(intersection_genes_a,intersection_genes_acap, intersection_genes_vcap, intersection_genes_v))))
+vcap_specific <- setdiff(intersection_genes_vcap, intersect(intersection_genes_vcap, Reduce(union, list(intersection_genes_a,intersection_genes_acap, intersection_genes_cap, intersection_genes_v))))
+v_specific <- setdiff(intersection_genes_v, intersect(intersection_genes_v, Reduce(union, list(intersection_genes_a,intersection_genes_acap, intersection_genes_cap, intersection_genes_vcap))))
+```
+
+
+```{r}
+element_counts <- table(unlist(list(deg_day1_acap$gene, deg_day3_acap$gene, deg_day7_acap$gene, deg_day1_cap$gene, deg_day3_cap$gene, deg_day7_cap$gene, deg_day1_vcap$gene, deg_day3_vcap$gene, deg_day7_vcap$gene, deg_day1_v$gene, deg_day3_v$gene, deg_day7_v$gene)))
+genes <- names(element_counts[element_counts <= 5])
+test<- intersect(intersection_genes_a, genes)
+
+element_counts <- table(unlist(list(deg_day1_a$gene, deg_day3_a$gene, deg_day7_a$gene, deg_day1_cap$gene, deg_day3_cap$gene, deg_day7_cap$gene, deg_day1_vcap$gene, deg_day3_vcap$gene, deg_day7_vcap$gene, deg_day1_v$gene, deg_day3_v$gene, deg_day7_v$gene)))
+genes <- names(element_counts[element_counts <= 5])
+test<- intersect(intersection_genes_acap, genes)
+
+element_counts <- table(unlist(list(deg_day1_a$gene, deg_day3_a$gene, deg_day7_a$gene, deg_day1_acap$gene, deg_day3_acap$gene, deg_day7_acap$gene, deg_day1_vcap$gene, deg_day3_vcap$gene, deg_day7_vcap$gene, deg_day1_v$gene, deg_day3_v$gene, deg_day7_v$gene)))
+genes <- names(element_counts[element_counts <= 4])
+test<- intersect(intersection_genes_cap, genes)
+
+element_counts <- table(unlist(list(deg_day1_a$gene, deg_day3_a$gene, deg_day7_a$gene, deg_day1_acap$gene, deg_day3_acap$gene, deg_day7_acap$gene, deg_day1_cap$gene, deg_day3_cap$gene, deg_day7_cap$gene, deg_day1_v$gene, deg_day3_v$gene, deg_day7_v$gene)))
+genes <- names(element_counts[element_counts <= 2])
+test<- intersect(intersection_genes_vcap, genes)
+
+element_counts <- table(unlist(list(deg_day1_a$gene, deg_day3_a$gene, deg_day7_a$gene, deg_day1_acap$gene, deg_day3_acap$gene, deg_day7_acap$gene, deg_day1_cap$gene, deg_day3_cap$gene, deg_day7_cap$gene, deg_day1_vcap$gene, deg_day3_vcap$gene, deg_day7_vcap$gene)))
+genes <- names(element_counts[element_counts <= 3])
+test<- intersect(intersection_genes_v, genes)
+
+#
+candidates_a <- c("Sort1", "Ptges3", "Vegfc")
+candidates_acap <- c("Dcbld2", "Smad7", "Prnp")
+candidates_cap <- c("Smad1", "Eif2ak4",  "Ikzf5", "Aspscr1", "Palm", "AW112010")
+candidates_vcap <- c("Retreg1", "Wnt5a", "Nckap5", "Tpd52l1", "Nsg1")
+candidates_v <- c("Klf7", "Clint1", "Ehd1",  "Eef1b2")
+
+
+final_dots_celltype_specific(rbind(deg_day1_a[deg_day1_a$gene %in% candidates_a,], deg_day1_acap[deg_day1_acap$gene %in% candidates_acap,], deg_day1_cap[deg_day1_cap$gene %in% candidates_cap,], deg_day1_vcap[deg_day1_vcap$gene %in% candidates_vcap,], deg_day1_v[deg_day1_v$gene %in% candidates_v,]), rbind(deg_day3_a[deg_day3_a$gene %in% candidates_a,], deg_day3_acap[deg_day3_acap$gene %in% candidates_acap,], deg_day3_cap[deg_day3_cap$gene %in% candidates_cap,],deg_day3_vcap[deg_day3_vcap$gene %in% candidates_vcap,], deg_day3_v[deg_day3_v$gene %in% candidates_v,]), rbind(deg_day7_a[deg_day7_a$gene %in% candidates_a,], deg_day7_acap[deg_day7_acap$gene %in% candidates_acap,], deg_day7_cap[deg_day7_cap$gene %in% candidates_cap,],deg_day7_vcap[deg_day7_vcap$gene %in% candidates_vcap,], deg_day7_v[deg_day7_v$gene %in% candidates_v,]), rev(c(candidates_a, candidates_acap, candidates_cap, candidates_vcap, candidates_v)), "dot_plot_celltype_specific.pdf")
+
+
+final_dots_celltype_specific(rbind(deg_day1_a, deg_day1_acap, deg_day1_cap, deg_day1_vcap, deg_day1_v), rbind(deg_day3_a, deg_day3_acap, deg_day3_cap,deg_day3_vcap, deg_day3_v), rbind(deg_day7_a, deg_day7_acap, deg_day7_cap,deg_day7_vcap, deg_day7_v), rev(c(candidates_a, candidates_acap, candidates_cap, candidates_vcap, candidates_v)), "dot_plot_celltype_specific_v2.pdf")
+
+final_dots_celltype_specific(rbind(deg_day1_a, deg_day1_acap, deg_day1_cap, deg_day1_vcap, deg_day1_v), rbind(deg_day3_a, deg_day3_acap, deg_day3_cap,deg_day3_vcap, deg_day3_v), rbind(deg_day7_a, deg_day7_acap, deg_day7_cap,deg_day7_vcap, deg_day7_v), test, "dot_plot_cap_specific_candidates.pdf")
+
+```
+
+
+
+
 ```{r}
 final_dots <- function(a, v, cap, vcap, acap, target_genes, filename_pdf){
-  pdf(file= filename_pdf, onefile = TRUE, width = 5, height = 5)
+  pdf(file= filename_pdf, onefile = TRUE, width = 5.5, height = 5)
   # data
   final_deg <- rbind(a[a$gene %in% target_genes,], v[v$gene %in% target_genes,])
   final_deg <- rbind(final_deg, cap[cap$gene %in% target_genes,])
@@ -551,7 +779,7 @@ additional_dots <- function(dpi1, dpi3, dpi7, ucla, target_genes, filename_pdf){
 }
 ```
 
-# DEG: selected genes (shared)
+# dot plot DEG: selected genes (shared)
 ```{r}
 desired_order <- c("Gm26672","Dysf","Mfsd4a","Zeb1", "Rapgef5", "Cst3", "Apoe","Tuba1a","Plxdc2","Edn1")
 final_dots(deg_day1_a, deg_day1_v, deg_day1_cap, deg_day1_vcap, deg_day1_acap, rev(desired_order), "day1_final_dot_plot.pdf")
@@ -567,7 +795,7 @@ desired_order <- c("Angptl4","Trp53inp1","Snrk","Timp3", "Slc7a5", "Itm2a","Pcp4
 final_dots(deg_day7_a, deg_day7_v, deg_day7_cap, deg_day7_vcap, deg_day7_acap, rev(desired_order), "day7_final_dot_plot.pdf")
 ```
 
-# shared with UCLA
+# dot plot DEG: shared with UCLA
 ```{r}
 # shared genes with UCLA
 desired_order <- c("Tmem252", "Smad1", "Wasf2","Rgcc", "Tsc22d3", "Akap12", "Rps29","Tsc22d1", "Hspa1b", "Cldn5","Jund",  "Fosb","Csrp2", "Itm2a")
@@ -584,11 +812,12 @@ colnames(ucla_for_rbind) <- colnames(deg_day1_cap[, !(names(deg_day1_cap) %in% c
 additional_dots(deg_day1_cap[, !(names(deg_day1_cap) %in% c("p_val"))], deg_day3_cap[, !(names(deg_day3_cap) %in% c("p_val"))], deg_day7_cap[, !(names(deg_day7_cap) %in% c("p_val"))], ucla_for_rbind, rev(desired_order), "top14_shared_degs_dot_plot.pdf")
 ```
 
-# DEG: specific genes
+# DEG: day specific DEGs
 ```{r}
+# day1
+
 day1_specific_degs <- c()
 
-# day1
 degs <- deg_day1_a$gene[!(deg_day1_a$gene %in% c(deg_day1_acap$gene, deg_day1_cap$gene, deg_day1_vcap$gene, deg_day1_v$gene))]
 write.csv(deg_day1_a[deg_day1_a$gene %in% degs, ], "specific_deg_day1_a.csv", row.names = FALSE)
 deg_day1_a <- deg_day1_a[order(abs(deg_day1_a$avg_log2FC), decreasing = TRUE), ]
@@ -616,9 +845,10 @@ day1_specific_degs <- c(day1_specific_degs, deg_day1_v$gene[!(deg_day1_v$gene %i
 ```
 
 ```{r}
+# day3
+
 day3_specific_degs <- c()
 
-# day3
 degs <- deg_day3_a$gene[!(deg_day3_a$gene %in% c(deg_day3_acap$gene, deg_day3_cap$gene, deg_day3_vcap$gene, deg_day3_v$gene))]
 write.csv(deg_day3_a[deg_day3_a$gene %in% degs, ], "specific_deg_day3_a.csv", row.names = FALSE)
 deg_day3_a <- deg_day3_a[order(abs(deg_day3_a$avg_log2FC), decreasing = TRUE), ]
@@ -646,9 +876,10 @@ day3_specific_degs <- c(day3_specific_degs, deg_day3_v$gene[!(deg_day3_v$gene %i
 ```
 
 ```{r}
+# day7
+
 day7_specific_degs <- c()
 
-# day7
 degs <- deg_day7_a$gene[!(deg_day7_a$gene %in% c(deg_day7_acap$gene, deg_day7_cap$gene, deg_day7_vcap$gene, deg_day7_v$gene))]
 write.csv(deg_day7_a[deg_day7_a$gene %in% degs, ], "specific_deg_day7_a.csv", row.names = FALSE)
 deg_day7_a <- deg_day7_a[order(abs(deg_day7_a$avg_log2FC), decreasing = TRUE), ]
@@ -674,6 +905,78 @@ write.csv(deg_day7_v[deg_day7_v$gene %in% degs, ], "specific_deg_day7_v.csv", ro
 deg_day7_v <- deg_day7_v[order(abs(deg_day7_v$avg_log2FC), decreasing = TRUE), ]
 day7_specific_degs <- c(day7_specific_degs, deg_day7_v$gene[!(deg_day7_v$gene %in% c(deg_day7_a$gene, deg_day7_acap$gene, deg_day7_cap$gene, deg_day7_vcap$gene))][1:5])
 ```
+
+
+
+
+#1/16
+
+```{r}
+intersection_genes <- Reduce(intersect, list(deg_day1_a$gene, deg_day1_v$gene, deg_day1_cap$gene, deg_day1_vcap$gene, deg_day1_acap$gene))
+raw_dots(deg_day1_a, deg_day1_v, deg_day1_cap, deg_day1_vcap, deg_day1_acap, intersection_genes, "day1_raw_dot_plot.pdf")
+```
+
+```{r}
+intersection_genes <- Reduce(intersect, list(deg_day3_a$gene, deg_day3_v$gene, deg_day3_cap$gene, deg_day3_vcap$gene, deg_day3_acap$gene))
+raw_dots(deg_day3_a, deg_day3_v, deg_day3_cap, deg_day3_vcap, deg_day3_acap, intersection_genes, "day3_raw_dot_plot.pdf")
+```
+
+```{r}
+intersection_genes <- Reduce(intersect, list(deg_day7_a$gene, deg_day7_v$gene, deg_day7_cap$gene, deg_day7_vcap$gene, deg_day7_acap$gene))
+raw_dots(deg_day7_a, deg_day7_v, deg_day7_cap, deg_day7_vcap, deg_day7_acap, intersection_genes, "day7_raw_dot_plot.pdf")
+```
+
+```{r}
+final_dots <- function(a, v, cap, vcap, acap, target_genes, filename_pdf){
+  pdf(file= filename_pdf, onefile = TRUE, width = 5.2, height = 5.6)
+  # data
+  final_deg <- rbind(a[a$gene %in% target_genes,], v[v$gene %in% target_genes,])
+  final_deg <- rbind(final_deg, cap[cap$gene %in% target_genes,])
+  final_deg <- rbind(final_deg, vcap[vcap$gene %in% target_genes,])
+  final_deg <- rbind(final_deg, acap[acap$gene %in% target_genes,])
+  final_deg$p_val_adj <-  final_deg$p_val_adj + 0.0000000000000000000000000000000000000001
+
+  # Create a ggplot dot plot
+  plts <- ggplot(final_deg, aes(x = factor(Cell_Type,levels = c("aEC", "acapEC", "capEC", "vcapEC", "vEC")), y = factor(gene, levels = target_genes), size = -log(p_val_adj), color = avg_log2FC)) +
+    geom_point() +
+    scale_size_continuous(name = "-log(P Value)") +
+    scale_color_gradient2(name = "Fold Change", midpoint = 0, low = "#403990", high = "#C52A20") +
+    labs(x = "Cell Type", y = "Genes") +
+    theme_minimal() +
+    theme(panel.grid = element_blank())  # Remove grid lines
+    
+  print(plts)
+  dev.off()
+}
+```
+
+
+
+
+```{r}
+desired_order <- c("Gm26672","Dysf","Mfsd4a","Zeb1", "Rapgef5", "Cst3", "Apoe","Tuba1a","Plxdc2","Edn1")
+
+desired_order <- day1_specific_degs 
+final_dots(deg_day1_a, deg_day1_v, deg_day1_cap, deg_day1_vcap, deg_day1_acap, rev(desired_order), "day1_specific_dot_plot.pdf")
+```
+
+```{r}
+desired_order <- c("Depp1","Cdkn1a","Fam117b", "Tmem204","Cttnbp2nl","Camk2n1","Fryl", "Btg1","Edn1", "Plxdc2")
+desired_order <- day3_specific_degs 
+
+final_dots(deg_day3_a, deg_day3_v, deg_day3_cap, deg_day3_vcap, deg_day3_acap, rev(desired_order), "day3_specific_dot_plot.pdf")
+```
+
+```{r}
+
+desired_order <- c("Angptl4","Trp53inp1","Snrk","Timp3", "Slc7a5", "Itm2a","Pcp4l1","Maoa","Lama4", "Fosb")
+desired_order <- day7_specific_degs 
+
+final_dots(deg_day7_a, deg_day7_v, deg_day7_cap, deg_day7_vcap, deg_day7_acap, rev(desired_order), "day7_specific_dot_plot.pdf")
+```
+
+
+
 
 
 # Pathways dot plots
@@ -916,93 +1219,167 @@ write.csv(pathway_day7_v[pathway_day7_v$`Ingenuity Canonical Pathways` %in% path
 
 ```
 
-
-
-#dot plot
 ```{r}
-library(ggplot2)
-library(ggplot2)
-library(ggplot2)
-library(ggplot2)
+pathway_day1_a$day <- rep("a_day1", length(pathway_day1_a$`Ingenuity Canonical Pathways`))
+pathway_day1_acap$day <- rep("acap_day1", length(pathway_day1_acap$`Ingenuity Canonical Pathways`))
+pathway_day1_cap$day <- rep("cap_day1", length(pathway_day1_cap$`Ingenuity Canonical Pathways`))
+pathway_day1_vcap$day <- rep("vcap_day1", length(pathway_day1_vcap$`Ingenuity Canonical Pathways`))
+pathway_day1_v$day <- rep("v_day1", length(pathway_day1_v$`Ingenuity Canonical Pathways`))
 
-# Sample data generation (replace with your actual data)
-set.seed(123)
-deg_table1 <- data.frame(
-  Gene = c("Gene1", "Gene2", "Gene3", "Gene4", "Gene5", "Gene6"),
-  P_Value = runif(6, 0, 0.05),
-  Fold_Change = rnorm(6)
-)
 
-deg_table2 <- data.frame(
-  Gene = c("Gene1", "Gene2", "Gene3", "Gene4", "Gene5", "Gene6"),
-  P_Value = runif(6, 0, 0.05),
-  Fold_Change = rnorm(6)
-)
+pathway_day3_a$day <- rep("a_day3", length(pathway_day3_a$`Ingenuity Canonical Pathways`))
+pathway_day3_acap$day <- rep("acap_day3", length(pathway_day3_acap$`Ingenuity Canonical Pathways`))
+pathway_day3_cap$day <- rep("cap_day3", length(pathway_day3_cap$`Ingenuity Canonical Pathways`))
+pathway_day3_vcap$day <- rep("vcap_day3", length(pathway_day3_vcap$`Ingenuity Canonical Pathways`))
+pathway_day3_v$day <- rep("v_day3", length(pathway_day3_v$`Ingenuity Canonical Pathways`))
+
+
+pathway_day7_a$day <- rep("a_day7", length(pathway_day7_a$`Ingenuity Canonical Pathways`))
+pathway_day7_acap$day <- rep("acap_day7", length(pathway_day7_acap$`Ingenuity Canonical Pathways`))
+pathway_day7_cap$day <- rep("cap_day7", length(pathway_day7_cap$`Ingenuity Canonical Pathways`))
+pathway_day7_vcap$day <- rep("vcap_day7", length(pathway_day7_vcap$`Ingenuity Canonical Pathways`))
+pathway_day7_v$day <- rep("v_day7", length(pathway_day7_v$`Ingenuity Canonical Pathways`))
+
+pathway_day1_aEC_up$day <- rep("a_day1", length(pathway_day1_aEC_up$`Ingenuity Canonical Pathways`))
+pathway_day1_acapEC_up$day <- rep("acap_day1", length(pathway_day1_acapEC_up$`Ingenuity Canonical Pathways`))
+pathway_day1_capEC_up$day <- rep("cap_day1", length(pathway_day1_capEC_up$`Ingenuity Canonical Pathways`))
+pathway_day1_vcapEC_up$day <- rep("vcap_day1", length(pathway_day1_vcapEC_up$`Ingenuity Canonical Pathways`))
+pathway_day1_vEC_up$day <- rep("v_day1", length(pathway_day1_vEC_up$`Ingenuity Canonical Pathways`))
+
+
+pathway_day3_aEC_up$day <- rep("a_day3", length(pathway_day3_aEC_up$`Ingenuity Canonical Pathways`))
+pathway_day3_acapEC_up$day <- rep("acap_day3", length(pathway_day3_acapEC_up$`Ingenuity Canonical Pathways`))
+pathway_day3_capEC_up$day <- rep("cap_day3", length(pathway_day3_capEC_up$`Ingenuity Canonical Pathways`))
+pathway_day3_vcapEC_up$day <- rep("vcap_day3", length(pathway_day3_vcapEC_up$`Ingenuity Canonical Pathways`))
+pathway_day3_vEC_up$day <- rep("v_day3", length(pathway_day3_vEC_up$`Ingenuity Canonical Pathways`))
+
+
+pathway_day7_aEC_up$day <- rep("a_day7", length(pathway_day7_aEC_up$`Ingenuity Canonical Pathways`))
+pathway_day7_acapEC_up$day <- rep("acap_day7", length(pathway_day7_acapEC_up$`Ingenuity Canonical Pathways`))
+pathway_day7_capEC_up$day <- rep("cap_day7", length(pathway_day7_capEC_up$`Ingenuity Canonical Pathways`))
+pathway_day7_vcapEC_up$day <- rep("vcap_day7", length(pathway_day7_vcapEC_up$`Ingenuity Canonical Pathways`))
+pathway_day7_vEC_up$day <- rep("v_day7", length(pathway_day7_vEC_up$`Ingenuity Canonical Pathways`))
+
+pathway_day1_a$day <- rep("a_day1", length(pathway_day1_a$`Ingenuity Canonical Pathways`))
+pathway_day1_acap$day <- rep("acap_day1", length(pathway_day1_acap$`Ingenuity Canonical Pathways`))
+pathway_day1_cap$day <- rep("cap_day1", length(pathway_day1_cap$`Ingenuity Canonical Pathways`))
+pathway_day1_vcap$day <- rep("vcap_day1", length(pathway_day1_vcap$`Ingenuity Canonical Pathways`))
+pathway_day1_v$day <- rep("v_day1", length(pathway_day1_v$`Ingenuity Canonical Pathways`))
+
+
+pathway_day3_a$day <- rep("a_day3", length(pathway_day3_a$`Ingenuity Canonical Pathways`))
+pathway_day3_acap$day <- rep("acap_day3", length(pathway_day3_acap$`Ingenuity Canonical Pathways`))
+pathway_day3_cap$day <- rep("cap_day3", length(pathway_day3_cap$`Ingenuity Canonical Pathways`))
+pathway_day3_vcap$day <- rep("vcap_day3", length(pathway_day3_vcap$`Ingenuity Canonical Pathways`))
+pathway_day3_v$day <- rep("v_day3", length(pathway_day3_v$`Ingenuity Canonical Pathways`))
+
+
+pathway_day7_a$day <- rep("a_day7", length(pathway_day7_a$`Ingenuity Canonical Pathways`))
+pathway_day7_acap$day <- rep("acap_day7", length(pathway_day7_acap$`Ingenuity Canonical Pathways`))
+pathway_day7_cap$day <- rep("cap_day7", length(pathway_day7_cap$`Ingenuity Canonical Pathways`))
+pathway_day7_vcap$day <- rep("vcap_day7", length(pathway_day7_vcap$`Ingenuity Canonical Pathways`))
+pathway_day7_v$day <- rep("v_day7", length(pathway_day7_v$`Ingenuity Canonical Pathways`))
 ```
 
 
 ```{r}
-# Merging data frames
-merged_deg <- merge(degs_AD_WT[degs_AD_WT$gene %in% my_features,], degs[degs$gene %in% my_features,], by = "gene", suffixes = c("_AD_vs_Healthy", "_Cluster1_vs_2and3"))
+pathway_day1_a <- pathway_day1_a[pathway_day1_a$`z-score`!="NaN", ]
+pathway_day1_acap <- pathway_day1_acap[pathway_day1_acap$`z-score`!="NaN", ]
+pathway_day1_cap <- pathway_day1_cap[pathway_day1_cap$`z-score`!="NaN", ]
+pathway_day1_vcap <- pathway_day1_vcap[pathway_day1_vcap$`z-score`!="NaN", ]
+pathway_day1_v <- pathway_day1_v[pathway_day1_v$`z-score`!="NaN", ]
+
+pathway_day3_a <- pathway_day3_a[pathway_day3_a$`z-score`!="NaN", ]
+pathway_day3_acap <- pathway_day3_acap[pathway_day3_acap$`z-score`!="NaN", ]
+pathway_day3_cap <- pathway_day3_cap[pathway_day3_cap$`z-score`!="NaN", ]
+pathway_day3_vcap <- pathway_day3_vcap[pathway_day3_vcap$`z-score`!="NaN", ]
+pathway_day3_v <- pathway_day3_v[pathway_day3_v$`z-score`!="NaN", ]
+
+pathway_day7_a <- pathway_day7_a[pathway_day7_a$`z-score`!="NaN", ]
+pathway_day7_acap <- pathway_day7_acap[pathway_day7_acap$`z-score`!="NaN", ]
+pathway_day7_cap <- pathway_day7_cap[pathway_day7_cap$`z-score`!="NaN", ]
+pathway_day7_vcap <- pathway_day7_vcap[pathway_day7_vcap$`z-score`!="NaN", ]
+pathway_day7_v <- pathway_day7_v[pathway_day7_v$`z-score`!="NaN", ]
+
+
+pathway_day1_aEC_up <- pathway_day1_aEC_up[pathway_day1_aEC_up$`z-score`!="NaN", ]
+pathway_day1_acapEC_up <- pathway_day1_acapEC_up[pathway_day1_acapEC_up$`z-score`!="NaN", ]
+pathway_day1_capEC_up <- pathway_day1_capEC_up[pathway_day1_capEC_up$`z-score`!="NaN", ]
+pathway_day1_vcapEC_up <- pathway_day1_vcapEC_up[pathway_day1_vcapEC_up$`z-score`!="NaN", ]
+pathway_day1_vEC_up <- pathway_day1_vEC_up[pathway_day1_vEC_up$`z-score`!="NaN", ]
+
+pathway_day3_aEC_up <- pathway_day3_aEC_up[pathway_day3_aEC_up$`z-score`!="NaN", ]
+pathway_day3_acapEC_up <- pathway_day3_acapEC_up[pathway_day3_acapEC_up$`z-score`!="NaN", ]
+pathway_day3_capEC_up <- pathway_day3_capEC_up[pathway_day3_capEC_up$`z-score`!="NaN", ]
+pathway_day3_vcapEC_up <- pathway_day3_vcapEC_up[pathway_day3_vcapEC_up$`z-score`!="NaN", ]
+pathway_day3_vEC_up <- pathway_day3_vEC_up[pathway_day3_vEC_up$`z-score`!="NaN", ]
+
+pathway_day7_aEC_up <- pathway_day7_aEC_up[pathway_day7_aEC_up$`z-score`!="NaN", ]
+pathway_day7_acapEC_up <- pathway_day7_acapEC_up[pathway_day7_acapEC_up$`z-score`!="NaN", ]
+pathway_day7_capEC_up <- pathway_day7_capEC_up[pathway_day7_capEC_up$`z-score`!="NaN", ]
+pathway_day7_vcapEC_up <- pathway_day7_vcapEC_up[pathway_day7_vcapEC_up$`z-score`!="NaN", ]
+pathway_day7_vEC_up <- pathway_day7_vEC_up[pathway_day7_vEC_up$`z-score`!="NaN", ]
+
+
+
+pathway_day1_aEC_down <- pathway_day1_aEC_down[pathway_day1_aEC_down$`z-score`!="NaN", ]
+pathway_day1_acapEC_down <- pathway_day1_acapEC_down[pathway_day1_acapEC_down$`z-score`!="NaN", ]
+pathway_day1_capEC_down <- pathway_day1_capEC_down[pathway_day1_capEC_down$`z-score`!="NaN", ]
+pathway_day1_vcapEC_down <- pathway_day1_vcapEC_down[pathway_day1_vcapEC_down$`z-score`!="NaN", ]
+pathway_day1_vEC_down <- pathway_day1_vEC_down[pathway_day1_vEC_down$`z-score`!="NaN", ]
+
+pathway_day3_aEC_down <- pathway_day3_aEC_down[pathway_day3_aEC_down$`z-score`!="NaN", ]
+pathway_day3_acapEC_down <- pathway_day3_acapEC_down[pathway_day3_acapEC_down$`z-score`!="NaN", ]
+pathway_day3_capEC_down <- pathway_day3_capEC_down[pathway_day3_capEC_down$`z-score`!="NaN", ]
+pathway_day3_vcapEC_down <- pathway_day3_vcapEC_down[pathway_day3_vcapEC_down$`z-score`!="NaN", ]
+pathway_day3_vEC_down <- pathway_day3_vEC_down[pathway_day3_vEC_down$`z-score`!="NaN", ]
+
+pathway_day7_aEC_down <- pathway_day7_aEC_down[pathway_day7_aEC_down$`z-score`!="NaN", ]
+pathway_day7_acapEC_down <- pathway_day7_acapEC_down[pathway_day7_acapEC_down$`z-score`!="NaN", ]
+pathway_day7_capEC_down <- pathway_day7_capEC_down[pathway_day7_capEC_down$`z-score`!="NaN", ]
+pathway_day7_vcapEC_down <- pathway_day7_vcapEC_down[pathway_day7_vcapEC_down$`z-score`!="NaN", ]
+pathway_day7_vEC_down <- pathway_day7_vEC_down[pathway_day7_vEC_down$`z-score`!="NaN", ]
 ```
 
-```{r}
-p_value_range <- range(c(merged_deg$p_val_AD_vs_Healthy, merged_deg$p_val_Cluster1_vs_2and3))
-
-```
 
 
 ```{r}
-# Dot plot using ggplot2
-dot_plot <- ggplot(merged_deg, aes(x = gene)) +
-  geom_point(aes(y = "AD vs Healthy", size = p_val_AD_vs_Healthy, color = p_val_AD_vs_Healthy), shape = 16) +
-  geom_point(aes(y = "Cluster1 vs 2+3", size = avg_log2FC_Cluster1_vs_2and3, color = avg_log2FC_Cluster1_vs_2and3), shape = 16) +
-  scale_size_continuous(name = "p_val", range = c(2,  10), limits = p_value_range) + #range = c(2,  10), 
-  scale_color_continuous(name = "avg_log2FC") +
-  labs(title = "Differentially Expressed Genes across studies", x = "DEGs", y = NULL) +
-  theme_minimal() +
-  theme(legend.position = "right") + coord_flip()
-
-
-# Show the dot plot
-print(dot_plot)
-```
-
-
-
-#1/16
-
-```{r}
-intersection_genes <- Reduce(intersect, list(deg_day1_a$gene, deg_day1_v$gene, deg_day1_cap$gene, deg_day1_vcap$gene, deg_day1_acap$gene))
-raw_dots(deg_day1_a, deg_day1_v, deg_day1_cap, deg_day1_vcap, deg_day1_acap, intersection_genes, "day1_raw_dot_plot.pdf")
-```
-
-```{r}
-intersection_genes <- Reduce(intersect, list(deg_day3_a$gene, deg_day3_v$gene, deg_day3_cap$gene, deg_day3_vcap$gene, deg_day3_acap$gene))
-raw_dots(deg_day3_a, deg_day3_v, deg_day3_cap, deg_day3_vcap, deg_day3_acap, intersection_genes, "day3_raw_dot_plot.pdf")
-```
-
-```{r}
-intersection_genes <- Reduce(intersect, list(deg_day7_a$gene, deg_day7_v$gene, deg_day7_cap$gene, deg_day7_vcap$gene, deg_day7_acap$gene))
-raw_dots(deg_day7_a, deg_day7_v, deg_day7_cap, deg_day7_vcap, deg_day7_acap, intersection_genes, "day7_raw_dot_plot.pdf")
-```
-
-```{r}
-final_dots <- function(a, v, cap, vcap, acap, target_genes, filename_pdf){
-  pdf(file= filename_pdf, onefile = TRUE, width = 4.2, height = 4.2)
+# multiple pages
+final_dots_celltype_specific <- function(day1, day3, day7, target_genes, filename_pdf){
+  pdf(file= filename_pdf, onefile = TRUE)
+  
+  for (i in seq(15, length(intersection_genes), by = 15)) {
+    # data
+    target_genes <- intersection_genes[(i-15):i]
+    
+    final_deg <- rbind(day1[day1$gene %in% target_genes,], day3[day3$gene %in% target_genes,])
+    final_deg <- rbind(final_deg, day7[day7$gene %in% target_genes,])
+    final_deg$p_val_adj <- final_deg$p_val_adj + 0.0000000000000000000000000000000000000001
+    
+    # Create a ggplot dot plot
+    plts <- ggplot(final_deg, aes(x = factor(day, levels = c("a_day1", "a_day3", "a_day7", "acap_day1", "acap_day3", "acap_day7", "cap_day1", "cap_day3", "cap_day7", "vcap_day1", "vcap_day3", "vcap_day7", "v_day1", "v_day3", "v_day7")), y = factor(gene, levels = target_genes), size = -log(p_val_adj), color = avg_log2FC)) +
+      geom_point() +
+      scale_size_continuous(name = "-log(P Value)") +
+      scale_color_gradient2(name = "Fold Change", midpoint = 0, low = "#403990", high = "#C52A20") +
+      labs(x = "Cell Type", y = "Genes") +
+      theme_minimal() +
+      theme(panel.grid = element_blank())  # Remove grid lines
+    
+    print(plts)
+  }
+  
+  
   # data
-  final_deg <- rbind(a[a$gene %in% target_genes,], v[v$gene %in% target_genes,])
-  final_deg <- rbind(final_deg, cap[cap$gene %in% target_genes,])
-  final_deg <- rbind(final_deg, vcap[vcap$gene %in% target_genes,])
-  final_deg <- rbind(final_deg, acap[acap$gene %in% target_genes,])
-  final_deg$p_val_adj <-  final_deg$p_val_adj + 0.0000000000000000000000000000000000000001
+  final_deg <- rbind(day1[day1$gene %in% target_genes,], day3[day3$gene %in% target_genes,])
+  final_deg <- rbind(final_deg, day7[day7$gene %in% target_genes,])
+  final_deg$p_val_adj <- final_deg$p_val_adj + 0.0000000000000000000000000000000000000001
 
   print(final_deg)
   # Create a ggplot dot plot
-  plts <- ggplot(final_deg, aes(x = factor(Cell_Type,levels = c("aEC", "acapEC", "capEC", "vcapEC", "vEC")), y = factor(gene, levels = target_genes), size = -log(p_val_adj), color = avg_log2FC)) +
+  plts <- ggplot(final_deg, aes(x = factor(day, levels = c("a_day1", "a_day3", "a_day7", "acap_day1", "acap_day3", "acap_day7", "cap_day1", "cap_day3", "cap_day7", "vcap_day1", "vcap_day3", "vcap_day7", "v_day1", "v_day3", "v_day7")), y = factor(gene, levels = target_genes), size = -log(p_val_adj), color = avg_log2FC)) +
     geom_point() +
     scale_size_continuous(name = "-log(P Value)") +
-    scale_color_gradient2(name = "Fold Change", midpoint = 0, low = "#403990", high = "#C52A20") +
+    scale_color_gradient2(name = "Fold Change", midpoint = 0, low = "#403990", high = "#C52A20",limits = c(-2.9, 2.6)) +
     labs(x = "Cell Type", y = "Genes") +
     theme_minimal() +
     theme(panel.grid = element_blank())  # Remove grid lines
@@ -1010,27 +1387,189 @@ final_dots <- function(a, v, cap, vcap, acap, target_genes, filename_pdf){
   print(plts)
   dev.off()
 }
+
+
+# single page
+final_dots_celltype_specific <- function(day1, day3, day7, target_pathways, filename_pdf){
+  pdf(file= filename_pdf, onefile = TRUE, width = 13.5, height = 8.7)
+  # data
+  final_deg <- rbind(day1[day1$"Ingenuity Canonical Pathways" %in% target_pathways,], day3[day3$"Ingenuity Canonical Pathways" %in% target_pathways,])
+  final_deg <- rbind(final_deg, day7[day7$"Ingenuity Canonical Pathways" %in% target_pathways,])
+  final_deg$"-log(p-value)" <- as.numeric(final_deg$"-log(p-value)")
+  colnames(final_deg)[colnames(final_deg) == "-log(p-value)"] <- "p_val"
+  colnames(final_deg)[colnames(final_deg) == "z-score"] <- "z_score"
+  colnames(final_deg)[colnames(final_deg) == "Ingenuity Canonical Pathways"] <- "pathways"
+  final_deg$p_val <-  final_deg$p_val + 0.000000000000000000000000000000000000001
+  print(final_deg)
+  
+  # Create a ggplot dot plot
+  plts <- ggplot(final_deg, aes(x = factor(day, levels = c("a_day1", "a_day3", "a_day7", "acap_day1", "acap_day3", "acap_day7", "cap_day1", "cap_day3", "cap_day7", "vcap_day1", "vcap_day3", "vcap_day7", "v_day1", "v_day3", "v_day7")), y = factor(pathways, levels = target_pathways), size = -log(p_val), color = z_score)) +
+    geom_point() +
+    scale_size_continuous(name = "-log(P Value)") +
+    scale_color_gradient2(name = "z score", low = "#403990", high = "#C52A20") +
+    labs(x = "Cell Type", y = "Pathways")+
+    theme_minimal() +
+    theme(panel.grid = element_blank())  # Remove grid lines
+    
+  print(plts)
+  dev.off()
+}
+
+# heatmap
+heatmap_pathway_celltype_specific <- function(day1, day3, day7, target_pathways, filename_pdf){
+  pdf(file= filename_pdf, onefile = TRUE, width = 13.5, height = 8.7)
+  # data
+  
+  final_deg <- merge(day1, day3, day7, by="Ingenuity Canonical Pathways", all = TRUE)
+
+  
+  final_deg <- rbind(day1[day1$"Ingenuity Canonical Pathways" %in% target_pathways,], day3[day3$"Ingenuity Canonical Pathways" %in% target_pathways,])
+  final_deg <- rbind(final_deg, day7[day7$"Ingenuity Canonical Pathways" %in% target_pathways,])
+  final_deg$"-log(p-value)" <- as.numeric(final_deg$"-log(p-value)")
+  colnames(final_deg)[colnames(final_deg) == "-log(p-value)"] <- "p_val"
+  colnames(final_deg)[colnames(final_deg) == "z-score"] <- "z_score"
+  colnames(final_deg)[colnames(final_deg) == "Ingenuity Canonical Pathways"] <- "pathways"
+  final_deg$p_val <-  final_deg$p_val + 0.000000000000000000000000000000000000001
+  print(final_deg)
+  
+  # The mtcars dataset:
+  final_deg <- as.matrix(final_deg)
+
+  # Default Heatmap
+  heatmap(final_deg, scale="column")
+}
 ```
 
 
 ```{r}
-desired_order <- c("Gm26672","Dysf","Mfsd4a","Zeb1", "Rapgef5", "Cst3", "Apoe","Tuba1a","Plxdc2","Edn1")
+merge_celltype <- function(day1, day3, day7, prefix){
+  # change colname
+  colnames(day1)[colnames(day1) == '-log(p-value)'] <- paste(prefix, 'dpi1', sep = "_")
+  colnames(day3)[colnames(day3) == '-log(p-value)'] <- paste(prefix, 'dpi3', sep = "_")
+  colnames(day7)[colnames(day7) == '-log(p-value)'] <- paste(prefix, 'dpi7', sep = "_")
+  
+  # merge
+  pathway_celltype_specific <- merge(day1[day1$`Ingenuity Canonical Pathways` %in% test, c("Ingenuity Canonical Pathways", paste(prefix, 'dpi1', sep = "_"))], day3[day3$`Ingenuity Canonical Pathways` %in% test, c("Ingenuity Canonical Pathways", paste(prefix, 'dpi3', sep = "_"))], by="Ingenuity Canonical Pathways", all = TRUE)
+  pathway_celltype_specific <- merge(pathway_celltype_specific, day7[day7$`Ingenuity Canonical Pathways` %in% test, c("Ingenuity Canonical Pathways",paste(prefix, 'dpi7', sep = "_"))], by="Ingenuity Canonical Pathways", all = TRUE)
+  
+  return(pathway_celltype_specific)
+}
 
-desired_order <- day1_specific_degs 
-final_dots(deg_day1_a, deg_day1_v, deg_day1_cap, deg_day1_vcap, deg_day1_acap, rev(desired_order), "day1_specific_dot_plot.pdf")
+#a_pathway <- merge(temp1[temp1$`Ingenuity Canonical Pathways` %in% test, c("Ingenuity Canonical Pathways","a_dpi1")], temp2[temp2$`Ingenuity Canonical Pathways` %in% test, c("Ingenuity Canonical Pathways","a_dpi3")], by="Ingenuity Canonical Pathways", all = TRUE)
+#a_pathway <- merge(a_pathway, temp3[temp3$`Ingenuity Canonical Pathways` %in% test, c("Ingenuity Canonical Pathways","a_dpi7")], by="Ingenuity Canonical Pathways", all = TRUE)
+a_pathway <- merge_celltype(pathway_day1_aEC_up, pathway_day3_aEC_up, pathway_day7_aEC_up, "a")
+
+
+
+heatmap_pathway_celltype_specific(rbind(pathway_day1_aEC_up, pathway_day1_acapEC_up, pathway_day1_capEC_up, pathway_day1_vcapEC_up, pathway_day1_vEC_up), rbind(pathway_day3_aEC_up, pathway_day3_acapEC_up, pathway_day3_capEC_up, pathway_day3_vcapEC_up, pathway_day3_vEC_up), rbind(pathway_day7_aEC_up, pathway_day7_acapEC_up, pathway_day7_capEC_up,pathway_day7_vcapEC_up, pathway_day7_vEC_up), test, "pathway_heatmap_a_specific_candidates_2.pdf")
+
 ```
+
 
 ```{r}
-desired_order <- c("Depp1","Cdkn1a","Fam117b", "Tmem204","Cttnbp2nl","Camk2n1","Fryl", "Btg1","Edn1", "Plxdc2")
-desired_order <- day3_specific_degs 
+intersection_pathways_a <- Reduce(intersect, list(pathway_day1_a$`Ingenuity Canonical Pathways`, pathway_day3_a$`Ingenuity Canonical Pathways`, pathway_day7_a$`Ingenuity Canonical Pathways`))
+intersection_pathways_acap <- Reduce(intersect, list(pathway_day1_acap$`Ingenuity Canonical Pathways`, pathway_day3_acap$`Ingenuity Canonical Pathways`, pathway_day7_acap$`Ingenuity Canonical Pathways`))
+intersection_pathways_cap <- Reduce(intersect, list(pathway_day1_cap$`Ingenuity Canonical Pathways`, pathway_day3_cap$`Ingenuity Canonical Pathways`, pathway_day7_cap$`Ingenuity Canonical Pathways`))
+intersection_pathways_vcap <- Reduce(intersect, list(pathway_day1_vcap$`Ingenuity Canonical Pathways`, pathway_day3_vcap$`Ingenuity Canonical Pathways`, pathway_day7_vcap$`Ingenuity Canonical Pathways`))
+intersection_pathways_v <- Reduce(intersect, list(pathway_day1_v$`Ingenuity Canonical Pathways`, pathway_day3_v$`Ingenuity Canonical Pathways`, pathway_day7_v$`Ingenuity Canonical Pathways`))
 
-final_dots(deg_day3_a, deg_day3_v, deg_day3_cap, deg_day3_vcap, deg_day3_acap, rev(desired_order), "day3_specific_dot_plot.pdf")
+
+# Sort the table by the absolute z-score values in descending order
+sorted_table <- pathway_day1_a[order(-abs(pathway_day1_a$`z-score`)), ]
+# Extract the top 10 pathways
+test <- head(sorted_table, 10)
+
+
+element_counts <- table(unlist(list(pathway_day1_acap$`Ingenuity Canonical Pathways`, pathway_day3_acap$`Ingenuity Canonical Pathways`, pathway_day7_acap$`Ingenuity Canonical Pathways`, pathway_day1_cap$`Ingenuity Canonical Pathways`, pathway_day3_cap$`Ingenuity Canonical Pathways`, pathway_day7_cap$`Ingenuity Canonical Pathways`, pathway_day1_vcap$`Ingenuity Canonical Pathways`, pathway_day3_vcap$`Ingenuity Canonical Pathways`, pathway_day7_vcap$`Ingenuity Canonical Pathways`, pathway_day1_v$`Ingenuity Canonical Pathways`, pathway_day3_v$`Ingenuity Canonical Pathways`, pathway_day7_v$`Ingenuity Canonical Pathways`)))
+pathways <- names(element_counts[element_counts <= 13])
+test<- intersect(intersection_genes_a, pathways)
+
+element_counts <- table(unlist(list(deg_day1_a$gene, deg_day3_a$gene, deg_day7_a$gene, deg_day1_cap$gene, deg_day3_cap$gene, deg_day7_cap$gene, deg_day1_vcap$gene, deg_day3_vcap$gene, deg_day7_vcap$gene, deg_day1_v$gene, deg_day3_v$gene, deg_day7_v$gene)))
+genes <- names(element_counts[element_counts <= 5])
+test<- intersect(intersection_genes_acap, genes)
+
+element_counts <- table(unlist(list(deg_day1_a$gene, deg_day3_a$gene, deg_day7_a$gene, deg_day1_acap$gene, deg_day3_acap$gene, deg_day7_acap$gene, deg_day1_vcap$gene, deg_day3_vcap$gene, deg_day7_vcap$gene, deg_day1_v$gene, deg_day3_v$gene, deg_day7_v$gene)))
+genes <- names(element_counts[element_counts <= 4])
+test<- intersect(intersection_genes_cap, genes)
+
+element_counts <- table(unlist(list(deg_day1_a$gene, deg_day3_a$gene, deg_day7_a$gene, deg_day1_acap$gene, deg_day3_acap$gene, deg_day7_acap$gene, deg_day1_cap$gene, deg_day3_cap$gene, deg_day7_cap$gene, deg_day1_v$gene, deg_day3_v$gene, deg_day7_v$gene)))
+genes <- names(element_counts[element_counts <= 2])
+test<- intersect(intersection_genes_vcap, genes)
+
+element_counts <- table(unlist(list(deg_day1_a$gene, deg_day3_a$gene, deg_day7_a$gene, deg_day1_acap$gene, deg_day3_acap$gene, deg_day7_acap$gene, deg_day1_cap$gene, deg_day3_cap$gene, deg_day7_cap$gene, deg_day1_vcap$gene, deg_day3_vcap$gene, deg_day7_vcap$gene)))
+genes <- names(element_counts[element_counts <= 3])
+test<- intersect(intersection_genes_v, genes)
+
+
+#
+candidates_a <- c("Sort1", "Ptges3", "Vegfc")
+candidates_acap <- c("Dcbld2", "Smad7", "Prnp")
+candidates_cap <- c("Smad1", "Eif2ak4",  "Ikzf5", "Aspscr1", "Palm", "AW112010")
+candidates_vcap <- c("Retreg1", "Wnt5a", "Nckap5", "Tpd52l1", "Nsg1")
+candidates_v <- c("Klf7", "Clint1", "Ehd1",  "Eef1b2")
+
+
+final_dots_celltype_specific(rbind(deg_day1_a[deg_day1_a$gene %in% candidates_a,], deg_day1_acap[deg_day1_acap$gene %in% candidates_acap,], deg_day1_cap[deg_day1_cap$gene %in% candidates_cap,], deg_day1_vcap[deg_day1_vcap$gene %in% candidates_vcap,], deg_day1_v[deg_day1_v$gene %in% candidates_v,]), rbind(deg_day3_a[deg_day3_a$gene %in% candidates_a,], deg_day3_acap[deg_day3_acap$gene %in% candidates_acap,], deg_day3_cap[deg_day3_cap$gene %in% candidates_cap,],deg_day3_vcap[deg_day3_vcap$gene %in% candidates_vcap,], deg_day3_v[deg_day3_v$gene %in% candidates_v,]), rbind(deg_day7_a[deg_day7_a$gene %in% candidates_a,], deg_day7_acap[deg_day7_acap$gene %in% candidates_acap,], deg_day7_cap[deg_day7_cap$gene %in% candidates_cap,],deg_day7_vcap[deg_day7_vcap$gene %in% candidates_vcap,], deg_day7_v[deg_day7_v$gene %in% candidates_v,]), rev(c(candidates_a, candidates_acap, candidates_cap, candidates_vcap, candidates_v)), "dot_plot_celltype_specific.pdf")
+
+
+final_dots_celltype_specific(rbind(deg_day1_a, deg_day1_acap, deg_day1_cap, deg_day1_vcap, deg_day1_v), rbind(deg_day3_a, deg_day3_acap, deg_day3_cap,deg_day3_vcap, deg_day3_v), rbind(deg_day7_a, deg_day7_acap, deg_day7_cap,deg_day7_vcap, deg_day7_v), rev(c(candidates_a, candidates_acap, candidates_cap, candidates_vcap, candidates_v)), "dot_plot_celltype_specific_v2.pdf")
+
+final_dots_celltype_specific(rbind(pathway_day1_a, pathway_day1_acap, pathway_day1_cap, pathway_day1_vcap, pathway_day1_v), rbind(pathway_day3_a, pathway_day3_acap, pathway_day3_cap, pathway_day3_vcap, pathway_day3_v), rbind(pathway_day7_a, pathway_day7_acap, pathway_day7_cap,pathway_day7_vcap, pathway_day7_v), test$`Ingenuity Canonical Pathways`, "pathway_dot_plot_a_specific_candidates.pdf")
+
 ```
+
+
 
 ```{r}
+intersection_pathways_a_up <- Reduce(intersect, list(pathway_day1_aEC_up$`Ingenuity Canonical Pathways`, pathway_day3_aEC_up$`Ingenuity Canonical Pathways`, pathway_day7_aEC_up$`Ingenuity Canonical Pathways`))
+intersection_pathways_acap_up <- Reduce(intersect, list(pathway_day1_acapEC_up$`Ingenuity Canonical Pathways`, pathway_day3_acapEC_up$`Ingenuity Canonical Pathways`, pathway_day7_acapEC_up$`Ingenuity Canonical Pathways`))
+intersection_pathways_cap_up <- Reduce(intersect, list(pathway_day1_capEC_up$`Ingenuity Canonical Pathways`, pathway_day3_capEC_up$`Ingenuity Canonical Pathways`, pathway_day7_capEC_up$`Ingenuity Canonical Pathways`))
+intersection_pathways_vcap_up <- Reduce(intersect, list(pathway_day1_vcapEC_up$`Ingenuity Canonical Pathways`, pathway_day3_vcapEC_up$`Ingenuity Canonical Pathways`, pathway_day7_vcapEC_up$`Ingenuity Canonical Pathways`))
+intersection_pathways_v_up <- Reduce(intersect, list(pathway_day1_vEC_up$`Ingenuity Canonical Pathways`, pathway_day3_vEC_up$`Ingenuity Canonical Pathways`, pathway_day7_vEC_up$`Ingenuity Canonical Pathways`))
 
-desired_order <- c("Angptl4","Trp53inp1","Snrk","Timp3", "Slc7a5", "Itm2a","Pcp4l1","Maoa","Lama4", "Fosb")
-desired_order <- day7_specific_degs 
 
-final_dots(deg_day7_a, deg_day7_v, deg_day7_cap, deg_day7_vcap, deg_day7_acap, rev(desired_order), "day7_specific_dot_plot.pdf")
+# Sort the table by the absolute z-score values in descending order
+test <- Reduce(intersect, list(head(pathway_day1_aEC_up[order(-abs(pathway_day1_aEC_up$`z-score`)), ], 50)$`Ingenuity Canonical Pathways`, head(pathway_day3_aEC_up[order(-abs(pathway_day3_aEC_up$`z-score`)), ], 50)$`Ingenuity Canonical Pathways`, head(pathway_day7_aEC_up[order(-abs(pathway_day7_aEC_up$`z-score`)), ], 50)$`Ingenuity Canonical Pathways`))
+# Extract the top 10 pathways
+test <- test[1:40]
+
+
+element_counts <- table(unlist(list(pathway_day1_acapEC_up$`Ingenuity Canonical Pathways`, pathway_day3_acapEC_up$`Ingenuity Canonical Pathways`, pathway_day7_acapEC_up$`Ingenuity Canonical Pathways`, pathway_day1_capEC_up$`Ingenuity Canonical Pathways`, pathway_day3_capEC_up$`Ingenuity Canonical Pathways`, pathway_day7_capEC_up$`Ingenuity Canonical Pathways`, pathway_day1_vcapEC_up$`Ingenuity Canonical Pathways`, pathway_day3_vcapEC_up$`Ingenuity Canonical Pathways`, pathway_day7_vcapEC_up$`Ingenuity Canonical Pathways`, pathway_day1_vEC_up$`Ingenuity Canonical Pathways`, pathway_day3_vEC_up$`Ingenuity Canonical Pathways`, pathway_day7_vEC_up$`Ingenuity Canonical Pathways`)))
+pathways <- names(element_counts[element_counts <= 12])
+test<- intersect(intersection_pathways_a_up, pathways)
+
+element_counts <- table(unlist(list(deg_day1_a$gene, deg_day3_a$gene, deg_day7_a$gene, deg_day1_cap$gene, deg_day3_cap$gene, deg_day7_cap$gene, deg_day1_vcap$gene, deg_day3_vcap$gene, deg_day7_vcap$gene, deg_day1_v$gene, deg_day3_v$gene, deg_day7_v$gene)))
+genes <- names(element_counts[element_counts <= 5])
+test<- intersect(intersection_genes_acap, genes)
+
+element_counts <- table(unlist(list(deg_day1_a$gene, deg_day3_a$gene, deg_day7_a$gene, deg_day1_acap$gene, deg_day3_acap$gene, deg_day7_acap$gene, deg_day1_vcap$gene, deg_day3_vcap$gene, deg_day7_vcap$gene, deg_day1_v$gene, deg_day3_v$gene, deg_day7_v$gene)))
+genes <- names(element_counts[element_counts <= 4])
+test<- intersect(intersection_genes_cap, genes)
+
+element_counts <- table(unlist(list(deg_day1_a$gene, deg_day3_a$gene, deg_day7_a$gene, deg_day1_acap$gene, deg_day3_acap$gene, deg_day7_acap$gene, deg_day1_cap$gene, deg_day3_cap$gene, deg_day7_cap$gene, deg_day1_v$gene, deg_day3_v$gene, deg_day7_v$gene)))
+genes <- names(element_counts[element_counts <= 2])
+test<- intersect(intersection_genes_vcap, genes)
+
+element_counts <- table(unlist(list(deg_day1_a$gene, deg_day3_a$gene, deg_day7_a$gene, deg_day1_acap$gene, deg_day3_acap$gene, deg_day7_acap$gene, deg_day1_cap$gene, deg_day3_cap$gene, deg_day7_cap$gene, deg_day1_vcap$gene, deg_day3_vcap$gene, deg_day7_vcap$gene)))
+genes <- names(element_counts[element_counts <= 3])
+test<- intersect(intersection_genes_v, genes)
+
+
+#
+candidates_a <- c("Sort1", "Ptges3", "Vegfc")
+candidates_acap <- c("Dcbld2", "Smad7", "Prnp")
+candidates_cap <- c("Smad1", "Eif2ak4",  "Ikzf5", "Aspscr1", "Palm", "AW112010")
+candidates_vcap <- c("Retreg1", "Wnt5a", "Nckap5", "Tpd52l1", "Nsg1")
+candidates_v <- c("Klf7", "Clint1", "Ehd1",  "Eef1b2")
+
+
+final_dots_celltype_specific(rbind(deg_day1_a[deg_day1_a$gene %in% candidates_a,], deg_day1_acap[deg_day1_acap$gene %in% candidates_acap,], deg_day1_cap[deg_day1_cap$gene %in% candidates_cap,], deg_day1_vcap[deg_day1_vcap$gene %in% candidates_vcap,], deg_day1_v[deg_day1_v$gene %in% candidates_v,]), rbind(deg_day3_a[deg_day3_a$gene %in% candidates_a,], deg_day3_acap[deg_day3_acap$gene %in% candidates_acap,], deg_day3_cap[deg_day3_cap$gene %in% candidates_cap,],deg_day3_vcap[deg_day3_vcap$gene %in% candidates_vcap,], deg_day3_v[deg_day3_v$gene %in% candidates_v,]), rbind(deg_day7_a[deg_day7_a$gene %in% candidates_a,], deg_day7_acap[deg_day7_acap$gene %in% candidates_acap,], deg_day7_cap[deg_day7_cap$gene %in% candidates_cap,],deg_day7_vcap[deg_day7_vcap$gene %in% candidates_vcap,], deg_day7_v[deg_day7_v$gene %in% candidates_v,]), rev(c(candidates_a, candidates_acap, candidates_cap, candidates_vcap, candidates_v)), "dot_plot_celltype_specific.pdf")
+
+
+final_dots_celltype_specific(rbind(deg_day1_a, deg_day1_acap, deg_day1_cap, deg_day1_vcap, deg_day1_v), rbind(deg_day3_a, deg_day3_acap, deg_day3_cap,deg_day3_vcap, deg_day3_v), rbind(deg_day7_a, deg_day7_acap, deg_day7_cap,deg_day7_vcap, deg_day7_v), rev(c(candidates_a, candidates_acap, candidates_cap, candidates_vcap, candidates_v)), "dot_plot_celltype_specific_v2.pdf")
+
+final_dots_celltype_specific(rbind(pathway_day1_aEC_up, pathway_day1_acapEC_up, pathway_day1_capEC_up, pathway_day1_vcapEC_up, pathway_day1_vEC_up), rbind(pathway_day3_aEC_up, pathway_day3_acapEC_up, pathway_day3_capEC_up, pathway_day3_vcapEC_up, pathway_day3_vEC_up), rbind(pathway_day7_aEC_up, pathway_day7_acapEC_up, pathway_day7_capEC_up,pathway_day7_vcapEC_up, pathway_day7_vEC_up), test, "pathway_dot_plot_a_specific_candidates_2.pdf")
+
 ```
+
+
